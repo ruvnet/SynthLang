@@ -98,7 +98,7 @@ export const PlaygroundOutput = ({
   children: ReactNode;
 }) => (
   <pre className="font-mono text-sm text-muted-foreground whitespace-pre-wrap 
-                  bg-black/10 p-4 rounded-lg">
+                  bg-black/10 p-4 rounded-lg max-h-[200px] overflow-y-auto">
     {children}
   </pre>
 );

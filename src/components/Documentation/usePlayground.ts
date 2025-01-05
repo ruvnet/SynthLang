@@ -57,7 +57,7 @@ export const usePlayground = ({ initialCode, onRun }: UsePlaygroundProps) => {
     try {
       setIsLoading(true);
       setErrors([]);
-      setOutput(null);
+      setOutput("");
 
       // Skip validation for comment-only code
       const nonCommentLines = code.split('\n')
@@ -77,8 +77,16 @@ export const usePlayground = ({ initialCode, onRun }: UsePlaygroundProps) => {
         await onRun(code);
       } else if (globalSettings?.openRouterApiKey) {
         try {
-          const result = await callOpenRouter(code, settings, globalSettings.openRouterApiKey);
-          setOutput(result);
+          await callOpenRouter(
+            code, 
+            settings, 
+            globalSettings.openRouterApiKey,
+            'interpreter',
+            undefined,
+            (chunk) => {
+              setOutput(prev => (prev || "") + chunk);
+            }
+          );
         } catch (error) {
           setErrors([error instanceof Error ? error.message : 'Failed to process code']);
         }

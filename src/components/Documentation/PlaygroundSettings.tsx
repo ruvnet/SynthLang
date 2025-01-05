@@ -20,6 +20,8 @@ import {
 import { Slider } from "../ui/slider";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
+import { Textarea } from "../ui/textarea";
+import { SYSTEM_PROMPT } from "../../services/openRouterService";
 
 interface PlaygroundSettingsProps {
   onSettingsChange: (settings: PlaygroundSettings) => void;
@@ -32,36 +34,45 @@ export interface PlaygroundSettings {
   autoFormat: boolean;
   syntaxHighlighting: boolean;
   showLineNumbers: boolean;
+  systemPrompt: string;
 }
+
+const DEFAULT_PLAYGROUND_SETTINGS: PlaygroundSettings = {
+  model: "openai/gpt-3.5-turbo",
+  temperature: 0.7,
+  maxTokens: 1000,
+  autoFormat: true,
+  syntaxHighlighting: true,
+  showLineNumbers: true,
+  systemPrompt: SYSTEM_PROMPT.interpreter
+};
 
 export const PlaygroundSettings: React.FC<PlaygroundSettingsProps> = ({ onSettingsChange }) => {
   const { settings: globalSettings } = useSettingsContext();
   const [isOpen, setIsOpen] = useState(false);
   const [settings, setSettings] = useState<PlaygroundSettings>({
-    model: "openai/gpt-3.5-turbo",
-    temperature: 0.7,
-    maxTokens: 1000,
-    autoFormat: true,
-    syntaxHighlighting: true,
-    showLineNumbers: true
+    ...DEFAULT_PLAYGROUND_SETTINGS,
+    model: globalSettings.defaultModel
   });
 
   const hasOpenRouterKey = !!globalSettings?.openRouterApiKey;
 
-  const models = hasOpenRouterKey ? [
-    { value: "openai/gpt-4", label: "GPT-4" },
-    { value: "openai/gpt-3.5-turbo", label: "GPT-3.5 Turbo" },
-    { value: "anthropic/claude-2", label: "Claude 2" },
-    { value: "anthropic/claude-instant-v1", label: "Claude Instant" }
-  ] : [
-    { value: "openai/gpt-3.5-turbo", label: "GPT-3.5 Turbo (OpenRouter API key required)" }
-  ];
-
+  const models = hasOpenRouterKey ? 
+    globalSettings.models.models.map(model => ({
+      value: model,
+      label: model.split('/')[1].toUpperCase().replace(/-/g, ' ')
+    })) : [
+      { value: "openai/gpt-3.5-turbo", label: "GPT-3.5 Turbo (OpenRouter API key required)" }
+    ];
 
   const handleSettingChange = (key: keyof PlaygroundSettings, value: any) => {
     const newSettings = { ...settings, [key]: value };
     setSettings(newSettings);
     onSettingsChange(newSettings);
+  };
+
+  const handleResetSystemPrompt = () => {
+    handleSettingChange("systemPrompt", SYSTEM_PROMPT.interpreter);
   };
 
   return (
@@ -90,7 +101,7 @@ export const PlaygroundSettings: React.FC<PlaygroundSettingsProps> = ({ onSettin
       </TooltipProvider>
 
       {isOpen && (
-        <div className="absolute right-0 top-10 w-80 p-4 rounded-lg border border-border/40 
+        <div className="absolute right-0 top-10 w-[500px] max-h-[800px] overflow-y-auto p-4 rounded-lg border border-border/40 
                        bg-card/95 backdrop-blur-sm shadow-xl z-50">
           <h3 className="text-sm font-medium mb-4">Playground Settings</h3>
           
@@ -118,6 +129,26 @@ export const PlaygroundSettings: React.FC<PlaygroundSettingsProps> = ({ onSettin
                   Configure OpenRouter API key in settings to access more models
                 </p>
               )}
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label>System Prompt</Label>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleResetSystemPrompt}
+                  className="text-xs"
+                >
+                  Reset to Default
+                </Button>
+              </div>
+              <Textarea
+                value={settings.systemPrompt}
+                onChange={(e) => handleSettingChange("systemPrompt", e.target.value)}
+                className="h-[200px] font-mono text-xs"
+                placeholder="Enter system prompt..."
+              />
             </div>
 
             <div className="space-y-2">

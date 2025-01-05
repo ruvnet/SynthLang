@@ -8,7 +8,15 @@ interface OpenRouterResponse {
   }>;
 }
 
-const SYSTEM_PROMPT = {
+interface OpenRouterStreamChunk {
+  choices: Array<{
+    delta: {
+      content?: string;
+    };
+  }>;
+}
+
+export const SYSTEM_PROMPT = {
   interpreter: `You are a SynthLang interpreter. Process the following SynthLang code according to these rules:
 
 [Grammar and Syntax]
@@ -120,7 +128,8 @@ export const callOpenRouter = async (
   settings: PlaygroundSettings, 
   apiKey: string,
   mode: 'interpreter' | 'translator' = 'interpreter',
-  frameworkInstructions?: string
+  frameworkInstructions?: string,
+  onStream?: (chunk: string) => void
 ): Promise<string> => {
   try {
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -136,9 +145,7 @@ export const callOpenRouter = async (
         messages: [
           {
             role: 'system',
-            content: frameworkInstructions 
-              ? `${SYSTEM_PROMPT[mode]}\n\n[Active Frameworks]\n${frameworkInstructions}`
-              : SYSTEM_PROMPT[mode]
+            content: frameworkInstructions || settings.systemPrompt || SYSTEM_PROMPT[mode]
           },
           {
             role: 'user',
@@ -150,7 +157,7 @@ export const callOpenRouter = async (
         top_p: 0.9,
         frequency_penalty: 0.0,
         presence_penalty: 0.0,
-        stream: false
+        stream: !!onStream
       })
     });
 
@@ -166,14 +173,49 @@ export const callOpenRouter = async (
       throw new Error(error.error?.message || 'Failed to process SynthLang code');
     }
 
-    const data: OpenRouterResponse = await response.json();
-    const content = data.choices[0]?.message?.content;
-    
-    if (!content) {
-      throw new Error('No response received from the model. Please try again.');
-    }
+    if (onStream) {
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      let fullContent = '';
 
-    return content;
+      if (!reader) {
+        throw new Error('Stream not available');
+      }
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n');
+
+        for (const line of lines) {
+          if (line.startsWith('data: ') && line !== 'data: [DONE]') {
+            try {
+              const data: OpenRouterStreamChunk = JSON.parse(line.slice(6));
+              const content = data.choices[0]?.delta?.content;
+              if (content) {
+                fullContent += content;
+                onStream(content);
+              }
+            } catch (e) {
+              console.error('Failed to parse stream chunk:', e);
+            }
+          }
+        }
+      }
+
+      return fullContent;
+    } else {
+      const data: OpenRouterResponse = await response.json();
+      const content = data.choices[0]?.message?.content;
+      
+      if (!content) {
+        throw new Error('No response received from the model. Please try again.');
+      }
+
+      return content;
+    }
   } catch (error) {
     console.error('OpenRouter API error:', error);
     if (error instanceof Error) {

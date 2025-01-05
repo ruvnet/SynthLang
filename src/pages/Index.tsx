@@ -1,7 +1,41 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Sparkles, Gauge, Calculator as CalcIcon, Settings } from "lucide-react";
+import { ArrowRight, Sparkles, Gauge, Calculator as CalcIcon, Settings, Code } from "lucide-react";
 import Calculator from "../components/TokenCalculator/Calculator";
 import Layout from "../components/Layout";
+import { CodeExample } from "../components/Documentation/CodeExample";
+import { PlaygroundProvider } from "../components/Documentation/PlaygroundContext";
+
+const sampleText = `The new AI model demonstrated remarkable capabilities in creative tasks,
+showing human-like understanding in art and music composition. However,
+researchers noted some limitations in handling complex logical reasoning.`;
+
+const exampleTraditional = {
+  title: "Traditional Prompt",
+  description: "Standard prompt format (85 tokens)",
+  code: `Please analyze the following text for its main themes, emotional tone,
+and key takeaways:
+
+${sampleText}
+
+Provide a detailed analysis with specific examples from the text. Format 
+the output as bullet points and include a brief summary at the end.`,
+  language: "text"
+};
+
+const exampleSynthLang = {
+  title: "SynthLang Format",
+  description: "Optimized format (35 tokens)",
+  code: `↹ text "${sampleText}"
+⊕ analyze_themes ^comprehensive
+⊕ analyze_tone ^emotional
+⊕ extract_key_points ^detailed
+Σ {
+  themes: ^bullet_points,
+  tone: ^brief,
+  takeaways: ^examples,
+  summary: ^concise
+}`,
+};
 
 const FEATURES = [
   {
@@ -47,6 +81,24 @@ const Index = () => {
             Get Started
             <ArrowRight className="w-4 h-4" />
           </Link>
+        </div>
+
+        {/* Example Section */}
+        <div className="glass-panel p-6 mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <Code className="w-6 h-6 text-purple-400" />
+            <h2 className="text-xl font-semibold">Try It Live</h2>
+          </div>
+          <p className="text-muted-foreground mb-6">
+            See how SynthLang reduces token usage while maintaining functionality. 
+            Compare traditional prompts with their optimized SynthLang equivalents.
+          </p>
+          <PlaygroundProvider initialCode="">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <CodeExample {...exampleTraditional} />
+              <CodeExample {...exampleSynthLang} />
+            </div>
+          </PlaygroundProvider>
         </div>
 
         {/* Quick Savings Calculator */}

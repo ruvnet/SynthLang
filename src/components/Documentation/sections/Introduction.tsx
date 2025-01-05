@@ -2,17 +2,20 @@ import { Lightbulb } from "lucide-react";
 import { DocSection } from "../types";
 import { CodeExample, CodeExampleGrid } from "../CodeExample";
 
-const simpleExample = {
-  title: "Simple Example: Text Summary",
-  description: "Compare a traditional prompt with SynthLang syntax",
-  code: `# Traditional prompt:
-"Summarize this text in 3 bullet points and analyze its sentiment:
+const simpleTraditional = {
+  title: "Traditional Prompt",
+  description: "Standard natural language prompt format",
+  code: `Summarize this text in 3 bullet points and analyze its sentiment:
 The new AI model demonstrated remarkable capabilities in creative tasks,
 showing human-like understanding in art and music composition. However,
-researchers noted some limitations in handling complex logical reasoning."
+researchers noted some limitations in handling complex logical reasoning.`,
+  language: "text"
+};
 
-# SynthLang equivalent:
-↹ text "The new AI model demonstrated remarkable capabilities in creative tasks,
+const simpleSynthLang = {
+  title: "SynthLang Equivalent",
+  description: "More efficient and structured format",
+  code: `↹ text "The new AI model demonstrated remarkable capabilities in creative tasks,
 showing human-like understanding in art and music composition. However,
 researchers noted some limitations in handling complex logical reasoning."
 ⊕ summarize ^bullet_points ^limit_3
@@ -23,17 +26,20 @@ researchers noted some limitations in handling complex logical reasoning."
 }`
 };
 
-const complexExample = {
-  title: "Advanced Example: Multi-step Analysis",
-  description: "See how SynthLang simplifies complex operations",
-  code: `# Traditional prompt:
-"First, analyze the following research paper for key findings. Then,
+const complexTraditional = {
+  title: "Traditional Prompt",
+  description: "Complex multi-step instruction",
+  code: `First, analyze the following research paper for key findings. Then,
 translate the findings to Japanese, maintaining academic terminology.
 Finally, create a comparison table showing similarities with previous
-research in the field. Make sure to highlight any novel contributions."
+research in the field. Make sure to highlight any novel contributions.`,
+  language: "text"
+};
 
-# SynthLang equivalent:
-↹ paper @research_context
+const complexSynthLang = {
+  title: "SynthLang Equivalent",
+  description: "Structured multi-step process",
+  code: `↹ paper @research_context
 ⊕ extract_key_findings ^comprehensive
 ⊕ translate → 日本語 ^academic
 ⊕ compare_research ^previous_studies
@@ -60,8 +66,20 @@ export const Introduction: DocSection = {
       example: "",
       component: () => (
         <div className="space-y-8">
-          <CodeExample {...simpleExample} />
-          <CodeExample {...complexExample} />
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Simple Example: Text Summary</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <CodeExample {...simpleTraditional} />
+              <CodeExample {...simpleSynthLang} />
+            </div>
+          </div>
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Advanced Example: Multi-step Analysis</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <CodeExample {...complexTraditional} />
+              <CodeExample {...complexSynthLang} />
+            </div>
+          </div>
         </div>
       )
     },

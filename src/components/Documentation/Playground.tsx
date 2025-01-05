@@ -93,7 +93,7 @@ export const Playground = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-border/40">
-        <div className="relative p-4">
+        <div className="relative p-4 min-h-[800px]">
           <div
             className="absolute inset-0 pointer-events-none p-4 font-mono text-sm"
             dangerouslySetInnerHTML={{ __html: highlightedCode }}
@@ -103,7 +103,7 @@ export const Playground = () => {
             value={code}
             onChange={(e) => setCode(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="w-full h-full min-h-[400px] bg-transparent border-none 
+            className="w-full h-full min-h-[800px] bg-transparent border-none 
                      outline-none resize-none font-mono text-sm text-transparent 
                      caret-white disabled:cursor-not-allowed"
             spellCheck={false}
@@ -113,33 +113,35 @@ export const Playground = () => {
           />
         </div>
 
-        <div className="p-4 bg-black/10 min-h-[400px]">
-          {isLoading ? (
-            <PlaygroundLoading />
-          ) : errors.length > 0 ? (
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-red-400">
+        <div className="relative p-4 bg-black/10 min-h-[800px]">
+          <div className="absolute inset-0 p-4 overflow-y-auto">
+            {isLoading ? (
+              <PlaygroundLoading />
+            ) : errors.length > 0 ? (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-red-400">
+                  <AlertTriangle className="w-4 h-4" />
+                  <span className="font-medium">Validation Errors</span>
+                </div>
+                <div className="space-y-1">
+                  {errors.map((error, index) => (
+                    <PlaygroundError key={index} error={error} />
+                  ))}
+                </div>
+              </div>
+            ) : output ? (
+              <PlaygroundOutput>{output}</PlaygroundOutput>
+            ) : !hasOpenRouterKey ? (
+              <div className="flex items-center gap-2 text-yellow-500 text-sm">
                 <AlertTriangle className="w-4 h-4" />
-                <span className="font-medium">Validation Errors</span>
+                <span>Configure OpenRouter API key in settings to run code</span>
               </div>
-              <div className="space-y-1">
-                {errors.map((error, index) => (
-                  <PlaygroundError key={index} error={error} />
-                ))}
+            ) : (
+              <div className="text-sm text-muted-foreground italic">
+                Click "Run" or press ⌘↵ to see the output
               </div>
-            </div>
-          ) : output ? (
-            <PlaygroundOutput>{output}</PlaygroundOutput>
-          ) : !hasOpenRouterKey ? (
-            <div className="flex items-center gap-2 text-yellow-500 text-sm">
-              <AlertTriangle className="w-4 h-4" />
-              <span>Configure OpenRouter API key in settings to run code</span>
-            </div>
-          ) : (
-            <div className="text-sm text-muted-foreground italic">
-              Click "Run" or press ⌘↵ to see the output
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import { Suspense, useCallback } from "react";
 import { Book, Command } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { SECTIONS } from "../components/Documentation/sections";
@@ -10,6 +10,7 @@ import { ScrollProgressProvider } from "../components/Documentation/ScrollProgre
 import { PlaygroundProvider } from "../components/Documentation/PlaygroundContext";
 import { KeyboardShortcuts } from "../components/Documentation/KeyboardShortcuts";
 import { useDocumentation } from "../hooks/useDocumentation";
+import { useSynthLang } from "../components/Documentation/useSynthLang";
 import Layout from "../components/Layout";
 
 const Documentation = () => {
@@ -28,9 +29,19 @@ const Documentation = () => {
     sections: SECTIONS
   });
 
+  const { executeSynthLang } = useSynthLang();
+
+  const handleRun = useCallback((code: string) => {
+    const result = executeSynthLang(code);
+    if (result.error) {
+      throw new Error(result.error);
+    }
+    return Promise.resolve(result.output);
+  }, [executeSynthLang]);
+
   return (
     <ScrollProgressProvider>
-      <PlaygroundProvider initialCode="">
+      <PlaygroundProvider initialCode="" onRun={handleRun}>
         <Layout title="Documentation">
           <main className="container mx-auto p-4">
             <div className="glass-panel p-6 rounded-lg border border-border/40 bg-card/30 backdrop-blur">

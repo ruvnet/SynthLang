@@ -119,21 +119,37 @@ export const useSynthLang = () => {
       // Parse and execute if valid
       const operations = parseSynthLang(code);
       
-      // Format operations into readable output
+      // Format operations into readable output with explanations
       const output = operations.map(op => {
         switch (op.type) {
           case 'input':
-            return `Input Operation: ${op.content}`;
+            const [label, content] = op.content.split(' "');
+            return `Input Operation: Process ${content.slice(0, -1)} using ${label}\n` +
+                   `This operation initializes the processing with the given input text.\n` +
+                   (op.modifiers ? `Applied modifiers: ${op.modifiers.join(' ')}\n` +
+                   `These modifiers control how the input is interpreted and processed.` : '');
           case 'operation':
-            return `Process Operation: ${op.content}`;
+            const [opLabel, opContent] = op.content.split(' "');
+            return `Process Operation: ${opLabel} on "${opContent.slice(0, -1)}"\n` +
+                   `This step performs ${opLabel.replace(/_/g, ' ')} on the content.\n` +
+                   (op.modifiers ? `Applied modifiers: ${op.modifiers.join(' ')}\n` +
+                   `These modifiers fine-tune how the operation is performed.` : '');
           case 'output':
-            return `Output Operation: ${op.content}`;
+            if (op.content.startsWith('Σ {')) {
+              const jsonLines = op.content.split('\n');
+              return `Output Format:\n${jsonLines.map(line => '  ' + line).join('\n')}\n` +
+                     `This defines the structure of the final output, with each field having specific formatting requirements.`;
+            }
+            return `Output Operation: ${op.content}\n` +
+                   `This specifies how the results should be formatted.\n` +
+                   (op.modifiers ? `Applied modifiers: ${op.modifiers.join(' ')}\n` +
+                   `These modifiers control the output formatting.` : '');
           case 'control':
             return `// ${op.content}`;
           default:
             return op.content;
         }
-      }).join('\n');
+      }).join('\n\n');
 
       return { output };
     } catch (error) {
@@ -176,12 +192,13 @@ export const useSynthLang = () => {
 
       // Handle regular lines
       return line.replace(
-        /(↹|⊕|Σ)|\b([a-zA-Z0-9_]+)\s+(?=")|("[^"]*")|(\^[a-zA-Z0-9_]+)|#.*$/g,
-        (match, glyph, label, content, modifier, comment) => {
+        /(↹|⊕|Σ)|\b([a-zA-Z0-9_]+)\s+(?=")|("[^"]*")|(\^[a-zA-Z0-9_]+)|(@[a-zA-Z0-9_]+)|#.*$/g,
+        (match, glyph, label, content, modifier, context, comment) => {
           if (glyph) return `<span class="text-purple-400">${glyph}</span>`;
           if (label) return `<span class="text-blue-400">${label}</span>`;
           if (content) return `<span class="text-yellow-300">${content}</span>`;
           if (modifier) return `<span class="text-green-400">${modifier}</span>`;
+          if (context) return `<span class="text-orange-400">${context}</span>`;
           if (comment) return `<span class="text-gray-500">${comment}</span>`;
           return match;
         }
