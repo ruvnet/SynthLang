@@ -185,17 +185,30 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 
 ```
 src/
-├── core/
-│   ├── translator/        # Prompt translation engine
-│   ├── optimizer/        # Token optimization system
-│   └── tester/          # Testing framework
-├── services/
-│   ├── openRouter/      # OpenRouter integration
-│   ├── storage/         # State management
-│   └── analytics/       # Performance metrics
-└── interfaces/
-    ├── web/            # Web interface
-    └── api/            # API endpoints
+├── components/                # UI Components
+│   ├── AdvancedCalculator/   # Advanced cost calculation
+│   ├── Documentation/        # Documentation system
+│   ├── TokenCalculator/      # Token usage calculator
+│   ├── Translate/           # Prompt translation
+│   └── ui/                  # Shared UI components
+├── config/                   # Configuration
+│   └── modelSearch.ts       # Model selection logic
+├── data/                    # Static data
+│   └── model_prices_and_context_window.json
+├── hooks/                   # React hooks
+│   ├── useDocumentation.ts
+│   └── useKeyboardShortcuts.ts
+├── lib/                     # Utility libraries
+│   └── utils.ts
+├── pages/                   # Application pages
+│   ├── About.tsx
+│   ├── Documentation.tsx
+│   ├── Playground.tsx
+│   └── Translate.tsx
+└── services/                # Core services
+    ├── frameworkStorage.ts  # State persistence
+    ├── openRouterService.ts # API integration
+    └── settingsService.ts   # App configuration
 ```
 
 ### Development Guidelines
