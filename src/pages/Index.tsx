@@ -1,9 +1,16 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Sparkles, Gauge, DollarSign, Calculator as CalcIcon } from "lucide-react";
+import { ArrowRight, Sparkles, Gauge, Calculator as CalcIcon, Settings } from "lucide-react";
 import Calculator from "../components/TokenCalculator/Calculator";
 import Layout from "../components/Layout";
 
 const FEATURES = [
+  {
+    title: "Advanced Calculator",
+    description: "Fine-tune your SynthLang implementation with advanced settings and metrics",
+    icon: Settings,
+    link: "/advanced-calculator",
+    color: "text-orange-400"
+  },
   {
     title: "Prompt Translation",
     description: "Convert standard prompts into optimized SynthLang format",
@@ -17,13 +24,6 @@ const FEATURES = [
     icon: Gauge,
     link: "/test",
     color: "text-blue-400"
-  },
-  {
-    title: "Cost Analytics",
-    description: "Track token usage and cost savings across translations",
-    icon: DollarSign,
-    link: "/analytics",
-    color: "text-green-400"
   }
 ] as const;
 
@@ -38,7 +38,7 @@ const Index = () => {
           </h1>
           <p className="text-xl text-muted-foreground mb-6">
             Reduce AI costs by up to 70% with SynthLang's efficient prompt optimization.
-            Maintain effectiveness while dramatically cutting token usage.
+            Experience up to 233% faster processing while maintaining effectiveness.
           </p>
           <Link 
             to="/translate" 

@@ -3,6 +3,8 @@ import { ModelSpec } from "../../config/modelSearch";
 export interface TokenMetrics {
   originalTokens: number;
   optimizedTokens: number;
+  improvementFactor: number;  // e.g., 3.33×
+  percentageIncrease: number; // e.g., 233%
   modelCosts: {
     [key: string]: {
       original: number;

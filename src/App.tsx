@@ -9,6 +9,7 @@ import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
 import About from "./pages/About";
 import Translate from "./pages/Translate";
+import AdvancedCalculator from "./pages/AdvancedCalculator";
 
 const App: React.FC = () => {
   return (
@@ -25,6 +26,7 @@ const App: React.FC = () => {
           <Route path="/settings" element={<Settings />} />
           <Route path="/about" element={<About />} />
           <Route path="/translate" element={<Translate />} />
+          <Route path="/advanced-calculator" element={<AdvancedCalculator />} />
         </Routes>
         <Toaster />
       </Router>

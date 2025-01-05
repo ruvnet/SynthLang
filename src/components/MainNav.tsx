@@ -36,7 +36,7 @@ export default function MainNav({ title }: MainNavProps) {
       icon: <Languages className="w-4 h-4" />
     },
     {
-      href: "/analytics",
+      href: "/advanced-calculator",
       label: "Analytics",
       icon: <BarChart2 className="w-4 h-4" />
     },

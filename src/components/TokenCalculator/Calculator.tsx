@@ -51,9 +51,14 @@ const Calculator = () => {
     const optimizedCost = optimizedTokens * (modelSpec.input_cost_per_token || 0);
     const savings = originalCost - optimizedCost;
     
+    const improvementFactor = tokens / optimizedTokens; // e.g., 3.33×
+    const percentageIncrease = ((improvementFactor - 1) * 100); // e.g., 233%
+    
     setTokenMetrics({
       originalTokens: tokens,
       optimizedTokens,
+      improvementFactor,
+      percentageIncrease,
       modelCosts: {
         [selectedModel]: {
           original: originalCost,

@@ -130,6 +130,18 @@ export const MetricsDisplay = ({
               )}
             </span>
           </div>
+          <div className="flex justify-between text-blue-400 font-bold">
+            <span>Improvement:</span>
+            <span className="font-mono">
+              {tokenMetrics.improvementFactor.toFixed(2)}×
+            </span>
+          </div>
+          <div className="flex justify-between text-green-400 font-bold">
+            <span>Speed Increase:</span>
+            <span className="font-mono">
+              {tokenMetrics.percentageIncrease.toFixed(0)}%
+            </span>
+          </div>
         </div>
       </div>
     </div>
