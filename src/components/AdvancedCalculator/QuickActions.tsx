@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Download, Upload, Search, Tag, Star, Clock, Settings2, Plus, Edit } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { Button } from "../ui/button";
 import { ScrollArea } from "../ui/scroll-area";
 import { usePresetManager } from "../../hooks/usePresetManager";
@@ -9,9 +9,10 @@ import { Textarea } from "../ui/textarea";
 import { Input } from "../ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Badge } from "../ui/badge";
-import { optimizedPresets } from "./optimizedPresets";
 import { CustomPresetForm } from "./CustomPresetForm";
 import { DEFAULT_FRAMEWORKS_CONFIG } from "./constants";
+import type { SynthLangConfig } from "./types";
+import { optimizedPresets } from "./optimizedPresets";
 
 export const QuickActions = () => {
   const {
@@ -53,59 +54,90 @@ export const QuickActions = () => {
         className="cursor-pointer" 
         onClick={onClick}
       >
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2">
-          <Settings2 className="w-4 h-4 text-purple-400" />
-          <h4 className="font-semibold">{preset.name}</h4>
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <Settings2 className="w-4 h-4 text-purple-400" />
+            <h4 className="font-semibold">{preset.name}</h4>
+          </div>
+          <div className="flex items-center gap-2">
+            {onEdit && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit();
+                }}
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
+            )}
+            <Clock className="w-4 h-4 text-muted-foreground" />
+            <span className="text-xs text-muted-foreground">
+              {new Date(preset.metadata.updatedAt).toLocaleDateString()}
+            </span>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          {onEdit && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={(e) => {
-                e.stopPropagation();
-                onEdit();
-              }}
-            >
-              <Edit className="h-4 w-4" />
-            </Button>
+        <p className="text-sm text-muted-foreground">{preset.description}</p>
+        <div className="flex flex-wrap gap-2 mt-2">
+          {preset.settings.customSettings?.streamingEnabled && (
+            <Badge variant="outline" className="text-xs">
+              Streaming
+            </Badge>
           )}
-          <Clock className="w-4 h-4 text-muted-foreground" />
-          <span className="text-xs text-muted-foreground">
-            {new Date(preset.metadata.updatedAt).toLocaleDateString()}
-          </span>
+          {preset.settings.customSettings?.cacheEnabled && (
+            <Badge variant="outline" className="text-xs">
+              Caching
+            </Badge>
+          )}
+          {preset.settings.customSettings?.parallelProcessing && (
+            <Badge variant="outline" className="text-xs">
+              Parallel
+            </Badge>
+          )}
+          {preset.settings.customSettings?.batchProcessing && (
+            <Badge variant="outline" className="text-xs">
+              Batch
+            </Badge>
+          )}
+          {preset.metadata.tags?.map(tag => (
+            <Badge key={tag} variant="secondary" className="text-xs">
+              {tag}
+            </Badge>
+          ))}
         </div>
-      </div>
-      <p className="text-sm text-muted-foreground">{preset.description}</p>
-      <div className="flex flex-wrap gap-2">
-        {preset.metadata.tags?.map(tag => (
-          <Badge key={tag} variant="secondary" className="text-xs">
-            {tag}
-          </Badge>
-        ))}
-      </div>
-      <div className="text-xs text-muted-foreground mt-2">
-        <span className="font-medium">Model:</span> {preset.settings.model}
-      </div>
+        <div className="flex items-center gap-4 text-xs text-muted-foreground mt-2">
+          <div>
+            <span className="font-medium">Model:</span> {preset.settings.model}
+          </div>
+          <div>
+            <span className="font-medium">Temperature:</span> {preset.settings.temperature}
+          </div>
+          <div>
+            <span className="font-medium">Context:</span> {(preset.settings.maxTokens / 1024).toFixed(1)}K
+          </div>
+        </div>
       </div>
     </div>
   );
 
-  const handleLoadPreset = async (preset: PresetConfiguration) => {
+  const handleLoadPreset = async (preset: PresetConfiguration, isOptimized: boolean = false) => {
     try {
-      await loadPreset(preset.id);
+      // Only try to load from storage if it's not an optimized preset
+      if (!isOptimized) {
+        await loadPreset(preset.id);
+      }
       
-      // Map preset settings to calculator configuration
-      const config = {
+      // Map preset settings to calculator configuration directly
+      const config: SynthLangConfig = {
         model: preset.settings.model,
         contextSize: preset.settings.maxTokens,
         features: {
           contextWindow: preset.settings.maxTokens,
           temperature: preset.settings.temperature,
           streamingMode: preset.settings.customSettings?.streamingEnabled ?? true,
-          customPrompt: "",
+          customPrompt: preset.settings.customSettings?.customPrompt || "",
           responseFormat: "json"
         },
         optimizations: {
@@ -174,6 +206,9 @@ export const QuickActions = () => {
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Load Preset Configuration</DialogTitle>
+            <DialogDescription>
+              Choose from optimized presets or load your custom configurations
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             {error && <p className="text-red-500">{error}</p>}
@@ -207,10 +242,10 @@ export const QuickActions = () => {
               <TabsContent value="optimized" className="mt-4">
                 <ScrollArea className="h-[400px] pr-4">
                   <div className="space-y-3">
-                    {filteredPresets(optimizedPresets).map((preset) => 
+                    {filteredPresets(optimizedPresets as unknown as PresetConfiguration[]).map((preset) => 
                       renderPresetCard(
                         preset,
-                        () => handleLoadPreset(preset),
+                        () => handleLoadPreset(preset, true),
                         () => handleEditPreset(preset)
                       )
                     )}
@@ -332,6 +367,9 @@ export const QuickActions = () => {
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Export Settings</DialogTitle>
+            <DialogDescription>
+              Export your preset configurations to share or backup
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <ScrollArea className="h-[300px] pr-4">

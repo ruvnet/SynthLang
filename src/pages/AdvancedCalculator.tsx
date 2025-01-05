@@ -1,5 +1,8 @@
+import { useState, useEffect } from "react";
 import Layout from "../components/Layout";
 import { AdvancedCalculator } from "../components/AdvancedCalculator";
+import { PreviewDisplay } from "../components/AdvancedCalculator/PreviewDisplay";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Link } from "react-router-dom";
 import { 
   Gauge, 
@@ -14,8 +17,38 @@ import {
   ArrowRight
 } from "lucide-react";
 import { QuickActions } from "../components/AdvancedCalculator/QuickActions";
+import { SynthLangConfig } from "../components/AdvancedCalculator/types";
 
 const AdvancedCalculatorPage = () => {
+  const [activeTab, setActiveTab] = useState("calculator");
+  const [config, setConfig] = useState<SynthLangConfig | undefined>();
+
+  useEffect(() => {
+    // Load initial config from localStorage
+    const savedConfig = localStorage.getItem('synthLang.calculatorConfig');
+    if (savedConfig) {
+      try {
+        setConfig(JSON.parse(savedConfig));
+      } catch (err) {
+        console.error('Failed to parse saved config:', err);
+      }
+    }
+
+    // Listen for config changes
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'synthLang.calculatorConfig' && e.newValue) {
+        try {
+          setConfig(JSON.parse(e.newValue));
+        } catch (err) {
+          console.error('Failed to parse updated config:', err);
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
   return (
     <Layout title="Advanced SynthLang Calculator">
       <main className="container mx-auto p-4 space-y-6">
@@ -57,10 +90,24 @@ const AdvancedCalculatorPage = () => {
           <QuickActions />
         </div>
 
-        {/* Main Calculator */}
+        {/* Main Content */}
         <div className="glass-panel p-6">
-          <h2 className="text-xl font-semibold mb-4">Calculator</h2>
-          <AdvancedCalculator />
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="calculator">Calculator</TabsTrigger>
+              <TabsTrigger value="preview">Preview</TabsTrigger>
+            </TabsList>
+            <TabsContent value="calculator">
+              <AdvancedCalculator onTabChange={(tab) => {
+                if (tab === 'preview') {
+                  setActiveTab('preview');
+                }
+              }} />
+            </TabsContent>
+            <TabsContent value="preview">
+              <PreviewDisplay config={config} />
+            </TabsContent>
+          </Tabs>
         </div>
 
         {/* Additional Resources */}

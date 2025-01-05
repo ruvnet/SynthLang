@@ -1,7 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Play } from 'lucide-react';
 import { useSettingsContext } from '../../services/settingsService';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '../ui/card';
+import { Button } from '../ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { Switch } from '../ui/switch';
 import { Slider } from '../ui/slider';
@@ -12,9 +14,12 @@ import { Textarea } from '../ui/textarea';
 import { CALCULATOR_TABS, FEATURE_OPTIONS, OPTIMIZATION_OPTIONS, DEFAULT_CONFIG, FRAMEWORK_OPTIONS } from './constants';
 import { SynthLangConfig, ResponseFormat } from './types';
 
-interface AdvancedCalculatorProps {}
+interface AdvancedCalculatorProps {
+  onTabChange?: (tab: string) => void;
+}
 
-export const AdvancedCalculator: React.FC<AdvancedCalculatorProps> = () => {
+export const AdvancedCalculator: React.FC<AdvancedCalculatorProps> = ({ onTabChange }) => {
+  const [activeTab, setActiveTab] = useState('basic');
   const { settings } = useSettingsContext();
   const [config, setConfig] = React.useState<SynthLangConfig>(() => {
     // Try to load saved config from localStorage
@@ -240,7 +245,10 @@ ${enabledFrameworks}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="basic" className="w-full">
+          <Tabs value={activeTab} onValueChange={(value) => {
+            setActiveTab(value);
+            onTabChange?.(value);
+          }} className="w-full">
             <TabsList className="grid w-full grid-cols-6">
               {CALCULATOR_TABS.map((tab) => (
                 <TabsTrigger key={tab.id} value={tab.id}>
@@ -407,6 +415,22 @@ ${enabledFrameworks}
                         {renderFrameworkSection('Constructed Languages', 'constructed')}
                       </div>
                     </CardContent>
+        <CardFooter>
+          <Button 
+            className="w-full flex items-center gap-2"
+            onClick={() => {
+              // Save current config
+              localStorage.setItem('synthLang.calculatorConfig', JSON.stringify(config));
+              
+              // Switch to preview tab
+              setActiveTab('preview');
+              onTabChange?.('preview');
+            }}
+          >
+            <Play className="w-4 h-4" />
+            Generate Preview
+          </Button>
+        </CardFooter>
                   </Card>
                 </div>
                 <div className="space-y-4">
