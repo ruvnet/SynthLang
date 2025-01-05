@@ -6,6 +6,43 @@ export const Syntax: DocSection = {
   icon: Brackets,
   content: [
     {
+      title: "Symbol Inventory",
+      text: "Complete catalog of SynthLang symbols and their semantic meanings:",
+      items: [
+        "Core Symbols: ↹, Σ, ⊕, ⊗, ⊥",
+        "Flow Control: ⇒, →, ↺, ∀, ∃",
+        "Logical Operators: ∧, ∨, ¬, ⊢, ⊨",
+        "Set Operations: ∪, ∩, ∖, ∈, ∉",
+        "Priority Markers: !, ?, *, #, @"
+      ],
+      example: `Symbol Categories:
+1. Processing: ⊕ (merge), ⊗ (transform)
+2. Flow: → (sequence), ↺ (loop)
+3. Logic: ∧ (and), ∨ (or), ¬ (not)
+4. Sets: ∪ (union), ∩ (intersect)
+5. Priority: ! (critical), ? (optional)`
+    },
+    {
+      title: "Priority and Attention",
+      text: "System for controlling processing priority and attention mechanisms:",
+      example: `Priority Levels:
+!critical: Highest priority execution
+!high: Elevated priority
+!normal: Standard processing
+!low: Background processing
+
+Attention Control:
+@focus(entity): Direct attention
+@context(scope): Set context
+@weight(0.8): Attention weight
+@mask([1,1,0]): Attention mask
+
+Combined Usage:
+↹ data !critical @focus(key_metrics)
+⊕ analyze !high @context(market)
+⊕ Σ !normal @weight(0.7)`
+    },
+    {
       title: "Basic Structure",
       text: `SynthLang syntax follows a precise, hierarchical structure designed for maximum efficiency:`,
       example: `<operation> <subject> <modifiers>
@@ -119,6 +156,61 @@ ML Operations:
 Fallback Patterns:
 ↹ primary || fallback || default
 ⊕ process !timeout(5s) => retry`
+    },
+    {
+      title: "Composition Rules",
+      text: "Guidelines for combining syntax elements effectively:",
+      example: `1. Operator Precedence:
+! > @ > ⊕ > ↹ > Σ
+
+2. Modifier Stacking:
+↹ data ^urgent ^brief ^eng
+(Modifiers apply left-to-right)
+
+3. Context Inheritance:
+↹ market @context(global) [
+  ⊕ analyze(US) // inherits global
+  ⊕ analyze(EU) // inherits global
+]
+
+4. Priority Propagation:
+↹ data !critical [
+  ⊕ process   // inherits critical
+  ⊕ validate  // inherits critical
+]`
+    },
+    {
+      title: "Advanced Syntax Patterns",
+      text: "Complex patterns for sophisticated operations:",
+      example: `1. Nested Operations:
+↹ data @context(finance) [
+  ⊕ analyze !high [
+    ↹ metrics @focus(risk)
+    ⊕ validate ^strict
+    ⊕ Σ ^brief
+  ]
+  ⊕ report ^detailed
+]
+
+2. Parallel with Dependencies:
+[p1] ↹ market_data
+[p2] ↹ news_feed
+[p3] ⊕ analyze(p1 ∧ p2)
+⊕ Σ ^comprehensive
+
+3. Conditional Flows:
+↹ data ⊕ IF risk>threshold => [
+  !critical [
+    ⊕ alert
+    ⊕ mitigate
+    ⊕ report ^urgent
+  ]
+] ELSE [
+  !normal [
+    ⊕ log
+    ⊕ monitor
+  ]
+]`
     }
   ]
 };

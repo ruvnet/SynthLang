@@ -6,6 +6,62 @@ export const Implementation: DocSection = {
   icon: Code,
   content: [
     {
+      title: "GPT-4 Pipeline Integration",
+      text: `Implementation guide for GPT-4-style model pipelines:`,
+      items: [
+        "Prompting and parsing strategies",
+        "Fine-tuning with JSONL data",
+        "Task-specific adaptations",
+        "Pipeline optimization techniques"
+      ],
+      example: `// Prompting and Parsing
+const pipeline = new SynthPipeline({
+  prompting: {
+    templateEngine: 'handlebars',
+    contextWindow: 4096,
+    systemPrompt: loadTemplate('system.hbs')
+  },
+  parsing: {
+    outputFormat: 'json',
+    validator: 'jsonschema',
+    errorRecovery: true
+  }
+});
+
+// Fine-tuning with JSONL
+const trainingData = new JSONLDataset({
+  path: './data/training.jsonl',
+  format: {
+    prompt: 'string',
+    completion: 'string',
+    metadata: 'object'
+  }
+});
+
+await pipeline.fineTune({
+  dataset: trainingData,
+  epochs: 3,
+  batchSize: 32,
+  validationSplit: 0.2
+});
+
+// Task-Specific Adaptations
+const taskAdapters = {
+  classification: new ClassificationAdapter({
+    labels: ['A', 'B', 'C'],
+    threshold: 0.7
+  }),
+  generation: new GenerationAdapter({
+    maxLength: 1000,
+    temperature: 0.7
+  }),
+  qa: new QAAdapter({
+    contextWindow: 2048,
+    retrievalMethod: 'semantic'
+  })
+};`
+    },
+    {
       title: "Installation",
       text: `Quick start guide for setting up SynthLang:`,
       code: `# Clone the repository

@@ -127,6 +127,38 @@ export const Examples: DocSection = {
 Σ response ^natural`
     },
     {
+      title: "Cross-Language Examples",
+      text: "Examples of SynthLang syntax across different languages with equivalent functionality",
+      example: `# English Prompt (150 tokens)
+Write a comprehensive analysis of the current market trends 
+in renewable energy, focusing on solar and wind power. 
+Include recent technological developments, cost analysis, 
+and future projections. Consider both residential and 
+commercial applications.
+
+# Chinese Prompt (140 tokens)
+撰写一份关于可再生能源市场趋势的综合分析，重点关注太阳能
+和风能。包括最近的技术发展、成本分析和未来预测。考虑住宅
+和商业应用。
+
+# SynthLang Prompt (45 tokens)
+↹ market_analysis @renewable_energy
+⊕ focus [solar, wind] ^comprehensive
+⊕ analyze {
+  tech: ^recent,
+  cost: ^detailed,
+  forecast: ^future
+}
+⊕ scope [residential, commercial]
+Σ report ^analysis
+
+Benefits:
+- Language-agnostic structure
+- Consistent token reduction (70%)
+- Preserved semantic content
+- Improved processing efficiency`
+    },
+    {
       title: "Workflow Automation",
       text: "Examples of automated workflow processes",
       example: `# Document processing workflow

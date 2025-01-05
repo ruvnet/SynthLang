@@ -6,6 +6,45 @@ export const CostAnalysis: DocSection = {
   icon: Calculator,
   content: [
     {
+      title: "Data Density Model",
+      text: `SynthLang uses a mathematical model to quantify and optimize data density in prompts:`,
+      example: `Data Density Definition:
+D = I/T where:
+- D: Data density
+- I: Information content (semantic units)
+- T: Token count
+
+Percentage Reduction Example:
+Original Prompt: 150 tokens
+SynthLang: 45 tokens
+Reduction = (150 - 45)/150 = 70%
+
+Improvement Factor:
+Factor = Original/Optimized
+= 150/45 ≈ 3.33×
+Percentage Increase = (3.33 - 1) × 100% = 233%`
+    },
+    {
+      title: "Latency Improvement Analysis",
+      text: `Token reduction directly impacts processing latency through several mechanisms:`,
+      items: [
+        "Token Overhead: Linear relationship with processing time",
+        "Attention Matrix: Quadratic complexity reduction",
+        "Context Window: More efficient utilization",
+        "Memory Access: Reduced cache misses"
+      ],
+      example: `Latency Calculation:
+Base Latency: 50ms
+Token Processing: 0.5ms/token
+
+Standard (150 tokens):
+Total = 50ms + (150 × 0.5ms) = 125ms
+
+SynthLang (45 tokens):
+Total = 50ms + (45 × 0.5ms) = 72.5ms
+Improvement: 42% reduction in latency`
+    },
+    {
       title: "Token Reduction Impact",
       text: `SynthLang achieves a 70% reduction in token usage, resulting in significant cost savings across various AI models:`,
       items: [

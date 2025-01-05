@@ -102,6 +102,66 @@ const usageExample = {
 }`
 };
 
+const modelBehaviorExample = {
+  title: "Model Behavior Control",
+  description: "Fine-grained control of model behavior through system prompt configuration",
+  language: "markdown",
+  code: `[Model Behavior Configuration]
+1. Response Format Control
+   - JSON: ^json -> structured data output
+   - Markdown: ^md -> formatted documentation
+   - Plain: ^text -> unformatted response
+   - Custom: Define schema with {...}
+
+2. Processing Modes
+   - Deterministic: ^exact -> consistent outputs
+   - Creative: ^creative -> varied responses
+   - Analytical: ^analytical -> detailed analysis
+   - Concise: ^brief -> minimal output
+
+3. Error Handling
+   - Strict: Report all issues
+   - Permissive: Auto-correct minor issues
+   - Interactive: Request clarification
+   - Silent: Best-effort execution
+
+4. Context Management
+   - Memory: Track conversation state
+   - Reset: Clear context on demand
+   - Merge: Combine multiple contexts
+   - Scope: Limit context window`
+};
+
+const optimizationExample = {
+  title: "System Prompt Optimization",
+  description: "Techniques for optimizing system prompt performance",
+  language: "markdown",
+  code: `[Optimization Strategies]
+1. Token Efficiency
+   - Use compact representations
+   - Leverage unicode symbols
+   - Minimize repetition
+   - Cache common patterns
+
+2. Response Shaping
+   - Template-based outputs
+   - Schema validation
+   - Format enforcement
+   - Consistency checks
+
+3. Performance Tuning
+   - Batch similar requests
+   - Prioritize critical paths
+   - Cache frequent patterns
+   - Optimize context window
+
+4. Quality Control
+   - Validate outputs
+   - Monitor accuracy
+   - Track metrics
+   - Auto-correction`
+};
+
 export const SystemPrompt: DocSection = {
   title: "System Prompt",
   icon: Terminal,
@@ -123,6 +183,18 @@ export const SystemPrompt: DocSection = {
       text: "Once implemented, you can use SynthLang commands to interact with the LLM in a structured and efficient way:",
       example: "",
       component: () => <CodeExample {...usageExample} />
+    },
+    {
+      title: "Model Behavior Control",
+      text: "Fine-tune model behavior and response characteristics through system prompt configuration:",
+      example: "",
+      component: () => <CodeExample {...modelBehaviorExample} />
+    },
+    {
+      title: "Optimization Techniques",
+      text: "Strategies for optimizing system prompt performance and efficiency:",
+      example: "",
+      component: () => <CodeExample {...optimizationExample} />
     }
   ]
 };
