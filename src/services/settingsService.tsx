@@ -24,34 +24,24 @@ interface SettingsContextType {
 const defaultSettings: Settings = {
   theme: 'dark',
   fontSize: 14,
-  defaultModel: 'deepseek-coder-33b',
+  defaultModel: 'openai/gpt-3.5-turbo',
   models: {
-    'deepseek-coder-33b': {
-      enabled: true,
-      contextWindow: 32768,
-      costPer1kTokens: 0.0008
-    },
-    'deepseek-coder-6.7b': {
-      enabled: true,
-      contextWindow: 32768,
-      costPer1kTokens: 0.0002
-    },
-    'gpt-4': {
+    'openai/gpt-4': {
       enabled: true,
       contextWindow: 8192,
       costPer1kTokens: 0.03
     },
-    'gpt-3.5-turbo': {
+    'openai/gpt-3.5-turbo': {
       enabled: true,
       contextWindow: 4096,
       costPer1kTokens: 0.002
     },
-    'claude-2': {
+    'anthropic/claude-2': {
       enabled: true,
       contextWindow: 100000,
       costPer1kTokens: 0.011
     },
-    'claude-instant': {
+    'anthropic/claude-instant-v1': {
       enabled: true,
       contextWindow: 100000,
       costPer1kTokens: 0.0015

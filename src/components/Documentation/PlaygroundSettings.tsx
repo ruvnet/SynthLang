@@ -38,7 +38,7 @@ export const PlaygroundSettings: React.FC<PlaygroundSettingsProps> = ({ onSettin
   const { settings: globalSettings } = useSettingsContext();
   const [isOpen, setIsOpen] = useState(false);
   const [settings, setSettings] = useState<PlaygroundSettings>({
-    model: "gpt-4",
+    model: "openai/gpt-3.5-turbo",
     temperature: 0.7,
     maxTokens: 1000,
     autoFormat: true,
@@ -49,14 +49,14 @@ export const PlaygroundSettings: React.FC<PlaygroundSettingsProps> = ({ onSettin
   const hasOpenRouterKey = !!globalSettings?.openRouterApiKey;
 
   const models = hasOpenRouterKey ? [
-    { value: "gpt-4", label: "GPT-4" },
-    { value: "gpt-3.5-turbo", label: "GPT-3.5 Turbo" },
-    { value: "claude-2", label: "Claude 2" },
-    { value: "claude-instant", label: "Claude Instant" },
-    { value: "palm-2", label: "PaLM 2" }
+    { value: "openai/gpt-4", label: "GPT-4" },
+    { value: "openai/gpt-3.5-turbo", label: "GPT-3.5 Turbo" },
+    { value: "anthropic/claude-2", label: "Claude 2" },
+    { value: "anthropic/claude-instant-v1", label: "Claude Instant" }
   ] : [
-    { value: "gpt-4", label: "GPT-4 (OpenRouter API key required)" }
+    { value: "openai/gpt-3.5-turbo", label: "GPT-3.5 Turbo (OpenRouter API key required)" }
   ];
+
 
   const handleSettingChange = (key: keyof PlaygroundSettings, value: any) => {
     const newSettings = { ...settings, [key]: value };

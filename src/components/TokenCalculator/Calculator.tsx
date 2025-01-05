@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Calculator as CalcIcon, FileText, Zap, ArrowDownUp } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { Slider } from "../ui/slider";
 import { ModelSelector } from './ModelSelector';
 import { TokenInput } from './TokenInput';
 import { SpeedMetrics } from './SpeedMetrics';
@@ -43,9 +44,10 @@ const Calculator = () => {
   const [baseLatency, setBaseLatency] = useState(DEFAULT_BASE_LATENCY);
   const [outputRatio, setOutputRatio] = useState(DEFAULT_OUTPUT_RATIO);
   const [outputCost, setOutputCost] = useState(DEFAULT_OUTPUT_COST);
+  const [reductionPercent, setReductionPercent] = useState(70); // Default 70% reduction
 
   const calculateMetrics = (tokens: number) => {
-    const optimizedTokens = Math.ceil(tokens * 0.3); // 70% reduction
+    const optimizedTokens = Math.ceil(tokens * (1 - reductionPercent / 100)); // Convert percent to decimal
     const modelSpec = AVAILABLE_MODELS[selectedModel];
     const originalCost = tokens * (modelSpec.input_cost_per_token || 0);
     const optimizedCost = optimizedTokens * (modelSpec.input_cost_per_token || 0);
@@ -113,12 +115,34 @@ const Calculator = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-4">
-        <ModelSelector
-          selectedModel={selectedModel}
-          onModelSelect={setSelectedModel}
-          availableModels={AVAILABLE_MODELS}
-        />
+      <div className="space-y-4">
+        <div className="flex gap-4">
+          <ModelSelector
+            selectedModel={selectedModel}
+            onModelSelect={setSelectedModel}
+            availableModels={AVAILABLE_MODELS}
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <div className="flex justify-between">
+            <label className="text-sm font-medium">Reduction Percentage</label>
+            <span className="text-sm text-muted-foreground">{reductionPercent}%</span>
+          </div>
+          <Slider
+            min={0}
+            max={100}
+            step={1}
+            value={[reductionPercent]}
+            onValueChange={([value]) => {
+              setReductionPercent(value);
+              if (tokenCount) {
+                calculateMetrics(tokenCount);
+              }
+            }}
+            className="w-full"
+          />
+        </div>
       </div>
 
       <Tabs defaultValue="tokens" className="w-full">

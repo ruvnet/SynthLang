@@ -173,6 +173,36 @@ export const FRAMEWORK_OPTIONS = [
     ],
     examples: ['▯◌△', '⬡⬢▯', '△◌⬢'],
     group: 'constructed'
+  },
+
+  // Optimization Frameworks
+  {
+    id: 'super_optimized',
+    name: 'Super Optimized Framework',
+    description: 'Achieve maximum data density through advanced compression techniques',
+    glyphs: [
+      { symbol: '⚡', name: 'Compress', description: 'Ultra-dense data compression', usage: 'Compress(data) -> densified output' },
+      { symbol: '⚙', name: 'Pack', description: 'Bit-level packing operation', usage: 'Pack(bits) for minimal space' },
+      { symbol: '⟪', name: 'Fold', description: 'Semantic folding for density', usage: 'Fold concepts into minimal form' },
+      { symbol: '⟫', name: 'Unfold', description: 'Semantic expansion', usage: 'Unfold compressed concepts' },
+      { symbol: '⌘', name: 'Optimize', description: 'Multi-level optimization', usage: 'Apply all optimization techniques' }
+    ],
+    examples: ['⚡data -> compact', '⟪concept⟫ -> dense', '⌘[process] -> optimal'],
+    group: 'optimization'
+  },
+  {
+    id: 'machine_language',
+    name: 'Machine Language Framework',
+    description: 'Low-level optimization using machine-oriented patterns',
+    glyphs: [
+      { symbol: '⎈', name: 'Register', description: 'Direct register operations', usage: 'Store in fast-access register' },
+      { symbol: '⌥', name: 'Bitwise', description: 'Bit-level operations', usage: 'Manipulate individual bits' },
+      { symbol: '⌤', name: 'Stack', description: 'Stack operations', usage: 'Push/pop for memory efficiency' },
+      { symbol: '⎆', name: 'Cache', description: 'Cache optimization', usage: 'Optimize for cache hits' },
+      { symbol: '⎇', name: 'Branch', description: 'Efficient branching', usage: 'Optimize conditional flows' }
+    ],
+    examples: ['⎈reg -> fast', '⌥bits & mask', '⎆[data] -> cached'],
+    group: 'optimization'
   }
 ] as const;
 
@@ -230,7 +260,11 @@ export const DEFAULT_FRAMEWORKS_CONFIG: FrameworksConfig = {
   sanskrit: { enabled: false, selectedGlyphs: [], customGlyphs: [] },
   
   // Constructed
-  ithkuil: { enabled: false, selectedGlyphs: [], customGlyphs: [] }
+  ithkuil: { enabled: false, selectedGlyphs: [], customGlyphs: [] },
+  
+  // Optimization
+  super_optimized: { enabled: false, selectedGlyphs: [], customGlyphs: [] },
+  machine_language: { enabled: false, selectedGlyphs: [], customGlyphs: [] }
 };
 
 export const BASE_FRAMEWORKS: Framework[] = [
@@ -422,6 +456,38 @@ export const BASE_FRAMEWORKS: Framework[] = [
     glyphs: [],
     examples: [],
     group: 'constructed'
+  },
+
+  // Optimization Frameworks
+  {
+    id: 'super_optimized',
+    name: 'Super Optimized Framework',
+    description: 'Achieve maximum data density through advanced compression techniques',
+    details: 'Utilize cutting-edge compression and optimization techniques to achieve the highest possible data density while maintaining semantic clarity.',
+    applications: [
+      'Ultra-dense encoding - Maximize information per token',
+      'Semantic compression - Fold complex concepts into minimal forms',
+      'Multi-level optimization - Apply layered efficiency techniques',
+      'Lossless density - Maintain full meaning in compressed form'
+    ],
+    glyphs: [],
+    examples: [],
+    group: 'optimization'
+  },
+  {
+    id: 'machine_language',
+    name: 'Machine Language Framework',
+    description: 'Low-level optimization using machine-oriented patterns',
+    details: 'Apply machine-level optimization patterns to achieve maximum efficiency through direct hardware-inspired operations.',
+    applications: [
+      'Register optimization - Direct fast-access operations',
+      'Cache efficiency - Optimize data locality and access',
+      'Stack management - Efficient memory utilization',
+      'Branch prediction - Optimize conditional flows'
+    ],
+    glyphs: [],
+    examples: [],
+    group: 'optimization'
   }
 ];
 

@@ -13,7 +13,7 @@ export interface Framework {
   applications: string[];
   glyphs: GlyphInfo[];
   examples: string[];
-  group: 'mathematical' | 'logographic' | 'semitic' | 'classical' | 'constructed';
+  group: 'mathematical' | 'logographic' | 'semitic' | 'classical' | 'constructed' | 'optimization';
 }
 
 export interface FrameworkState {

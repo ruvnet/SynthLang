@@ -8,7 +8,8 @@ interface OpenRouterResponse {
   }>;
 }
 
-const SYSTEM_PROMPT = `You are a SynthLang interpreter. Process the following SynthLang code according to these rules:
+const SYSTEM_PROMPT = {
+  interpreter: `You are a SynthLang interpreter. Process the following SynthLang code according to these rules:
 
 [Grammar and Syntax]
 1. Task Glyphs (T)
@@ -34,12 +35,92 @@ const SYSTEM_PROMPT = `You are a SynthLang interpreter. Process the following Sy
    - + (Concatenate outputs)
    - -> (Action direction)
 
-Process the input and provide output according to these rules.`;
+Process the input and provide output according to these rules.`,
+
+  translator: `You are a SynthLang translator that converts standard prompts into SynthLang's hyper-efficient format. Follow these rules precisely:
+
+[Framework Integration]
+1. Mathematical Frameworks:
+   - Use provided framework glyphs appropriately in the translation
+   - Apply framework-specific notation where relevant
+   - Maintain mathematical rigor according to each framework's rules
+   - Preserve semantic relationships using framework symbols
+   - Combine multiple frameworks coherently when specified
+
+2. Optimization Frameworks:
+   - Apply compression and optimization techniques to maximize efficiency
+   - Use machine-level patterns for low-level optimization
+   - Maintain semantic clarity while achieving maximum density
+   - Combine optimization techniques coherently
+
+3. Framework Combinations:
+   - Integrate mathematical and optimization frameworks seamlessly
+   - Use optimization techniques to enhance mathematical expressions
+   - Preserve mathematical precision while maximizing efficiency
+   - Apply framework-specific optimizations where appropriate
+
+[Grammar Rules]
+1. Task Glyphs:
+   - ↹ (Focus/Filter) for main tasks and instructions
+   - Σ (Summarize) for condensing information
+   - ⊕ (Combine/Merge) for context and data integration
+   - ? (Query/Clarify) for validation checks
+   - IF for conditional operations
+
+2. Subject Markers:
+   - Use • before datasets (e.g., •customerData)
+   - Use 花 for abstract concepts
+   - Use 山 for hierarchical structures
+
+3. Modifiers:
+   - ^format(type) for output format
+   - ^n for importance level
+   - ^lang for language specification
+   - ^t{n} for time constraints
+
+4. Flow Control:
+   - [p=n] for priority (1-5)
+   - -> for sequential operations
+   - + for parallel tasks
+   - | for alternatives
+
+[Translation Process]
+1. Structure:
+   - Start with model selection: ↹ model.{name}
+   - Add format specification: ⊕ format(json)
+   - Group related operations with []
+   - Separate major sections with blank lines
+
+2. Data Sources:
+   - Convert datasets to •name format
+   - Link related data with :
+   - Use ⊕ to merge multiple sources
+   - Add ^t{timeframe} for temporal data
+
+3. Tasks:
+   - Convert objectives to task glyphs
+   - Add priority levels based on impact
+   - Chain dependent operations with ->
+   - Group parallel tasks with +
+   - Use ? for validation steps
+
+4. Optimization:
+   - Remove articles (a, an, the)
+   - Convert verbose phrases to symbols
+   - Use abbreviations (e.g., cfg, eval, impl)
+   - Maintain semantic relationships
+   - Group similar operations
+   - Chain related analyses
+
+Convert the input to SynthLang format, focusing on maximum efficiency while preserving critical information.`
+};
 
 export const callOpenRouter = async (
   code: string, 
   settings: PlaygroundSettings, 
-  apiKey: string
+  apiKey: string,
+  mode: 'interpreter' | 'translator' = 'interpreter',
+  frameworkInstructions?: string
 ): Promise<string> => {
   try {
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -55,7 +136,9 @@ export const callOpenRouter = async (
         messages: [
           {
             role: 'system',
-            content: SYSTEM_PROMPT
+            content: frameworkInstructions 
+              ? `${SYSTEM_PROMPT[mode]}\n\n[Active Frameworks]\n${frameworkInstructions}`
+              : SYSTEM_PROMPT[mode]
           },
           {
             role: 'user',
@@ -73,14 +156,30 @@ export const callOpenRouter = async (
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.message || 'Failed to process SynthLang code');
+      if (error.error?.message?.includes('insufficient_quota')) {
+        throw new Error('Insufficient credits. Please check your OpenRouter account.');
+      } else if (error.error?.message?.includes('invalid_api_key')) {
+        throw new Error('Invalid API key. Please check your API key in Settings.');
+      } else if (error.error?.message?.includes('model_not_available')) {
+        throw new Error('Selected model is not available. Please choose a different model.');
+      }
+      throw new Error(error.error?.message || 'Failed to process SynthLang code');
     }
 
     const data: OpenRouterResponse = await response.json();
-    return data.choices[0]?.message?.content || '';
+    const content = data.choices[0]?.message?.content;
+    
+    if (!content) {
+      throw new Error('No response received from the model. Please try again.');
+    }
+
+    return content;
   } catch (error) {
     console.error('OpenRouter API error:', error);
-    throw new Error('Failed to process SynthLang code. Please check your API key and try again.');
+    if (error instanceof Error) {
+      throw error; // Re-throw specific errors
+    }
+    throw new Error('Failed to process SynthLang code. Please check your connection and try again.');
   }
 };
 
@@ -96,9 +195,19 @@ export const checkOpenRouterAvailability = async (apiKey: string): Promise<boole
       }
     });
 
+    if (!response.ok) {
+      const error = await response.json();
+      if (error.error?.message?.includes('invalid_api_key')) {
+        throw new Error('Invalid API key');
+      }
+    }
+
     return response.ok;
   } catch (error) {
     console.error('Failed to check OpenRouter availability:', error);
+    if (error instanceof Error && error.message === 'Invalid API key') {
+      throw error;
+    }
     return false;
   }
 };
