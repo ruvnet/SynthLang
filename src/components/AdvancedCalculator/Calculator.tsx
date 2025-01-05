@@ -17,7 +17,17 @@ interface AdvancedCalculatorProps {}
 export const AdvancedCalculator: React.FC<AdvancedCalculatorProps> = () => {
   const { settings } = useSettingsContext();
   const [config, setConfig] = React.useState<SynthLangConfig>(() => {
-    // Get first enabled model as default
+    // Try to load saved config from localStorage
+    const savedConfig = localStorage.getItem('synthLang.calculatorConfig');
+    if (savedConfig) {
+      try {
+        return JSON.parse(savedConfig);
+      } catch (err) {
+        console.error('Failed to parse saved config:', err);
+      }
+    }
+    
+    // Fall back to default config
     const defaultModel = Object.entries(settings.models)
       .find(([_, settings]) => settings.enabled)?.[0] || DEFAULT_CONFIG.model;
     
@@ -27,6 +37,23 @@ export const AdvancedCalculator: React.FC<AdvancedCalculatorProps> = () => {
       contextSize: settings.models[defaultModel]?.contextWindow || DEFAULT_CONFIG.contextSize
     };
   });
+
+  // Load config when it changes in localStorage
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'synthLang.calculatorConfig' && e.newValue) {
+        try {
+          const newConfig = JSON.parse(e.newValue);
+          setConfig(newConfig);
+        } catch (err) {
+          console.error('Failed to parse updated config:', err);
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   // Update context size when model changes
   useEffect(() => {

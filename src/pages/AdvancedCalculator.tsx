@@ -13,6 +13,7 @@ import {
   Lightbulb,
   ArrowRight
 } from "lucide-react";
+import { QuickActions } from "../components/AdvancedCalculator/QuickActions";
 
 const AdvancedCalculatorPage = () => {
   return (
@@ -53,22 +54,7 @@ const AdvancedCalculatorPage = () => {
         {/* Quick Actions */}
         <div className="glass-panel p-6">
           <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
-          <div className="grid md:grid-cols-2 gap-4">
-            <button className="glass-panel p-4 hover:bg-accent/50 transition-colors text-left">
-              <div className="flex items-center gap-2 mb-2">
-                <Download className="w-5 h-5 text-purple-400" />
-                <h3 className="font-semibold">Load Preset Configuration</h3>
-              </div>
-              <p className="text-sm text-muted-foreground">Use optimized settings for common scenarios</p>
-            </button>
-            <button className="glass-panel p-4 hover:bg-accent/50 transition-colors text-left">
-              <div className="flex items-center gap-2 mb-2">
-                <Upload className="w-5 h-5 text-blue-400" />
-                <h3 className="font-semibold">Export Settings</h3>
-              </div>
-              <p className="text-sm text-muted-foreground">Save your configuration for later use</p>
-            </button>
-          </div>
+          <QuickActions />
         </div>
 
         {/* Main Calculator */}
