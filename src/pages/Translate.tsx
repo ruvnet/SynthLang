@@ -146,7 +146,82 @@ const Translate = () => {
             
             return `${framework.name}:\n${framework.description}\nAvailable Glyphs:\n${selectedGlyphs.join('\n')}`;
           })
-          .join('\n\n') || undefined;
+          .join('\n\n');
+
+        const instructions = `${frameworkInstructions}\n\nSYNTHLANG TRANSLATION FORMAT:
+
+LINE STRUCTURE (EXACT SYNTAX REQUIRED):
+↹ label:"content" -> description   # Input (MUST START HERE)
+⊕ label:"content" -> description   # Process (MIDDLE STEPS)
+Σ label:"content" -> description   # Output (MUST END HERE)
+
+COMPONENT REQUIREMENTS (EACH LINE MUST FOLLOW):
+1. Task Glyph (FIRST CHARACTER):
+   ↹ = Input/Parse (REQUIRED START)
+   ⊕ = Process/Transform (MIDDLE)
+   Σ = Output/Generate (REQUIRED END)
+
+2. Label (AFTER GLYPH):
+   - Single word only
+   - Ends with colon
+   - No spaces/hyphens
+   VALID: header: content: data:
+   INVALID: my-label: two words: data-field:
+
+3. Content (IN QUOTES):
+   - Double quotes required
+   - Exact text inside
+   - No escaped quotes
+   VALID: "[Title]" "text here"
+   INVALID: [Title] 'text' "escaped \\"quotes\\""
+
+4. Arrow (EXACT SPACING):
+   - Space before ->
+   - Space after ->
+   VALID: " -> "
+   INVALID: "->" "-> " " ->"
+
+5. Description (VERB FIRST):
+   - Starts with verb
+   - Clear purpose
+   - Brief phrase
+   VALID: Parse section, Extract data
+   INVALID: Section parsed, The data is extracted
+
+SEQUENCE RULES (STRICT ORDER):
+1. START with ↹ operations (REQUIRED):
+   - Must begin with input
+   - Extract raw content
+   - Parse sections
+
+2. CONTINUE with ⊕ operations:
+   - Process content
+   - Transform data
+   - Apply formatting
+
+3. END with Σ operations (REQUIRED):
+   - Must end with output
+   - Format results
+   - Generate final form
+
+EXAMPLE WITH EXACT FORMAT:
+Input:
+[Overview]
+1. Main Points
+   * First point
+   * Second point
+
+Valid SynthLang Format:
+↹ header:"[Overview]" -> Parse section title
+↹ title:"Main Points" -> Extract section name
+↹ list:"First point, Second point" -> Parse list items
+⊕ analyze:"content structure" -> Process structure
+⊕ validate:"syntax rules" -> Check formatting
+⊕ format:"documentation" -> Apply structure
+Σ output:"formatted content" -> Generate final output
+
+Convert input to SynthLang format using EXACT syntax:
+${text}`;
 
         translatedContent = await callOpenRouter(
           text.trim(),
@@ -160,7 +235,7 @@ const Translate = () => {
           },
           apiKey,
           'translator',
-          frameworkInstructions
+          instructions
         );
       } catch (err) {
         if (err instanceof Error && err.message.includes('Failed to process')) {
@@ -220,13 +295,12 @@ const Translate = () => {
   }, [initialState, translateToSynthLang]);
 
   const handleTestTranslation = useCallback(() => {
-    navigate("/test", { 
+    navigate("/playground", { 
       state: { 
-        prompt: translatedText,
-        metrics 
+        prompt: translatedText
       } 
     });
-  }, [navigate, translatedText, metrics]);
+  }, [navigate, translatedText]);
 
   return (
     <Layout title="Translate">

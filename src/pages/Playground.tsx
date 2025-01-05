@@ -3,13 +3,13 @@ import { PlaygroundProvider } from "../components/Documentation/PlaygroundContex
 import Layout from "../components/Layout";
 
 const defaultCode = `# Try SynthLang here
-↹ text "Write a short story about a robot learning to paint" ^creative
-⊕ analyze_sentiment ^thorough
-⊕ extract_themes ^comprehensive
+↹ text "Write a short story about a robot learning to paint" ^creative ^detailed
+⊕ analyze "themes and emotions" ^comprehensive ^deep
+⊕ format "narrative structure" ^engaging ^clear
 Σ {
-  story: ^polished,
-  sentiment: ^brief,
-  themes: ^bullet_points
+  story: ^creative,
+  themes: ^detailed,
+  emotions: ^analyzed
 }`;
 
 const Playground = () => {

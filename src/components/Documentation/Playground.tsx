@@ -1,4 +1,4 @@
-import { Play, Copy, Check, RotateCcw, AlertTriangle, Command } from "lucide-react";
+import { Play, Copy, Check, RotateCcw, AlertTriangle, Command, Loader2 } from "lucide-react";
 import { usePlaygroundContext, PlaygroundError, PlaygroundOutput, PlaygroundLoading } from "./PlaygroundContext";
 import { PlaygroundSettings, type PlaygroundSettings as PlaygroundSettingsType } from "./PlaygroundSettings";
 import { useSettingsContext } from "../../services/settingsService";
@@ -72,13 +72,20 @@ export const Playground = () => {
             </button>
             <button
               onClick={handleRun}
-              className="flex items-center gap-1 px-2 py-1 bg-purple-500/20 
-                       hover:bg-purple-500/30 rounded text-sm font-medium 
-                       transition-colors disabled:opacity-50"
+              className={`flex items-center gap-1 px-2 py-1 rounded text-sm font-medium 
+                       transition-colors ${
+                         isLoading 
+                           ? 'bg-purple-500/30 cursor-not-allowed' 
+                           : 'bg-purple-500/20 hover:bg-purple-500/30'
+                       } disabled:opacity-50`}
               title="Run code (⌘↵)"
               disabled={isLoading || !hasOpenRouterKey}
             >
-              <Play className="w-3 h-3" />
+              {isLoading ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                <Play className="w-3 h-3" />
+              )}
               {isLoading ? 'Running...' : 'Run'}
             </button>
           </div>

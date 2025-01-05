@@ -68,6 +68,7 @@ export const usePlayground = ({ initialCode, onRun }: UsePlaygroundProps) => {
         const validationErrors = validateSynthLang(code);
         if (validationErrors.length > 0) {
           setErrors(validationErrors);
+          setIsLoading(false);
           return;
         }
       }

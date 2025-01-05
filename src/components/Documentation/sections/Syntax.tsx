@@ -6,211 +6,137 @@ export const Syntax: DocSection = {
   icon: Brackets,
   content: [
     {
-      title: "Symbol Inventory",
-      text: "Complete catalog of SynthLang symbols and their semantic meanings:",
-      items: [
-        "Core Symbols: ↹, Σ, ⊕, ⊗, ⊥",
-        "Flow Control: ⇒, →, ↺, ∀, ∃",
-        "Logical Operators: ∧, ∨, ¬, ⊢, ⊨",
-        "Set Operations: ∪, ∩, ∖, ∈, ∉",
-        "Priority Markers: !, ?, *, #, @"
-      ],
-      example: `Symbol Categories:
-1. Processing: ⊕ (merge), ⊗ (transform)
-2. Flow: → (sequence), ↺ (loop)
-3. Logic: ∧ (and), ∨ (or), ¬ (not)
-4. Sets: ∪ (union), ∩ (intersect)
-5. Priority: ! (critical), ? (optional)`
-    },
-    {
-      title: "Priority and Attention",
-      text: "System for controlling processing priority and attention mechanisms:",
-      example: `Priority Levels:
-!critical: Highest priority execution
-!high: Elevated priority
-!normal: Standard processing
-!low: Background processing
-
-Attention Control:
-@focus(entity): Direct attention
-@context(scope): Set context
-@weight(0.8): Attention weight
-@mask([1,1,0]): Attention mask
-
-Combined Usage:
-↹ data !critical @focus(key_metrics)
-⊕ analyze !high @context(market)
-⊕ Σ !normal @weight(0.7)`
-    },
-    {
       title: "Basic Structure",
-      text: `SynthLang syntax follows a precise, hierarchical structure designed for maximum efficiency:`,
-      example: `<operation> <subject> <modifiers>
-↹ TSLA •price ^urgent
-⊕ IF <210 => SELL
-⊕ IF >220 => BUY
-⊕ Σ ^rationale`
+      text: `SynthLang follows a clear, consistent syntax pattern:`,
+      example: `# Input operation
+↹ text "content" ^modifier
+
+# Process operation
+⊕ analyze "data" ^modifier
+
+# Output operation
+Σ {
+  key: ^modifier,
+  result: ^format
+}`
     },
     {
       title: "Core Operators",
-      text: "Primary operators that form the foundation of SynthLang instructions:",
+      text: "Primary operators that form the foundation of SynthLang:",
       items: [
-        "↹ (Focus): Direct attention to specific data or context",
-        "Σ (Summarize): Generate concise summaries or analyses",
-        "⊕ (Combine): Merge multiple operations or results",
-        "IF: Conditional logic and decision making",
-        "=> (Implication): Define results or consequent actions"
-      ]
-    },
-    {
-      title: "Subject Markers",
-      text: "Identifiers for data sources and objects:",
-      items: [
-        "•data: Generic data reference",
-        "•price: Price-related data",
-        "•report: Report or document",
-        "•portfolio: Portfolio data",
-        "•account: Account information"
+        "↹ (Input): Define input data or context",
+        "⊕ (Process): Apply operations or transformations",
+        "Σ (Output): Generate formatted output",
+        "→ (Flow): Define processing sequence",
+        "⇒ (Route): Specify conditional paths"
       ],
-      example: `Examples:
-↹ •portfolio ^urgent
-↹ •price AAPL ^1h
-↹ •report Q4 ^brief`
+      example: `# Basic sequence
+↹ text "analyze market trends" ^comprehensive
+⊕ analyze "sentiment" ^detailed
+⊕ extract "key points" ^brief
+Σ {
+  sentiment: ^analyzed,
+  points: ^formatted
+}`
     },
     {
-      title: "Modifiers",
+      title: "Modifiers and Annotations",
       text: "Adjustments and specifications for operations:",
       items: [
-        "^4: Emphasis level (1-5)",
-        "^eng: English language output",
-        "^urgent: High priority processing",
-        "^brief: Shortened output",
-        "^1h: Time window (h=hours, d=days, w=weeks)",
-        "^rationale: Include explanation"
+        "^modifier: Operation modifier",
+        "@context: Context annotation",
+        "^urgent: Priority indicator",
+        "^brief: Output format",
+        "^detailed: Analysis depth"
       ],
-      example: `Usage Examples:
-Σ •report ^brief ^eng
-↹ BTC •volatility ^1h ^urgent
-⊕ analysis ^4 ^rationale`
+      example: `# Using modifiers
+↹ data "market analysis" ^urgent @finance
+⊕ process "trends" ^comprehensive
+Σ {
+  analysis: ^detailed,
+  summary: ^brief
+}`
     },
     {
       title: "Flow Control",
       text: "Operators for controlling execution flow:",
-      example: `Conditional Execution:
-IF price>100 => ALERT
-IF vol>1M => ⊕ analysis
+      example: `# Sequential processing
+↹ text "process this content" ^initial
+⊕ analyze → extract → format
+Σ {
+  result: ^formatted
+}
 
-Sequential Operations:
-↹ data
-⊕ process
-⊕ Σ ^brief
-
-Parallel Processing:
-[p1] ↹ AAPL
-[p2] ↹ GOOGL
-⊕ compare`
+# Conditional routing
+↹ data "check conditions" ^validate
+⊕ process ⇒ {
+  case "valid": → handle,
+  case "error": → report
+}
+Σ {
+  status: ^processed
+}`
     },
     {
       title: "Advanced Patterns",
       text: "Complex syntax patterns for specialized tasks:",
-      example: `Market Analysis:
-↹ sector(Tech) •companies
-⊕ IF marketCap>1B => analyze
-⊕ Σ "top5" ^brief
+      example: `# Multi-stage analysis
+↹ text "complex analysis required" ^detailed
+⊕ analyze "first stage" ^comprehensive
+⊕ process "second stage" ^thorough
+Σ {
+  stage1: ^analyzed,
+  stage2: ^processed,
+  summary: ^brief
+}
 
-Risk Assessment:
-↹ •portfolio
-⊕ risk>HIGH => [
-  ↹ holdings
-  ⊕ rebalance ^urgent
-  ⊕ notify ^rationale
-]`
-    },
-    {
-      title: "Domain-Specific Extensions",
-      text: "Specialized syntax for different domains:",
-      items: [
-        "Financial: price, vol, marketCap operators",
-        "Analytics: groupBy, aggregate functions",
-        "Compliance: verify, validate operators",
-        "ML/AI: train, predict, evaluate operators"
-      ],
-      example: `Financial Analysis:
-↹ TSLA
-⊕ MA(50) cross MA(200) => ALERT
-
-ML Operations:
-↹ model.BERT
-⊕ train(epochs=10) ^urgent
-⊕ evaluate ^metrics`
+# Parallel processing
+↹ data "parallel tasks" ^urgent
+⊕ [
+  analyze "task1" ^quick,
+  process "task2" ^detailed
+]
+Σ {
+  results: ^combined
+}`
     },
     {
       title: "Error Handling",
       text: "Syntax for handling exceptions and errors:",
-      example: `Basic Error Handling:
-↹ data ?exists => [
-  success: process,
-  error: notify ^urgent
-]
+      example: `# Basic error handling
+↹ text "validate this" ^careful
+⊕ validate "content" ^strict
+Σ {
+  valid: ^checked,
+  errors: ^listed
+}
 
-Fallback Patterns:
-↹ primary || fallback || default
-⊕ process !timeout(5s) => retry`
+# With fallback
+↹ primary "try this first" ^important
+⊕ process || fallback "use this instead" ^backup
+Σ {
+  result: ^handled
+}`
     },
     {
       title: "Composition Rules",
-      text: "Guidelines for combining syntax elements effectively:",
-      example: `1. Operator Precedence:
-! > @ > ⊕ > ↹ > Σ
+      text: "Guidelines for combining syntax elements:",
+      example: `# Modifier order
+↹ text "analyze carefully" ^urgent ^detailed ^thorough
 
-2. Modifier Stacking:
-↹ data ^urgent ^brief ^eng
-(Modifiers apply left-to-right)
+# Context inheritance
+↹ data "parent context" @global
+⊕ process "child task" @local
+Σ {
+  result: ^formatted
+}
 
-3. Context Inheritance:
-↹ market @context(global) [
-  ⊕ analyze(US) // inherits global
-  ⊕ analyze(EU) // inherits global
-]
-
-4. Priority Propagation:
-↹ data !critical [
-  ⊕ process   // inherits critical
-  ⊕ validate  // inherits critical
-]`
-    },
-    {
-      title: "Advanced Syntax Patterns",
-      text: "Complex patterns for sophisticated operations:",
-      example: `1. Nested Operations:
-↹ data @context(finance) [
-  ⊕ analyze !high [
-    ↹ metrics @focus(risk)
-    ⊕ validate ^strict
-    ⊕ Σ ^brief
-  ]
-  ⊕ report ^detailed
-]
-
-2. Parallel with Dependencies:
-[p1] ↹ market_data
-[p2] ↹ news_feed
-[p3] ⊕ analyze(p1 ∧ p2)
-⊕ Σ ^comprehensive
-
-3. Conditional Flows:
-↹ data ⊕ IF risk>threshold => [
-  !critical [
-    ⊕ alert
-    ⊕ mitigate
-    ⊕ report ^urgent
-  ]
-] ELSE [
-  !normal [
-    ⊕ log
-    ⊕ monitor
-  ]
-]`
+# Priority handling
+↹ task "important work" ^critical
+⊕ process "urgent steps" ^high
+Σ {
+  status: ^tracked
+}`
     }
   ]
 };

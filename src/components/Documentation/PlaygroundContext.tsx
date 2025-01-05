@@ -44,27 +44,14 @@ export const PlaygroundProvider = ({
   initialCode,
   onRun
 }: PlaygroundProviderProps) => {
-  const [isLoading, setIsLoading] = useState(false);
   const [settings, setSettings] = useState<PlaygroundSettings>(defaultSettings);
   const playground = usePlayground({ 
     initialCode,
-    onRun: onRun ? async (code) => {
-      try {
-        setIsLoading(true);
-        await onRun(code);
-      } finally {
-        setIsLoading(false);
-      }
-    } : undefined
+    onRun
   });
 
-  const handleLoadExample = useCallback(async (code: string) => {
-    try {
-      setIsLoading(true);
-      playground.loadExample(code);
-    } finally {
-      setIsLoading(false);
-    }
+  const handleLoadExample = useCallback((code: string) => {
+    playground.loadExample(code);
   }, [playground]);
 
   const handleUpdateSettings = useCallback((newSettings: PlaygroundSettings) => {
@@ -73,7 +60,6 @@ export const PlaygroundProvider = ({
 
   const value: PlaygroundContextType = {
     ...playground,
-    isLoading,
     settings,
     loadExample: handleLoadExample,
     updateSettings: handleUpdateSettings

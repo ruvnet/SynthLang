@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { validateSynthLang } from './useSynthLangUtils';
 
 interface SynthLangResult {
   output: string;
@@ -13,70 +14,124 @@ interface SynthLangOperation {
 
 export const useSynthLang = () => {
   const parseSynthLang = useCallback((code: string): SynthLangOperation[] => {
-    const lines = code.split('\n').filter(line => line.trim());
-    return lines.map(line => {
-      const trimmed = line.trim();
+    const lines = code.split('\n');
+    const operations: SynthLangOperation[] = [];
+    let inJsonBlock = false;
+    let jsonContent: string[] = [];
+    let inMultilineContent = false;
+    let multilineBuffer = '';
+
+    for (let i = 0; i < lines.length; i++) {
+      const trimmed = lines[i].trim();
       
+      // Skip empty lines
+      if (!trimmed) continue;
+
       // Parse comments
       if (trimmed.startsWith('#')) {
-        return {
+        operations.push({
           type: 'control',
           content: trimmed.slice(1).trim()
-        };
+        });
+        continue;
       }
 
-      // Extract modifiers
-      const modifiers = trimmed.match(/(\^[a-zA-Z0-9_]+|@[a-zA-Z0-9_]+|\$[a-zA-Z0-9_]+|#[a-zA-Z0-9_]+)/g) || [];
-
-      // Parse operations
-      if (trimmed.startsWith('↹')) {
-        return {
-          type: 'input',
-          content: trimmed.slice(1).trim(),
-          modifiers
-        };
-      }
-      if (trimmed.startsWith('⊕')) {
-        return {
-          type: 'operation',
-          content: trimmed.slice(1).trim(),
-          modifiers
-        };
-      }
-      if (trimmed.startsWith('Σ')) {
-        return {
-          type: 'output',
-          content: trimmed.slice(1).trim(),
-          modifiers
-        };
+      // Handle JSON block state
+      if (trimmed.startsWith('Σ {')) {
+        inJsonBlock = true;
+        jsonContent = [trimmed];
+        continue;
       }
 
-      return {
-        type: 'control',
-        content: trimmed
-      };
-    });
+      if (inJsonBlock) {
+        jsonContent.push(trimmed);
+        if (trimmed === '}') {
+          operations.push({
+            type: 'output',
+            content: jsonContent.join('\n'),
+            modifiers: []
+          });
+          inJsonBlock = false;
+        }
+        continue;
+      }
+
+      // Handle multiline content
+      if (inMultilineContent) {
+        multilineBuffer += '\n' + trimmed;
+        if (trimmed.endsWith('"')) {
+          inMultilineContent = false;
+          const match = multilineBuffer.match(/^([↹⊕Σ])\s+([a-zA-Z0-9_]+)\s+"([^"]*)"(?:\s+(\^[a-zA-Z0-9_]+(?:\s+\^[a-zA-Z0-9_]+)*)?)?$/);
+          if (match) {
+            const [_, glyph, label, content, modifiers] = match;
+            operations.push({
+              type: glyph === '↹' ? 'input' : 
+                    glyph === '⊕' ? 'operation' : 
+                    glyph === 'Σ' ? 'output' : 'control',
+              content: `${label} "${content}"`,
+              modifiers: modifiers ? modifiers.split(/\s+/) : []
+            });
+          }
+        }
+        continue;
+      }
+
+      // Check for start of multiline content
+      if (trimmed.match(/^[↹⊕Σ]\s+[a-zA-Z0-9_]+\s+"[^"]*$/)) {
+        inMultilineContent = true;
+        multilineBuffer = trimmed;
+        continue;
+      }
+
+      // Parse single line operations
+      const match = trimmed.match(/^([↹⊕Σ])\s+([a-zA-Z0-9_]+)\s+"([^"]*)"(?:\s+(\^[a-zA-Z0-9_]+(?:\s+\^[a-zA-Z0-9_]+)*)?)?$/);
+      if (match) {
+        const [_, glyph, label, content, modifiers] = match;
+        operations.push({
+          type: glyph === '↹' ? 'input' : 
+                glyph === '⊕' ? 'operation' : 
+                glyph === 'Σ' ? 'output' : 'control',
+          content: `${label} "${content}"`,
+          modifiers: modifiers ? modifiers.split(/\s+/) : []
+        });
+      } else {
+        operations.push({
+          type: 'control',
+          content: trimmed
+        });
+      }
+    }
+
+    return operations;
   }, []);
 
   const executeSynthLang = useCallback((code: string): SynthLangResult => {
     try {
+      // Validate the code first
+      const errors = validateSynthLang(code);
+      if (errors.length > 0) {
+        return {
+          output: '',
+          error: errors.join('\n')
+        };
+      }
+
+      // Parse and execute if valid
       const operations = parseSynthLang(code);
       
       // Format operations into readable output
       const output = operations.map(op => {
-        const modifierStr = op.modifiers?.length 
-          ? ` [${op.modifiers.join(', ')}]`
-          : '';
-
         switch (op.type) {
           case 'input':
-            return `Input: ${op.content}${modifierStr}`;
+            return `Input Operation: ${op.content}`;
           case 'operation':
-            return `Operation: ${op.content}${modifierStr}`;
+            return `Process Operation: ${op.content}`;
           case 'output':
-            return `Output: ${op.content}${modifierStr}`;
+            return `Output Operation: ${op.content}`;
           case 'control':
             return `// ${op.content}`;
+          default:
+            return op.content;
         }
       }).join('\n');
 
@@ -90,68 +145,48 @@ export const useSynthLang = () => {
   }, [parseSynthLang]);
 
   const highlightSyntax = useCallback((code: string): string => {
-    return code.replace(
-      /(↹|⊕|Σ|→|∀|∃|⇒|↺|⊥|⊤|⊗|∩|∪|∆|≡|≠)|\b(try|catch|finally|case|when)\b|(@\w+|\$\w+|\^\w+|#\w+)|("[^"]*")|(\{[^}]*\})|(\[[^\]]*\])|#.*$/gm,
-      (match, operator, keyword, modifier, string, object, array, comment) => {
-        if (operator) return `<span class="text-purple-400">${operator}</span>`;
-        if (keyword) return `<span class="text-blue-400">${keyword}</span>`;
-        if (modifier) return `<span class="text-green-400">${modifier}</span>`;
-        if (string) return `<span class="text-yellow-300">${string}</span>`;
-        if (object || array) return `<span class="text-blue-300">${match}</span>`;
-        if (comment) return `<span class="text-gray-500">${match}</span>`;
-        return match;
-      }
-    );
-  }, []);
-
-  const validateSynthLang = useCallback((code: string): string[] => {
-    const errors: string[] = [];
     const lines = code.split('\n');
-    let hasInput = false;
-    let hasOutput = false;
-    let hasNonCommentLines = false;
+    let inJson = false;
+    let jsonContent = '';
 
-    lines.forEach((line, index) => {
+    return lines.map(line => {
       const trimmed = line.trim();
-      
-      // Skip empty lines and comments
-      if (!trimmed || trimmed.startsWith('#')) return;
 
-      hasNonCommentLines = true;
-
-      if (trimmed.startsWith('↹')) hasInput = true;
-      if (trimmed.startsWith('Σ')) hasOutput = true;
-
-      // Validate basic syntax - only check non-empty, non-comment lines
-      if (!trimmed.match(/^(↹|⊕|Σ|#)/)) {
-        errors.push(`Line ${index + 1}: Invalid operation - must start with ↹, ⊕, or Σ`);
+      // Handle JSON blocks
+      if (trimmed.startsWith('Σ {')) {
+        inJson = true;
+        jsonContent = trimmed;
+        return `<span class="text-purple-400">Σ</span> <span class="text-blue-300">${trimmed.slice(1)}</span>`;
+      }
+      if (inJson) {
+        jsonContent += '\n' + trimmed;
+        if (trimmed.endsWith('}')) {
+          inJson = false;
+          return `<span class="text-blue-300">${trimmed}</span>`;
+        }
+        return `<span class="text-blue-300">${trimmed}</span>`;
       }
 
-      // Validate modifiers
-      const modifiers = trimmed.match(/(\^[a-zA-Z0-9_]+|@[a-zA-Z0-9_]+|\$[a-zA-Z0-9_]+|#[a-zA-Z0-9_]+)/g) || [];
-      modifiers.forEach(mod => {
-        if (!mod.match(/^[\^@$#][a-zA-Z0-9_]+$/)) {
-          errors.push(`Line ${index + 1}: Invalid modifier format - ${mod}`);
-        }
-      });
-
-      // Validate operation syntax
-      if (trimmed.startsWith('⊕')) {
-        // Check for valid operation syntax
-        const operationParts = trimmed.slice(1).trim().split(/\s+/);
-        if (operationParts.length < 1) {
-          errors.push(`Line ${index + 1}: Operation requires a command`);
-        }
+      // Handle JSON content lines
+      const jsonLineMatch = trimmed.match(/^([a-zA-Z0-9_]+):\s+(\^[a-zA-Z0-9_]+)(?:\s*,\s*)?$/);
+      if (jsonLineMatch) {
+        const [_, key, modifier] = jsonLineMatch;
+        return `<span class="text-blue-400">${key}</span>: <span class="text-green-400">${modifier}</span>${trimmed.endsWith(',') ? ',' : ''}`;
       }
-    });
 
-    // Only check for input/output requirements if there are non-comment lines
-    if (hasNonCommentLines) {
-      if (!hasInput) errors.push('Missing input operation (↹)');
-      if (!hasOutput) errors.push('Missing output operation (Σ)');
-    }
-
-    return errors;
+      // Handle regular lines
+      return line.replace(
+        /(↹|⊕|Σ)|\b([a-zA-Z0-9_]+)\s+(?=")|("[^"]*")|(\^[a-zA-Z0-9_]+)|#.*$/g,
+        (match, glyph, label, content, modifier, comment) => {
+          if (glyph) return `<span class="text-purple-400">${glyph}</span>`;
+          if (label) return `<span class="text-blue-400">${label}</span>`;
+          if (content) return `<span class="text-yellow-300">${content}</span>`;
+          if (modifier) return `<span class="text-green-400">${modifier}</span>`;
+          if (comment) return `<span class="text-gray-500">${comment}</span>`;
+          return match;
+        }
+      );
+    }).join('\n');
   }, []);
 
   return {
