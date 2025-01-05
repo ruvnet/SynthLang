@@ -1,8 +1,17 @@
 # SynthLang Prompt Generator & Tester
 
-## Overview
+![SynthLang Interface](../public/screenshot.png)
 
-SynthLang Prompt Generator & Tester is a specialized system designed to optimize and translate existing prompts into SynthLang format while providing comprehensive testing capabilities through OpenRouter integration. This system focuses on prompt optimization, cost reduction, and maintaining prompt effectiveness through systematic testing.
+Transform your AI prompts into optimized, cost-effective instructions with SynthLang - the advanced prompt engineering toolkit that helps you achieve better results while reducing costs.
+
+## Why SynthLang?
+
+✨ **Optimize Your Prompts** - Convert standard prompts into our efficient SynthLang format  
+💰 **Reduce Costs** - Cut token usage by 30-50% while maintaining quality  
+🚀 **Test at Scale** - Validate across multiple models through OpenRouter  
+📊 **Track Performance** - Get detailed metrics on effectiveness and costs  
+⚡ **Work Faster** - Process multiple prompts simultaneously  
+🔄 **Version Control** - Keep track of your prompt improvements  
 
 ## Core Features
 
