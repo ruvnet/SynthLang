@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles, Gauge, DollarSign, Calculator as CalcIcon } from "lucide-react";
-import MainNav from "../components/MainNav";
 import Calculator from "../components/TokenCalculator/Calculator";
+import Layout from "../components/Layout";
 
 const FEATURES = [
   {
@@ -29,9 +29,7 @@ const FEATURES = [
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background">
-      <MainNav title="SynthLang" />
-      
+    <Layout title="SynthLang">
       <main className="container mx-auto p-4">
         {/* Hero Section */}
         <div className="glass-panel p-8 mb-8">
@@ -103,7 +101,7 @@ const Index = () => {
           </div>
         </div>
       </main>
-    </div>
+    </Layout>
   );
 };
 

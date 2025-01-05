@@ -1,6 +1,6 @@
 import { Playground as PlaygroundComponent } from "../components/Documentation/Playground";
 import { PlaygroundProvider } from "../components/Documentation/PlaygroundContext";
-import MainNav from "../components/MainNav";
+import Layout from "../components/Layout";
 
 const defaultCode = `# Try SynthLang here
 ↹ text "Write a short story about a robot learning to paint" ^creative
@@ -14,9 +14,8 @@ const defaultCode = `# Try SynthLang here
 
 const Playground = () => {
   return (
-    <div className="min-h-screen bg-background">
-      <MainNav title="Playground" />
-      <PlaygroundProvider initialCode={defaultCode}>
+    <PlaygroundProvider initialCode={defaultCode}>
+      <Layout title="Playground">
         <main className="container mx-auto p-4">
           <div className="glass-panel p-6 rounded-lg border border-border/40 bg-card/30 backdrop-blur">
             <h1 className="text-2xl font-bold mb-6">SynthLang Playground</h1>
@@ -27,8 +26,8 @@ const Playground = () => {
             <PlaygroundComponent />
           </div>
         </main>
-      </PlaygroundProvider>
-    </div>
+      </Layout>
+    </PlaygroundProvider>
   );
 };
 

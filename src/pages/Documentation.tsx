@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 import { Book, Command } from "lucide-react";
-import MainNav from "../components/MainNav";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { SECTIONS } from "../components/Documentation/sections";
 import { DocSection, DocSectionSkeleton, DocSectionError } from "../components/Documentation/DocSection";
@@ -11,6 +10,7 @@ import { ScrollProgressProvider } from "../components/Documentation/ScrollProgre
 import { PlaygroundProvider } from "../components/Documentation/PlaygroundContext";
 import { KeyboardShortcuts } from "../components/Documentation/KeyboardShortcuts";
 import { useDocumentation } from "../hooks/useDocumentation";
+import Layout from "../components/Layout";
 
 const Documentation = () => {
   const {
@@ -31,9 +31,7 @@ const Documentation = () => {
   return (
     <ScrollProgressProvider>
       <PlaygroundProvider initialCode="">
-        <div className="min-h-screen bg-background">
-          <MainNav title="Documentation" />
-          
+        <Layout title="Documentation">
           <main className="container mx-auto p-4">
             <div className="glass-panel p-6 rounded-lg border border-border/40 bg-card/30 backdrop-blur">
               <div className="flex items-center justify-between mb-6">
@@ -148,7 +146,7 @@ const Documentation = () => {
           <div ref={modalRef}>
             <KeyboardShortcuts shortcuts={shortcuts} />
           </div>
-        </div>
+        </Layout>
       </PlaygroundProvider>
     </ScrollProgressProvider>
   );

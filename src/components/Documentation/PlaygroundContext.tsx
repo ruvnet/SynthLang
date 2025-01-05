@@ -1,5 +1,6 @@
 import { createContext, useContext, ReactNode, useCallback, useState } from 'react';
 import { usePlayground } from './usePlayground';
+import type { PlaygroundSettings } from './PlaygroundSettings';
 
 interface PlaygroundState {
   code: string;
@@ -8,6 +9,7 @@ interface PlaygroundState {
   errors: string[];
   highlightedCode: string;
   isLoading: boolean;
+  settings: PlaygroundSettings;
 }
 
 interface PlaygroundContextType extends PlaygroundState {
@@ -17,7 +19,17 @@ interface PlaygroundContextType extends PlaygroundState {
   handleReset: () => void;
   handleKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
   loadExample: (code: string) => void;
+  updateSettings: (settings: PlaygroundSettings) => void;
 }
+
+const defaultSettings: PlaygroundSettings = {
+  model: "gpt-4",
+  temperature: 0.7,
+  maxTokens: 1000,
+  autoFormat: true,
+  syntaxHighlighting: true,
+  showLineNumbers: true
+};
 
 const PlaygroundContext = createContext<PlaygroundContextType | null>(null);
 
@@ -33,6 +45,7 @@ export const PlaygroundProvider = ({
   onRun
 }: PlaygroundProviderProps) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [settings, setSettings] = useState<PlaygroundSettings>(defaultSettings);
   const playground = usePlayground({ 
     initialCode,
     onRun: onRun ? async (code) => {
@@ -45,7 +58,6 @@ export const PlaygroundProvider = ({
     } : undefined
   });
 
-  // Wrap loadExample to handle loading state
   const handleLoadExample = useCallback(async (code: string) => {
     try {
       setIsLoading(true);
@@ -55,10 +67,16 @@ export const PlaygroundProvider = ({
     }
   }, [playground]);
 
+  const handleUpdateSettings = useCallback((newSettings: PlaygroundSettings) => {
+    setSettings(newSettings);
+  }, []);
+
   const value: PlaygroundContextType = {
     ...playground,
     isLoading,
-    loadExample: handleLoadExample
+    settings,
+    loadExample: handleLoadExample,
+    updateSettings: handleUpdateSettings
   };
 
   return (

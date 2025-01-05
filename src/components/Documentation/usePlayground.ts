@@ -1,5 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSynthLang } from './useSynthLang';
+import type { PlaygroundSettings } from './PlaygroundSettings';
+import { useSettingsContext } from '../../services/settingsService';
+import { callOpenRouter } from '../../services/openRouterService';
 
 interface UsePlaygroundProps {
   initialCode: string;
@@ -12,13 +15,27 @@ export const usePlayground = ({ initialCode, onRun }: UsePlaygroundProps) => {
   const [output, setOutput] = useState<string | null>(null);
   const [errors, setErrors] = useState<string[]>([]);
   const [highlightedCode, setHighlightedCode] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const { settings: globalSettings } = useSettingsContext();
+  const [settings, setSettings] = useState<PlaygroundSettings>({
+    model: "gpt-4",
+    temperature: 0.7,
+    maxTokens: 1000,
+    autoFormat: true,
+    syntaxHighlighting: true,
+    showLineNumbers: true
+  });
 
   const { executeSynthLang, validateSynthLang, highlightSyntax } = useSynthLang();
 
   // Update syntax highlighting when code changes
   useEffect(() => {
-    setHighlightedCode(highlightSyntax(code));
-  }, [code, highlightSyntax]);
+    if (settings.syntaxHighlighting) {
+      setHighlightedCode(highlightSyntax(code));
+    } else {
+      setHighlightedCode(code);
+    }
+  }, [code, highlightSyntax, settings.syntaxHighlighting]);
 
   const setCodeWithValidation = useCallback((newCode: string) => {
     setCode(newCode);
@@ -36,8 +53,12 @@ export const usePlayground = ({ initialCode, onRun }: UsePlaygroundProps) => {
     }
   }, [code]);
 
-  const handleRun = useCallback(() => {
+  const handleRun = useCallback(async () => {
     try {
+      setIsLoading(true);
+      setErrors([]);
+      setOutput(null);
+
       // Skip validation for comment-only code
       const nonCommentLines = code.split('\n')
         .map(line => line.trim())
@@ -45,35 +66,35 @@ export const usePlayground = ({ initialCode, onRun }: UsePlaygroundProps) => {
 
       if (nonCommentLines.length > 0) {
         const validationErrors = validateSynthLang(code);
-        setErrors(validationErrors);
+        if (validationErrors.length > 0) {
+          setErrors(validationErrors);
+          return;
+        }
+      }
 
-        if (validationErrors.length === 0) {
-          if (onRun) {
-            onRun(code);
-          } else {
-            const result = executeSynthLang(code);
-            if (result.error) {
-              setErrors([result.error]);
-              setOutput(null);
-            } else {
-              setOutput(result.output);
-              setErrors([]);
-            }
-          }
-        } else {
-          setOutput(null);
+      if (onRun) {
+        await onRun(code);
+      } else if (globalSettings?.openRouterApiKey) {
+        try {
+          const result = await callOpenRouter(code, settings, globalSettings.openRouterApiKey);
+          setOutput(result);
+        } catch (error) {
+          setErrors([error instanceof Error ? error.message : 'Failed to process code']);
         }
       } else {
-        // For comment-only code, just show the formatted output
         const result = executeSynthLang(code);
-        setOutput(result.output);
-        setErrors([]);
+        if (result.error) {
+          setErrors([result.error]);
+        } else {
+          setOutput(result.output);
+        }
       }
     } catch (error) {
       setErrors([error instanceof Error ? error.message : 'An error occurred']);
-      setOutput(null);
+    } finally {
+      setIsLoading(false);
     }
-  }, [code, onRun, executeSynthLang, validateSynthLang]);
+  }, [code, onRun, executeSynthLang, validateSynthLang, settings, globalSettings?.openRouterApiKey]);
 
   const handleReset = useCallback(() => {
     setCode(initialCode);
@@ -105,33 +126,14 @@ export const usePlayground = ({ initialCode, onRun }: UsePlaygroundProps) => {
   }, [code, handleRun, handleReset]);
 
   const loadExample = useCallback((exampleCode: string) => {
-    try {
-      setCode(exampleCode);
-      setOutput(null);
-      setErrors([]);
+    setCode(exampleCode);
+    setOutput(null);
+    setErrors([]);
+  }, []);
 
-      // Automatically run the example if it's valid
-      const nonCommentLines = exampleCode.split('\n')
-        .map(line => line.trim())
-        .filter(line => line && !line.startsWith('#'));
-
-      if (nonCommentLines.length > 0) {
-        const validationErrors = validateSynthLang(exampleCode);
-        if (validationErrors.length === 0) {
-          const result = executeSynthLang(exampleCode);
-          if (!result.error) {
-            setOutput(result.output);
-          }
-        }
-      } else {
-        // For comment-only code, just show the formatted output
-        const result = executeSynthLang(exampleCode);
-        setOutput(result.output);
-      }
-    } catch (error) {
-      console.error('Failed to load example:', error);
-    }
-  }, [executeSynthLang, validateSynthLang]);
+  const updateSettings = useCallback((newSettings: PlaygroundSettings) => {
+    setSettings(newSettings);
+  }, []);
 
   return {
     code,
@@ -139,11 +141,14 @@ export const usePlayground = ({ initialCode, onRun }: UsePlaygroundProps) => {
     output,
     errors,
     highlightedCode,
+    isLoading,
+    settings,
     setCode: setCodeWithValidation,
     handleCopy,
     handleRun,
     handleReset,
     handleKeyDown,
-    loadExample
+    loadExample,
+    updateSettings
   };
 };

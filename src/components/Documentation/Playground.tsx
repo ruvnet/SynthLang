@@ -1,5 +1,7 @@
 import { Play, Copy, Check, RotateCcw, AlertTriangle, Command } from "lucide-react";
 import { usePlaygroundContext, PlaygroundError, PlaygroundOutput, PlaygroundLoading } from "./PlaygroundContext";
+import { PlaygroundSettings, type PlaygroundSettings as PlaygroundSettingsType } from "./PlaygroundSettings";
+import { useSettingsContext } from "../../services/settingsService";
 
 export const Playground = () => {
   const {
@@ -13,8 +15,17 @@ export const Playground = () => {
     handleCopy,
     handleRun,
     handleReset,
-    handleKeyDown
+    handleKeyDown,
+    settings,
+    updateSettings
   } = usePlaygroundContext();
+
+  const { settings: globalSettings } = useSettingsContext();
+  const hasOpenRouterKey = !!globalSettings?.openRouterApiKey;
+
+  const handleSettingsChange = (newSettings: PlaygroundSettingsType) => {
+    updateSettings(newSettings);
+  };
 
   return (
     <div className="rounded-lg border border-border/40 bg-card/30 backdrop-blur overflow-hidden">
@@ -38,6 +49,7 @@ export const Playground = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <PlaygroundSettings onSettingsChange={handleSettingsChange} />
             <button
               onClick={handleReset}
               className="p-1 hover:bg-white/5 rounded transition-colors"
@@ -64,7 +76,7 @@ export const Playground = () => {
                        hover:bg-purple-500/30 rounded text-sm font-medium 
                        transition-colors disabled:opacity-50"
               title="Run code (⌘↵)"
-              disabled={isLoading}
+              disabled={isLoading || !hasOpenRouterKey}
             >
               <Play className="w-3 h-3" />
               {isLoading ? 'Running...' : 'Run'}
@@ -84,7 +96,7 @@ export const Playground = () => {
             value={code}
             onChange={(e) => setCode(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="w-full h-full min-h-[200px] bg-transparent border-none 
+            className="w-full h-full min-h-[400px] bg-transparent border-none 
                      outline-none resize-none font-mono text-sm text-transparent 
                      caret-white disabled:cursor-not-allowed"
             spellCheck={false}
@@ -94,7 +106,7 @@ export const Playground = () => {
           />
         </div>
 
-        <div className="p-4 bg-black/10">
+        <div className="p-4 bg-black/10 min-h-[400px]">
           {isLoading ? (
             <PlaygroundLoading />
           ) : errors.length > 0 ? (
@@ -111,6 +123,11 @@ export const Playground = () => {
             </div>
           ) : output ? (
             <PlaygroundOutput>{output}</PlaygroundOutput>
+          ) : !hasOpenRouterKey ? (
+            <div className="flex items-center gap-2 text-yellow-500 text-sm">
+              <AlertTriangle className="w-4 h-4" />
+              <span>Configure OpenRouter API key in settings to run code</span>
+            </div>
           ) : (
             <div className="text-sm text-muted-foreground italic">
               Click "Run" or press ⌘↵ to see the output
