@@ -125,12 +125,12 @@ export const SystemPromptDisplay = ({ frameworks }: SystemPromptDisplayProps) =>
   };
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>System Prompt</CardTitle>
+    <Card className="overflow-hidden">
+      <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 sm:p-6">
+        <CardTitle className="text-lg sm:text-xl">System Prompt</CardTitle>
         <button
           onClick={copyToClipboard}
-          className="console-button flex items-center gap-2"
+          className="console-button flex items-center gap-2 text-sm w-full sm:w-auto justify-center"
         >
           {copied ? (
             <>
@@ -145,10 +145,13 @@ export const SystemPromptDisplay = ({ frameworks }: SystemPromptDisplayProps) =>
           )}
         </button>
       </CardHeader>
-      <CardContent>
-        <pre className="whitespace-pre-wrap text-sm bg-accent/20 p-4 rounded-lg overflow-auto max-h-[500px]">
-          {systemPrompt}
-        </pre>
+      <CardContent className="p-0">
+        <div className="relative">
+          <pre className="whitespace-pre-wrap text-xs sm:text-sm bg-accent/20 p-4 sm:p-6 rounded-none sm:rounded-lg overflow-auto max-h-[300px] sm:max-h-[500px] font-mono leading-relaxed">
+            {systemPrompt}
+          </pre>
+          <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-background to-transparent pointer-events-none" />
+        </div>
       </CardContent>
     </Card>
   );

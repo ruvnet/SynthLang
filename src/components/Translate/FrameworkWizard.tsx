@@ -180,25 +180,26 @@ export const FrameworkWizard = ({ onFrameworkCreated }: FrameworkWizardProps) =>
         return (
           <div className="space-y-4">
             <div>
-              <label className="text-sm font-medium">Framework Name</label>
+              <label className="text-sm font-medium mb-1.5 block">Framework Name</label>
               <Input
                 value={framework.name}
                 onChange={e => setFramework(prev => ({ ...prev, name: e.target.value }))}
                 placeholder="Enter framework name"
+                className="text-base sm:text-sm"
               />
             </div>
             <div>
-              <label className="text-sm font-medium">Framework Group</label>
+              <label className="text-sm font-medium mb-1.5 block">Framework Group</label>
               <Select
                 value={framework.group}
                 onValueChange={value => setFramework(prev => ({ ...prev, group: value as typeof FRAMEWORK_GROUPS[number] }))}
               >
-                <SelectTrigger>
+                <SelectTrigger className="text-base sm:text-sm">
                   <SelectValue placeholder="Select a group" />
                 </SelectTrigger>
                 <SelectContent>
                   {FRAMEWORK_GROUPS.map(group => (
-                    <SelectItem key={group} value={group}>
+                    <SelectItem key={group} value={group} className="text-base sm:text-sm">
                       {group.charAt(0).toUpperCase() + group.slice(1)}
                     </SelectItem>
                   ))}
@@ -206,11 +207,12 @@ export const FrameworkWizard = ({ onFrameworkCreated }: FrameworkWizardProps) =>
               </Select>
             </div>
             <div>
-              <label className="text-sm font-medium">Short Description</label>
+              <label className="text-sm font-medium mb-1.5 block">Short Description</label>
               <Input
                 value={framework.description}
                 onChange={e => setFramework(prev => ({ ...prev, description: e.target.value }))}
                 placeholder="Brief description of the framework"
+                className="text-base sm:text-sm"
               />
             </div>
           </div>
@@ -220,33 +222,37 @@ export const FrameworkWizard = ({ onFrameworkCreated }: FrameworkWizardProps) =>
         return (
           <div className="space-y-4">
             <div>
-              <label className="text-sm font-medium">Detailed Description</label>
+              <label className="text-sm font-medium mb-1.5 block">Detailed Description</label>
               <Textarea
                 value={framework.details}
                 onChange={e => setFramework(prev => ({ ...prev, details: e.target.value }))}
                 placeholder="Detailed explanation of your framework"
-                className="min-h-[100px]"
+                className="min-h-[100px] text-base sm:text-sm"
               />
             </div>
             <div>
-              <label className="text-sm font-medium">Applications</label>
-              <div className="space-y-2">
-                <div className="flex gap-2">
+              <label className="text-sm font-medium mb-1.5 block">Applications</label>
+              <div className="space-y-3">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <Input
                     value={newApplication}
                     onChange={e => setNewApplication(e.target.value)}
                     placeholder="Add an application"
+                    className="text-base sm:text-sm flex-1"
                   />
-                  <Button onClick={addApplication} type="button">Add</Button>
+                  <Button onClick={addApplication} type="button" className="text-base sm:text-sm w-full sm:w-auto">
+                    Add
+                  </Button>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-2 max-h-[200px] overflow-y-auto">
                   {framework.applications?.map((app, index) => (
-                    <div key={index} className="flex items-center justify-between bg-accent/20 p-2 rounded">
-                      <span>{app}</span>
+                    <div key={index} className="flex items-center justify-between bg-accent/20 p-2 rounded text-sm">
+                      <span className="flex-1 mr-2">{app}</span>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => removeApplication(index)}
+                        className="shrink-0"
                       >
                         <Trash className="h-4 w-4" />
                       </Button>
@@ -261,56 +267,63 @@ export const FrameworkWizard = ({ onFrameworkCreated }: FrameworkWizardProps) =>
       case 2:
         return (
           <div className="space-y-4">
-            <div className="space-y-2">
+            <div className="space-y-3">
               <div>
-                <label className="text-sm font-medium">Symbol</label>
+                <label className="text-sm font-medium mb-1.5 block">Symbol</label>
                 <Input
                   value={newGlyph.symbol}
                   onChange={e => setNewGlyph(prev => ({ ...prev, symbol: e.target.value }))}
                   placeholder="Glyph symbol"
+                  className="text-base sm:text-sm"
                 />
               </div>
               <div>
-                <label className="text-sm font-medium">Name</label>
+                <label className="text-sm font-medium mb-1.5 block">Name</label>
                 <Input
                   value={newGlyph.name}
                   onChange={e => setNewGlyph(prev => ({ ...prev, name: e.target.value }))}
                   placeholder="Glyph name"
+                  className="text-base sm:text-sm"
                 />
               </div>
               <div>
-                <label className="text-sm font-medium">Description</label>
+                <label className="text-sm font-medium mb-1.5 block">Description</label>
                 <Input
                   value={newGlyph.description}
                   onChange={e => setNewGlyph(prev => ({ ...prev, description: e.target.value }))}
                   placeholder="Glyph description"
+                  className="text-base sm:text-sm"
                 />
               </div>
               <div>
-                <label className="text-sm font-medium">Usage</label>
+                <label className="text-sm font-medium mb-1.5 block">Usage</label>
                 <Input
                   value={newGlyph.usage}
                   onChange={e => setNewGlyph(prev => ({ ...prev, usage: e.target.value }))}
                   placeholder="Usage example"
+                  className="text-base sm:text-sm"
                 />
               </div>
-              <Button onClick={addGlyph} type="button" className="w-full">
+              <Button onClick={addGlyph} type="button" className="w-full text-base sm:text-sm">
                 Add Glyph
               </Button>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 max-h-[200px] overflow-y-auto">
               {framework.glyphs?.map((glyph, index) => (
-                <div key={index} className="flex items-center justify-between bg-accent/20 p-2 rounded">
-                  <div>
-                    <span className="text-lg mr-2">{glyph.symbol}</span>
-                    <span className="font-medium">{glyph.name}</span>
-                    <p className="text-sm text-muted-foreground">{glyph.description}</p>
-                    <p className="text-sm font-mono">{glyph.usage}</p>
+                <div key={index} className="flex items-start justify-between bg-accent/20 p-3 rounded">
+                  <div className="flex-1 mr-2">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-lg">{glyph.symbol}</span>
+                      <span className="font-medium text-sm">{glyph.name}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{glyph.description}</p>
+                    <p className="text-xs font-mono mt-1">{glyph.usage}</p>
                   </div>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => removeGlyph(index)}
+                    className="shrink-0"
                   >
                     <Trash className="h-4 w-4" />
                   </Button>
@@ -324,24 +337,28 @@ export const FrameworkWizard = ({ onFrameworkCreated }: FrameworkWizardProps) =>
         return (
           <div className="space-y-4">
             <div>
-              <label className="text-sm font-medium">Examples</label>
-              <div className="space-y-2">
-                <div className="flex gap-2">
+              <label className="text-sm font-medium mb-1.5 block">Examples</label>
+              <div className="space-y-3">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <Input
                     value={newExample}
                     onChange={e => setNewExample(e.target.value)}
                     placeholder="Add an example"
+                    className="text-base sm:text-sm flex-1"
                   />
-                  <Button onClick={addExample} type="button">Add</Button>
+                  <Button onClick={addExample} type="button" className="text-base sm:text-sm w-full sm:w-auto">
+                    Add
+                  </Button>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-2 max-h-[300px] overflow-y-auto">
                   {framework.examples?.map((example, index) => (
                     <div key={index} className="flex items-center justify-between bg-accent/20 p-2 rounded">
-                      <span className="font-mono">{example}</span>
+                      <span className="font-mono text-sm flex-1 mr-2 break-all">{example}</span>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => removeExample(index)}
+                        className="shrink-0"
                       >
                         <Trash className="h-4 w-4" />
                       </Button>
@@ -377,7 +394,7 @@ export const FrameworkWizard = ({ onFrameworkCreated }: FrameworkWizardProps) =>
     <>
       <Button
         onClick={() => setOpen(true)}
-        className="w-full"
+        className="w-full text-base sm:text-sm"
         variant="outline"
       >
         <Plus className="w-4 h-4 mr-2" />
@@ -385,10 +402,10 @@ export const FrameworkWizard = ({ onFrameworkCreated }: FrameworkWizardProps) =>
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>{STEPS[step].title}</DialogTitle>
-            <p className="text-sm text-muted-foreground">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+          <DialogHeader className="mb-4">
+            <DialogTitle className="text-lg sm:text-xl">{STEPS[step].title}</DialogTitle>
+            <p className="text-sm text-muted-foreground mt-1">
               {STEPS[step].description}
             </p>
           </DialogHeader>
@@ -397,11 +414,12 @@ export const FrameworkWizard = ({ onFrameworkCreated }: FrameworkWizardProps) =>
             {renderStep()}
           </div>
 
-          <div className="flex justify-between mt-4">
+          <div className="flex flex-col-reverse sm:flex-row justify-between gap-2 mt-4 pt-4 border-t">
             <Button
               variant="outline"
               onClick={handleBack}
               disabled={step === 0}
+              className="w-full sm:w-auto text-base sm:text-sm"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back
@@ -411,6 +429,7 @@ export const FrameworkWizard = ({ onFrameworkCreated }: FrameworkWizardProps) =>
               <Button
                 onClick={handleSave}
                 disabled={!canProceed()}
+                className="w-full sm:w-auto text-base sm:text-sm"
               >
                 <Save className="w-4 h-4 mr-2" />
                 Save Framework
@@ -419,6 +438,7 @@ export const FrameworkWizard = ({ onFrameworkCreated }: FrameworkWizardProps) =>
               <Button
                 onClick={handleNext}
                 disabled={!canProceed()}
+                className="w-full sm:w-auto text-base sm:text-sm"
               >
                 Next
                 <ArrowRight className="w-4 h-4 ml-2" />

@@ -304,27 +304,27 @@ ${text}`;
 
   return (
     <Layout title="Translate">
-      <main className="container mx-auto p-4">
+      <main className="container mx-auto px-4 py-6 max-w-[1200px]">
         {/* Metrics Overview */}
         {metrics && (
-          <div className="grid md:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <div className="glass-panel p-4 rounded-lg border border-border/40 bg-card/30 backdrop-blur">
               <div className="text-sm text-muted-foreground mb-1">Original Tokens</div>
-              <div className="text-2xl font-bold">{metrics.originalTokens}</div>
+              <div className="text-xl md:text-2xl font-bold">{metrics.originalTokens}</div>
             </div>
             <div className="glass-panel p-4 rounded-lg border border-border/40 bg-card/30 backdrop-blur">
               <div className="text-sm text-muted-foreground mb-1">Optimized Tokens</div>
-              <div className="text-2xl font-bold">{metrics.optimizedTokens}</div>
+              <div className="text-xl md:text-2xl font-bold">{metrics.optimizedTokens}</div>
             </div>
             <div className="glass-panel p-4 rounded-lg border border-border/40 bg-card/30 backdrop-blur">
               <div className="text-sm text-muted-foreground mb-1">Cost Savings</div>
-              <div className="text-2xl font-bold text-green-400">
+              <div className="text-xl md:text-2xl font-bold text-green-400">
                 ${metrics.savings.toFixed(4)}
               </div>
             </div>
             <div className="glass-panel p-4 rounded-lg border border-border/40 bg-card/30 backdrop-blur">
               <div className="text-sm text-muted-foreground mb-1">Reduction</div>
-              <div className="text-2xl font-bold text-purple-400">
+              <div className="text-xl md:text-2xl font-bold text-purple-400">
                 {((metrics.originalTokens - metrics.optimizedTokens) / metrics.originalTokens * 100).toFixed(0)}%
               </div>
             </div>
@@ -332,12 +332,12 @@ ${text}`;
         )}
 
         {/* Translation Interface */}
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Original Text */}
-          <div className="glass-panel p-6 rounded-lg border border-border/40 bg-card/30 backdrop-blur">
-            <h2 className="text-xl font-semibold mb-4">Original Prompt</h2>
+          <div className="glass-panel p-4 md:p-6 rounded-lg border border-border/40 bg-card/30 backdrop-blur">
+            <h2 className="text-lg md:text-xl font-semibold mb-4">Original Prompt</h2>
             <textarea
-              className="console-input w-full h-64 mb-4"
+              className="console-input w-full h-48 md:h-64 mb-4 text-sm md:text-base"
               value={originalText}
               onChange={(e) => {
                 setOriginalText(e.target.value);
@@ -345,7 +345,7 @@ ${text}`;
               }}
               placeholder="Enter your prompt here..."
             />
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
               <Calculator className="w-4 h-4" />
               <span>Tokens: {metrics?.originalTokens || 0}</span>
               <span className="mx-2">•</span>
@@ -354,24 +354,24 @@ ${text}`;
           </div>
 
           {/* SynthLang Translation */}
-          <div className="glass-panel p-6 rounded-lg border border-border/40 bg-card/30 backdrop-blur">
-            <h2 className="text-xl font-semibold mb-4">SynthLang Translation</h2>
+          <div className="glass-panel p-4 md:p-6 rounded-lg border border-border/40 bg-card/30 backdrop-blur">
+            <h2 className="text-lg md:text-xl font-semibold mb-4">SynthLang Translation</h2>
             <textarea
-              className="console-input w-full h-64 mb-4"
+              className="console-input w-full h-48 md:h-64 mb-4 text-sm md:text-base"
               value={translatedText}
               placeholder="Optimized translation will appear here..."
               readOnly
             />
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                 <Calculator className="w-4 h-4" />
                 <span>Tokens: {metrics?.optimizedTokens || 0}</span>
                 <span className="mx-2">•</span>
                 <span>Cost: ${metrics?.optimizedCost.toFixed(4) || "0.0000"}</span>
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex flex-wrap items-center gap-2">
                 <button 
-                  className="console-button flex items-center gap-2"
+                  className="console-button flex items-center gap-2 text-sm"
                   onClick={() => translateToSynthLang(originalText)}
                   disabled={isTranslating || !originalText.trim()}
                 >
@@ -388,7 +388,7 @@ ${text}`;
                   )}
                 </button>
                 <button 
-                  className="console-button flex items-center gap-2"
+                  className="console-button flex items-center gap-2 text-sm"
                   onClick={handleTestTranslation}
                   disabled={!translatedText || isTranslating}
                 >
@@ -404,14 +404,14 @@ ${text}`;
         {error && (
           <div className="glass-panel p-4 mt-6 rounded-lg border border-red-500/40 bg-red-500/10 text-red-400 flex items-center gap-2">
             <AlertCircle className="w-4 h-4" />
-            <span>{error}</span>
+            <span className="text-sm">{error}</span>
           </div>
         )}
 
         {!settings.openRouterApiKey && (
           <div className="glass-panel p-4 mt-6 rounded-lg border border-yellow-500/40 bg-yellow-500/10 text-yellow-400 flex items-center gap-2">
             <AlertCircle className="w-4 h-4" />
-            <span>OpenRouter API key not found. Please add it in Settings to use the translation feature.</span>
+            <span className="text-sm">OpenRouter API key not found. Please add it in Settings to use the translation feature.</span>
           </div>
         )}
 
@@ -435,7 +435,7 @@ ${text}`;
             />
           </div>
 
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-2 mb-4">
             <TabsTrigger value="frameworks">Frameworks</TabsTrigger>
             <TabsTrigger value="system-prompt">System Prompt</TabsTrigger>
           </TabsList>
@@ -446,15 +446,15 @@ ${text}`;
                 <CardTitle>Translation Frameworks</CardTitle>
                 <CardDescription>Select mathematical frameworks and glyphs to enhance translation</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="overflow-hidden">
                 <Accordion type="multiple" className="w-full space-y-2">
                   {allFrameworkOptions.map((framework) => (
                     <AccordionItem key={framework.id} value={framework.id} className="border rounded-lg">
                       <div className="flex items-center justify-between pr-4">
-                        <AccordionTrigger className="hover:no-underline flex-1">
-                          <div className="flex items-center gap-2">
+                        <AccordionTrigger className="hover:no-underline flex-1 px-2">
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
                             <div className="font-semibold">{framework.name}</div>
-                            <div className="text-sm text-muted-foreground">
+                            <div className="text-xs sm:text-sm text-muted-foreground">
                               ({framework.glyphs.map(g => g.symbol).join(' ')})
                             </div>
                           </div>
@@ -471,7 +471,7 @@ ${text}`;
                               {framework.description}
                             </p>
                             <div className="space-y-4">
-                              <div className="grid grid-cols-5 gap-2">
+                              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
                                 {framework.glyphs.map((glyph, i) => (
                                   <div key={i} className="relative group">
                                     <button
@@ -485,7 +485,7 @@ ${text}`;
                                     >
                                       {glyph.symbol}
                                     </button>
-                                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 p-3 bg-popover text-popover-foreground text-sm rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none">
+                                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-[calc(100vw-2rem)] sm:w-64 p-3 bg-popover text-popover-foreground text-sm rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none">
                                       <div className="font-semibold">{glyph.name}</div>
                                       <div className="text-xs mt-1">{glyph.description}</div>
                                       <div className="text-xs mt-1 font-mono">{glyph.usage}</div>
@@ -501,7 +501,7 @@ ${text}`;
                           </div>
                           <div>
                             <h4 className="text-sm font-medium mb-2">Examples:</h4>
-                            <div className="grid grid-cols-1 gap-2">
+                            <div className="grid grid-cols-1 gap-2 overflow-x-auto">
                               {framework.examples.map((example, i) => (
                                 <div key={i} className="text-sm font-mono bg-accent/10 p-2 rounded">
                                   {example}
@@ -523,12 +523,12 @@ ${text}`;
           </TabsContent>
         </Tabs>
 
-        <div className="glass-panel p-6 mt-6 rounded-lg border border-border/40 bg-card/30 backdrop-blur">
-          <h2 className="text-xl font-semibold mb-4">Optimization Details</h2>
-          <div className="space-y-4">
+        <div className="glass-panel p-4 md:p-6 mt-6 rounded-lg border border-border/40 bg-card/30 backdrop-blur">
+          <h2 className="text-lg md:text-xl font-semibold mb-4">Optimization Details</h2>
+          <div className="space-y-4 overflow-x-auto">
             <div>
-              <h3 className="text-lg font-medium mb-2">Token Reduction Strategy</h3>
-              <ul className="list-disc list-inside text-muted-foreground">
+              <h3 className="text-base md:text-lg font-medium mb-2">Token Reduction Strategy</h3>
+              <ul className="list-disc list-inside text-sm text-muted-foreground">
                 <li>Removed redundant context</li>
                 <li>Optimized instruction format</li>
                 <li>Compressed similar patterns</li>
@@ -536,8 +536,8 @@ ${text}`;
               </ul>
             </div>
             <div>
-              <h3 className="text-lg font-medium mb-2">Preservation Guarantees</h3>
-              <ul className="list-disc list-inside text-muted-foreground">
+              <h3 className="text-base md:text-lg font-medium mb-2">Preservation Guarantees</h3>
+              <ul className="list-disc list-inside text-sm text-muted-foreground">
                 <li>Core instruction integrity</li>
                 <li>Critical context retention</li>
                 <li>Semantic equivalence</li>
