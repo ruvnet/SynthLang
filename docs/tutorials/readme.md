@@ -46,6 +46,58 @@ SynthLang is a revolutionary prompt language designed to maximize the efficiency
 - **Semantic Compression**: Pack more meaning into fewer tokens using logographic principles
 - **Framework Integration**: Built-in support for mathematical frameworks like Set Theory and Category Theory
 - **Cost Efficiency**: Significant reduction in API costs through optimized token usage
+- **Translation System**: Advanced framework-based translation with support for multiple mathematical and linguistic systems
+
+## Translation System
+
+The SynthLang translation system provides powerful capabilities for converting verbose prompts into optimized SynthLang format:
+
+### Translation Frameworks
+
+Multiple frameworks are available to enhance translation efficiency:
+
+- **Set Theory** (∈ ∉ ∪ ∩): Fundamental mathematical notation
+- **Category Theory** (→ ⇒ ↦ ∘): Advanced compositional structures
+- **Abstract Algebra** (⊕ ⊗ ⊙ ×): Algebraic operations
+- **Topology** (∂ ƒ ≃ ⇒): Spatial and structural relationships
+- **Complex Analysis** (∫ ∮ ∬ ∇ ∆): Advanced mathematical operations
+- **Mandarin Chinese**: Data-dense character system
+- **Japanese**: Kanji-based compression
+- **Arabic**: Right-to-left script system
+
+### Translation Process
+
+1. Input your original prompt
+2. Select desired translation frameworks
+3. Click "Translate" to generate optimized SynthLang
+4. Review metrics showing token reduction and cost savings
+5. Test the translation to verify functionality
+
+### Translation Metrics
+
+The system provides real-time metrics:
+- Token count comparison (original vs optimized)
+- Cost analysis per 1M tokens
+- Percentage reduction in tokens
+- Estimated cost savings
+
+### Example Translation
+
+Original (1451 tokens):
+```text
+Technical instruction prompt with detailed implementation steps...
+```
+
+Translated (210 tokens):
+```synthlang
+↹ node•npm•editor•postman
+⊕ mkdir•secure-rest-api
+⊕ cd•secure-rest-api
+⊕ npm•init•-y
+```
+
+Reduction: 86% fewer tokens
+Cost Savings: $0.0031 per 1M tokens
 
 ## Simple Example
 
