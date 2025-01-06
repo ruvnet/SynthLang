@@ -67,11 +67,32 @@ const Translate = () => {
   const [metrics, setMetrics] = useState<TranslationMetrics | null>(initialState?.metrics || null);
   const [isTranslating, setIsTranslating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
 
-  // Get the default model (first enabled model)
+  // Get the selected model and its cost
   const defaultModel = Object.entries(settings.models)
     .find(([_, settings]) => settings.enabled)?.[0] || "openai/gpt-3.5-turbo";
-  const modelCost = settings.models[defaultModel]?.costPer1kTokens || 0;
+  const selectedModel = settings.models[defaultModel];
+  const [modelCost, setModelCost] = useState(selectedModel?.costPer1kTokens || 0);
+  const modelContext = selectedModel?.contextWindow || 4096;
+
+  // Initialize model cost and trigger initial calculation
+  useEffect(() => {
+    const initialCost = 0.0025; // $2.50 per million tokens
+    setModelCost(initialCost);
+    
+    // Trigger initial metrics calculation with the default cost
+    if (metrics) {
+      const originalCost = (metrics.originalTokens / 1000) * initialCost;
+      const optimizedCost = (metrics.optimizedTokens / 1000) * initialCost;
+      setMetrics({
+        ...metrics,
+        originalCost,
+        optimizedCost,
+        savings: Math.max(0, originalCost - optimizedCost)
+      });
+    }
+  }, [selectedModel]);
 
   const handleFrameworkToggle = useCallback((id: string, enabled: boolean) => {
     setConfig(prev => ({
@@ -115,6 +136,7 @@ const Translate = () => {
 
     setIsTranslating(true);
     setError(null);
+    setTranslatedText(""); // Clear previous translation
 
     try {
       // Calculate original metrics
@@ -149,84 +171,43 @@ const Translate = () => {
 
         const instructions = `${frameworkInstructions}\n\nSYNTHLANG TRANSLATION FORMAT:
 
-LINE STRUCTURE (EXACT SYNTAX REQUIRED):
-↹ label:"content" -> description   # Input (MUST START HERE)
-⊕ label:"content" -> description   # Process (MIDDLE STEPS)
-Σ label:"content" -> description   # Output (MUST END HERE)
+RULES:
+1. Use ONLY these symbols: ↹ (input), ⊕ (process), Σ (output)
+2. NO quotes, arrows, or descriptions
+3. Use • to join related items
+4. Use => for transformations
+5. Maximum 30 characters per line
+6. Use mathematical operators (+, >, <, ^)
+7. Break complex tasks into steps
 
-COMPONENT REQUIREMENTS (EACH LINE MUST FOLLOW):
-1. Task Glyph (FIRST CHARACTER):
-   ↹ = Input/Parse (REQUIRED START)
-   ⊕ = Process/Transform (MIDDLE)
-   Σ = Output/Generate (REQUIRED END)
+IMPORTANT: Keep translations extremely concise!
 
-2. Label (AFTER GLYPH):
-   - Single word only
-   - Ends with colon
-   - No spaces/hyphens
-   VALID: header: content: data:
-   INVALID: my-label: two words: data-field:
+GOOD EXAMPLES:
+↹ data•source
+⊕ condition>5 => action
+Σ result + log
 
-3. Content (IN QUOTES):
-   - Double quotes required
-   - Exact text inside
-   - No escaped quotes
-   VALID: "[Title]" "text here"
-   INVALID: [Title] 'text' "escaped \\"quotes\\""
+↹ input•stream, params
+⊕ transform => output
+⊕ Σ final^2 + cache
 
-4. Arrow (EXACT SPACING):
-   - Space before ->
-   - Space after ->
-   VALID: " -> "
-   INVALID: "->" "-> " " ->"
+↹ news•feed•google
+⊕ sentiment>0 => pos
+⊕ sentiment<0 => neg
+Σ trend + factors
 
-5. Description (VERB FIRST):
-   - Starts with verb
-   - Clear purpose
-   - Brief phrase
-   VALID: Parse section, Extract data
-   INVALID: Section parsed, The data is extracted
+BAD EXAMPLES (TOO VERBOSE):
+↹ data:"source" -> Parse input
+⊕ process:"condition" -> Check value
 
-SEQUENCE RULES (STRICT ORDER):
-1. START with ↹ operations (REQUIRED):
-   - Must begin with input
-   - Extract raw content
-   - Parse sections
-
-2. CONTINUE with ⊕ operations:
-   - Process content
-   - Transform data
-   - Apply formatting
-
-3. END with Σ operations (REQUIRED):
-   - Must end with output
-   - Format results
-   - Generate final form
-
-EXAMPLE WITH EXACT FORMAT:
-Input:
-[Overview]
-1. Main Points
-   * First point
-   * Second point
-
-Valid SynthLang Format:
-↹ header:"[Overview]" -> Parse section title
-↹ title:"Main Points" -> Extract section name
-↹ list:"First point, Second point" -> Parse list items
-⊕ analyze:"content structure" -> Process structure
-⊕ validate:"syntax rules" -> Check formatting
-⊕ format:"documentation" -> Apply structure
-Σ output:"formatted content" -> Generate final output
-
-Convert input to SynthLang format using EXACT syntax:
+Convert input to concise SynthLang format using minimal symbols:
 ${text}`;
 
         await callOpenRouter(
           text.trim(),
           {
             model: defaultModel,
-            temperature: 0.2,
+            temperature: 0.1,
             maxTokens: 2000
           },
           apiKey,
@@ -234,29 +215,37 @@ ${text}`;
           instructions,
           undefined,
           (chunk) => {
-            setTranslatedText(prev => (prev || "") + chunk);
+            setTranslatedText(prev => {
+              const newText = (prev || "") + chunk;
+              
+              // Calculate metrics with current text
+              const optimizedTokens = calculateTokens(newText);
+              
+              // Calculate costs using actual model pricing
+              const originalCost = Number(((originalTokens / 1000) * modelCost).toFixed(6));
+              const optimizedCost = Number(((optimizedTokens / 1000) * modelCost).toFixed(6));
+              const savings = Number((originalCost - optimizedCost).toFixed(6));
+
+              // Update metrics with precise values
+              setMetrics({
+                originalTokens,
+                optimizedTokens,
+                originalCost,
+                optimizedCost,
+                savings: Math.max(0, savings) // Ensure non-negative savings
+              });
+
+              return newText;
+            });
           }
         );
+
       } catch (err) {
         if (err instanceof Error && err.message.includes('Failed to process')) {
           throw new Error("Translation failed. Please check your API key in Settings and ensure you have sufficient credits.");
         }
         throw err;
       }
-
-      // Calculate optimized metrics
-      const optimizedTokens = calculateTokens(translatedText);
-      const optimizedCost = (optimizedTokens / 1000) * modelCost;
-      const savings = originalCost - optimizedCost;
-
-      // Update state
-      setMetrics({
-        originalTokens,
-        optimizedTokens,
-        originalCost,
-        optimizedCost,
-        savings
-      });
 
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to translate prompt. Please try again.");
@@ -282,12 +271,27 @@ ${text}`;
     }));
   }, [customFrameworks]);
 
-  // Translate initial text if provided
+  // Initialize metrics for initial text
   useEffect(() => {
     if (initialState?.originalText) {
-      translateToSynthLang(initialState.originalText);
+      // Calculate initial metrics
+      const text = initialState.originalText;
+      const tokens = calculateTokens(text);
+      const cost = Number(((tokens / 1000) * modelCost).toFixed(6));
+      
+      setMetrics(prev => ({
+        ...prev,
+        originalTokens: tokens,
+        originalCost: cost,
+        optimizedTokens: prev?.optimizedTokens || 0,
+        optimizedCost: prev?.optimizedCost || 0,
+        savings: prev ? Math.max(0, cost - prev.optimizedCost) : 0
+      }));
+
+      // Start translation if needed
+      translateToSynthLang(text);
     }
-  }, [initialState, translateToSynthLang]);
+  }, [initialState, modelCost]);
 
   const handleTestTranslation = useCallback(() => {
     navigate("/playground", { 
@@ -302,7 +306,7 @@ ${text}`;
       <main className="container mx-auto px-4 py-6 max-w-[1200px]">
         {/* Metrics Overview */}
         {metrics && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-2 md:grid-cols-5 lg:grid-cols-5 gap-4 mb-6">
             <div className="glass-panel p-4 rounded-lg border border-border/40 bg-card/30 backdrop-blur">
               <div className="text-sm text-muted-foreground mb-1">Original Tokens</div>
               <div className="text-xl md:text-2xl font-bold">{metrics.originalTokens}</div>
@@ -310,6 +314,35 @@ ${text}`;
             <div className="glass-panel p-4 rounded-lg border border-border/40 bg-card/30 backdrop-blur">
               <div className="text-sm text-muted-foreground mb-1">Optimized Tokens</div>
               <div className="text-xl md:text-2xl font-bold">{metrics.optimizedTokens}</div>
+            </div>
+            <div className="glass-panel p-4 rounded-lg border border-border/40 bg-card/30 backdrop-blur">
+              <div className="text-sm text-muted-foreground mb-1">Model Cost (per 1M)</div>
+              <div className="flex items-center gap-2">
+                <span>$</span>
+                <input
+                  type="number"
+                  defaultValue="2.50"
+                  onChange={(e) => {
+                    const newCost = Number(e.target.value) / 1000;
+                    setModelCost(newCost);
+                    
+                    // Recalculate metrics with new cost
+                    if (metrics) {
+                      const originalCost = (metrics.originalTokens / 1000) * newCost;
+                      const optimizedCost = (metrics.optimizedTokens / 1000) * newCost;
+                      setMetrics({
+                        ...metrics,
+                        originalCost,
+                        optimizedCost,
+                        savings: Math.max(0, originalCost - optimizedCost)
+                      });
+                    }
+                  }}
+                  className="w-24 px-2 py-1 text-lg font-bold bg-background border rounded"
+                  step="0.01"
+                  min="0"
+                />
+              </div>
             </div>
             <div className="glass-panel p-4 rounded-lg border border-border/40 bg-card/30 backdrop-blur">
               <div className="text-sm text-muted-foreground mb-1">Cost Savings</div>
@@ -330,13 +363,95 @@ ${text}`;
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Original Text */}
           <div className="glass-panel p-4 md:p-6 rounded-lg border border-border/40 bg-card/30 backdrop-blur">
-            <h2 className="text-lg md:text-xl font-semibold mb-4">Original Prompt</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg md:text-xl font-semibold">Original Prompt</h2>
+              <button
+                className="console-button flex items-center gap-2 text-sm"
+                onClick={async () => {
+                  try {
+                    const apiKey = settings.openRouterApiKey?.trim();
+                    if (!apiKey) {
+                      throw new Error("OpenRouter API key not found. Please add it in Settings.");
+                    }
+
+                    setIsGenerating(true);
+                    setOriginalText(""); // Clear existing text
+                    
+                    const samplePrompt = "Generate a detailed technical instruction prompt about 1000 tokens in length. The prompt should be well-structured, comprehensive, and follow a similar format to documentation or technical specifications. Include numbered sections, bullet points, and clear implementation steps.";
+
+                    const systemPrompt = "You are a helpful AI assistant that generates detailed technical instruction prompts.";
+
+                    await callOpenRouter(
+                      samplePrompt,
+                      {
+                        model: defaultModel,
+                        temperature: 0.7,
+                        maxTokens: 2000
+                      },
+                      apiKey,
+                      'base',
+                      systemPrompt,
+                      undefined,
+                      (chunk) => {
+                        setOriginalText(prev => {
+                          const newText = prev + chunk;
+                          // Calculate metrics for the new text
+                          const tokens = calculateTokens(newText);
+                          const cost = Number(((tokens / 1000) * modelCost).toFixed(6));
+                          
+                          setMetrics(prev => ({
+                            ...prev,
+                            originalTokens: tokens,
+                            originalCost: cost,
+                            optimizedTokens: prev?.optimizedTokens || 0,
+                            optimizedCost: prev?.optimizedCost || 0,
+                            savings: prev ? Math.max(0, cost - prev.optimizedCost) : 0
+                          }));
+                          
+                          return newText;
+                        });
+                      }
+                    );
+                  } catch (err) {
+                    setError(err instanceof Error ? err.message : "Failed to generate sample prompt");
+                  } finally {
+                    setIsGenerating(false);
+                  }
+                }}
+                disabled={isGenerating || isTranslating}
+              >
+                {isGenerating ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    Generate Sample
+                  </>
+                )}
+              </button>
+            </div>
             <textarea
               className="console-input w-full h-48 md:h-64 mb-4 text-sm md:text-base"
               value={originalText}
               onChange={(e) => {
-                setOriginalText(e.target.value);
+                const text = e.target.value;
+                setOriginalText(text);
                 setError(null);
+
+                // Calculate initial metrics
+                const tokens = calculateTokens(text);
+                const cost = Number(((tokens / 1000) * modelCost).toFixed(6));
+                
+                setMetrics(prev => ({
+                  ...prev,
+                  originalTokens: tokens,
+                  originalCost: cost,
+                  optimizedTokens: prev?.optimizedTokens || 0,
+                  optimizedCost: prev?.optimizedCost || 0,
+                  savings: prev ? Math.max(0, cost - prev.optimizedCost) : 0
+                }));
               }}
               placeholder="Enter your prompt here..."
             />
