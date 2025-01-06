@@ -1,5 +1,6 @@
 import React from "react";
 import MainNav from "./MainNav";
+import { Footer } from "./Footer";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -11,6 +12,7 @@ const Layout = ({ children, title }: LayoutProps) => {
     <div className="min-h-screen bg-background">
       <MainNav title={title} />
       <main className="pt-[96px]">{children}</main>
+      <Footer />
     </div>
   );
 };

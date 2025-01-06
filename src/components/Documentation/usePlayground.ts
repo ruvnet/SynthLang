@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSynthLang } from './useSynthLang';
 import type { PlaygroundSettings } from './PlaygroundSettings';
 import { useSettingsContext } from '../../services/settingsService';
-import { callOpenRouter } from '../../services/openRouterService';
+import { callOpenRouter, SYSTEM_PROMPT } from '../../services/openRouterService';
 
 interface UsePlaygroundProps {
   initialCode: string;
@@ -23,7 +23,8 @@ export const usePlayground = ({ initialCode, onRun }: UsePlaygroundProps) => {
     maxTokens: 1000,
     autoFormat: true,
     syntaxHighlighting: true,
-    showLineNumbers: true
+    showLineNumbers: true,
+    systemPrompt: SYSTEM_PROMPT.interpreter
   });
 
   const { executeSynthLang, validateSynthLang, highlightSyntax } = useSynthLang();
@@ -79,9 +80,14 @@ export const usePlayground = ({ initialCode, onRun }: UsePlaygroundProps) => {
         try {
           await callOpenRouter(
             code, 
-            settings, 
+            {
+              model: settings.model,
+              temperature: settings.temperature,
+              maxTokens: settings.maxTokens
+            }, 
             globalSettings.openRouterApiKey,
             'interpreter',
+            undefined,
             undefined,
             (chunk) => {
               setOutput(prev => (prev || "") + chunk);

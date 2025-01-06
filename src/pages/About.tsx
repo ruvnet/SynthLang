@@ -35,7 +35,7 @@ const About = () => {
                   </Button>
                   <Button
                     variant="outline"
-                    onClick={() => window.open("https://synthlang.ruv.io", "_blank")}
+                    onClick={() => window.open("https://synthlang.fly.dev/demo", "_blank")}
                   >
                     Live Demo
                   </Button>
@@ -70,12 +70,12 @@ const About = () => {
                   <p className="text-sm text-muted-foreground">
                     Visit{" "}
                     <a
-                      href="https://synthlang.ruv.io"
+                      href="https://synthlang.fly.dev/demo"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-primary hover:underline"
                     >
-                      synthlang.ruv.io
+                      synthlang.fly.dev
                     </a>
                     {" "}for more information and live examples.
                   </p>

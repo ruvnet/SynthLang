@@ -134,7 +134,6 @@ const Translate = () => {
       }
 
       // Call OpenRouter with error handling
-      let translatedContent;
       try {
         const frameworkInstructions = Object.entries(config.frameworks)
           .filter(([_, state]) => state.enabled)
@@ -223,19 +222,20 @@ Valid SynthLang Format:
 Convert input to SynthLang format using EXACT syntax:
 ${text}`;
 
-        translatedContent = await callOpenRouter(
+        await callOpenRouter(
           text.trim(),
           {
             model: defaultModel,
             temperature: 0.2,
-            maxTokens: 2000,
-            autoFormat: true,
-            syntaxHighlighting: true,
-            showLineNumbers: true
+            maxTokens: 2000
           },
           apiKey,
           'translator',
-          instructions
+          instructions,
+          undefined,
+          (chunk) => {
+            setTranslatedText(prev => (prev || "") + chunk);
+          }
         );
       } catch (err) {
         if (err instanceof Error && err.message.includes('Failed to process')) {
@@ -244,17 +244,12 @@ ${text}`;
         throw err;
       }
 
-      if (!translatedContent) {
-        throw new Error("No translation received. Please try again.");
-      }
-
       // Calculate optimized metrics
-      const optimizedTokens = calculateTokens(translatedContent);
+      const optimizedTokens = calculateTokens(translatedText);
       const optimizedCost = (optimizedTokens / 1000) * modelCost;
       const savings = originalCost - optimizedCost;
 
       // Update state
-      setTranslatedText(translatedContent);
       setMetrics({
         originalTokens,
         optimizedTokens,

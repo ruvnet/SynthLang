@@ -120,37 +120,6 @@ const Documentation = () => {
                 </Tabs>
               )}
             </div>
-
-            <footer className="mt-8 text-center text-sm text-muted-foreground">
-              <p>SynthLang Documentation - Version 1.0.0</p>
-              <p className="mt-2">
-                A hyper-efficient prompt language for optimizing AI interactions
-              </p>
-              <div className="mt-4 flex justify-center space-x-4">
-                <a 
-                  href="https://github.com/yourusername/synthlang" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="hover:text-purple-400 transition-colors"
-                >
-                  GitHub
-                </a>
-                <span>•</span>
-                <a 
-                  href="/docs/contributing" 
-                  className="hover:text-purple-400 transition-colors"
-                >
-                  Contributing
-                </a>
-                <span>•</span>
-                <a 
-                  href="/docs/license" 
-                  className="hover:text-purple-400 transition-colors"
-                >
-                  License
-                </a>
-              </div>
-            </footer>
           </main>
 
           <ScrollToTop />

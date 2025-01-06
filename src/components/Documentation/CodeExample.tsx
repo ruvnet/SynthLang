@@ -60,27 +60,26 @@ export const CodeExample = ({
       }
 
       // Call OpenRouter if API key is available
-      if (settings.openRouterApiKey) {
-        await callOpenRouter(
-          code, 
-          {
-            model: settings.defaultModel,
-            temperature: 0.7,
-            maxTokens: 1000,
-            autoFormat: true,
-            syntaxHighlighting: true,
-            showLineNumbers: true
-          }, 
-          settings.openRouterApiKey,
-          'interpreter',
-          undefined,
-          (chunk) => {
-            setExampleOutput(prev => (prev || "") + chunk);
-          }
-        );
-      } else {
+      if (!settings.openRouterApiKey) {
         throw new Error("OpenRouter API key not found. Please add your API key in Settings.");
       }
+
+      setExampleOutput("");
+      await callOpenRouter(
+        code, 
+        {
+          model: settings.defaultModel,
+          temperature: 0.7,
+          maxTokens: 1000
+        }, 
+        settings.openRouterApiKey,
+        'interpreter',
+        undefined,
+        undefined,
+        (chunk) => {
+          setExampleOutput(prev => (prev || "") + chunk);
+        }
+      );
 
       // Also load into playground for reference
       await loadExample(code);
