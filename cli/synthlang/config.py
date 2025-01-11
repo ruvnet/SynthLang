@@ -1,57 +1,42 @@
 """Configuration management for SynthLang."""
 import json
+import os
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 class Config(BaseModel):
     """Configuration model."""
-    model: str = "gpt-4o-mini"
-    environment: str = "production"
-    log_level: str = "INFO"
+    openai_api_key: str = Field(default_factory=lambda: os.getenv("OPENAI_API_KEY", ""))
+    model: str = Field(default="gpt-4o-mini")
+    environment: str = Field(default="production")
+    log_level: str = Field(default="INFO")
+
+    class Config:
+        env_file = ".env"
 
 class ConfigManager:
     """Configuration manager."""
     
-    def load(self, path: Path) -> Config:
-        """Load configuration from file.
+    def load(self) -> Config:
+        """Load configuration from environment variables.
         
-        Args:
-            path: Path to configuration file
-            
         Returns:
             Loaded configuration
             
         Raises:
-            FileNotFoundError: If configuration file not found
-            ValueError: If configuration is invalid
+            ValueError: If required environment variables are missing
         """
-        if not path.exists():
-            raise FileNotFoundError(f"Configuration file not found: {path}")
-            
-        with open(path) as f:
-            try:
-                data = json.load(f)
-                return Config(**data)
-            except Exception as e:
-                raise ValueError(f"Invalid configuration: {str(e)}")
+        try:
+            return Config()
+        except Exception as e:
+            raise ValueError(f"Invalid configuration: {str(e)}")
     
-    def save(self, config: Config, path: Path) -> None:
-        """Save configuration to file.
+    def update(self, updates: Dict[str, Any]) -> Config:
+        """Update configuration values in environment.
         
         Args:
-            config: Configuration to save
-            path: Path to save configuration to
-        """
-        with open(path, "w") as f:
-            json.dump(config.model_dump(), f, indent=2)
-    
-    def update(self, path: Path, updates: Dict[str, Any]) -> Config:
-        """Update configuration values.
-        
-        Args:
-            path: Path to configuration file
             updates: Dictionary of updates to apply
             
         Returns:
@@ -60,14 +45,13 @@ class ConfigManager:
         Raises:
             ValueError: If updates are invalid
         """
-        config = self.load(path)
+        config = self.load()
         
         # Update values
         for key, value in updates.items():
             if not hasattr(config, key):
                 raise ValueError(f"Invalid configuration key: {key}")
+            os.environ[f"SYNTHLANG_{key.upper()}"] = str(value)
             setattr(config, key, value)
             
-        # Save updated config
-        self.save(config, path)
         return config
