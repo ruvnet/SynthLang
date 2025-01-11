@@ -26,7 +26,7 @@ setup(
     long_description_content_type="text/markdown",
     author="SynthLang Team",
     author_email="team@synthlang.org",
-    url="https://github.com/synthlang/synthlang-cli",
+    url="https://github.com/ruvnet/SynthLang",
     packages=find_packages(),
     include_package_data=True,
     python_requires=">=3.8",
@@ -60,7 +60,7 @@ setup(
     keywords="ai, nlp, prompt-engineering, code-generation, framework-translation",
     project_urls={
         "Documentation": "https://synthlang.org/docs",
-        "Source": "https://github.com/synthlang/synthlang-cli",
-        "Issues": "https://github.com/synthlang/synthlang-cli/issues",
+        "Source": "https://github.com/ruvnet/SynthLang",
+        "Issues": "https://github.com/ruvnet/SynthLang/issues",
     }
 )
