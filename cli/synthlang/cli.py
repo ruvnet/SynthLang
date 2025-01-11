@@ -66,14 +66,25 @@ def init(config: Path):
     required=True,
     help="Path to configuration file"
 )
-@click.option("--source", required=True, help="Source code to translate")
+@click.option("--source", required=True, help="Natural language prompt to translate")
 @click.option(
     "--target-framework",
     required=True,
-    help="Target framework for translation"
+    help="Target framework for translation (use 'synthlang' for SynthLang format)"
 )
 def translate(config: Path, source: str, target_framework: str):
-    """Translate code between frameworks."""
+    """Translate natural language prompts to SynthLang format.
+    
+    Example:
+        synthlang translate --config config.json \\
+            --source "analyze customer feedback and generate summary" \\
+            --target-framework synthlang
+    """
+    if target_framework.lower() != "synthlang":
+        raise click.ClickException(
+            "Only 'synthlang' is supported as target framework"
+        )
+    
     config_data = load_config(config)
     
     translator = FrameworkTranslator(
@@ -83,9 +94,9 @@ def translate(config: Path, source: str, target_framework: str):
     try:
         result = translator.translate(source)
         click.echo("Translation complete")
-        click.echo("\nSource code:")
+        click.echo("\nSource prompt:")
         click.echo(result["source"])
-        click.echo("\nTranslated code:")
+        click.echo("\nTranslated prompt:")
         click.echo(result["target"])
         click.echo("\nExplanation:")
         click.echo(result["explanation"])
