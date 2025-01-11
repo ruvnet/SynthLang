@@ -12,13 +12,11 @@ from synthlang import __version__
 from synthlang.config import Config, ConfigManager
 from synthlang.core.modules import FrameworkTranslator, SystemPromptGenerator
 
-def load_config(config_path: Path) -> Config:
-    """Load configuration from file."""
-    if not config_path.exists():
-        raise click.ClickException("Configuration file not found")
+def load_config() -> Config:
+    """Load configuration from environment."""
     try:
         config_manager = ConfigManager()
-        return config_manager.load(config_path)
+        return config_manager.load()
     except Exception as e:
         raise click.ClickException(f"Error loading configuration: {str(e)}")
 
@@ -48,44 +46,17 @@ def main():
     pass
 
 @main.command()
-@click.option(
-    "--config",
-    type=click.Path(path_type=Path),
-    required=True,
-    help="Path to configuration file"
-)
-def init(config: Path):
-    """Initialize configuration."""
-    if config.exists():
-        raise click.ClickException("Configuration file already exists")
-    
-    config_manager = ConfigManager()
-    default_config = Config(
-        model="gpt-4o-mini",
-        environment="development",
-        log_level="INFO"
-    )
-    config_manager.save(default_config, config)
-    click.echo("Configuration initialized")
-
-@main.command()
-@click.option(
-    "--config",
-    type=click.Path(path_type=Path),
-    required=True,
-    help="Path to configuration file"
-)
 @click.option("--source", required=True, help="Natural language prompt to translate")
 @click.option(
     "--target-framework",
     required=True,
     help="Target framework for translation (use 'synthlang' for SynthLang format)"
 )
-def translate(config: Path, source: str, target_framework: str):
+def translate(source: str, target_framework: str):
     """Translate natural language prompts to SynthLang format.
     
     Example:
-        synthlang translate --config config.json \\
+        synthlang translate \\
             --source "analyze customer feedback and generate summary" \\
             --target-framework synthlang
     """
@@ -94,7 +65,7 @@ def translate(config: Path, source: str, target_framework: str):
             "Only 'synthlang' is supported as target framework"
         )
     
-    config_data = load_config(config)
+    config_data = load_config()
     api_key = get_api_key()
     
     translator = FrameworkTranslator(
@@ -114,16 +85,10 @@ def translate(config: Path, source: str, target_framework: str):
         raise click.ClickException(f"Translation failed: {str(e)}")
 
 @main.command()
-@click.option(
-    "--config",
-    type=click.Path(path_type=Path),
-    required=True,
-    help="Path to configuration file"
-)
 @click.option("--task", required=True, help="Task description")
-def generate(config: Path, task: str):
+def generate(task: str):
     """Generate system prompts."""
-    config_data = load_config(config)
+    config_data = load_config()
     api_key = get_api_key()
     
     generator = SystemPromptGenerator(
@@ -143,16 +108,10 @@ def generate(config: Path, task: str):
         raise click.ClickException(f"Generation failed: {str(e)}")
 
 @main.command()
-@click.option(
-    "--config",
-    type=click.Path(path_type=Path),
-    required=True,
-    help="Path to configuration file"
-)
 @click.option("--prompt", required=True, help="Prompt to optimize")
-def optimize(config: Path, prompt: str):
+def optimize(prompt: str):
     """Optimize prompts using DSPy."""
-    config_data = load_config(config)
+    config_data = load_config()
     
     # TODO: Implement prompt optimization
     click.echo("Prompt optimized")
@@ -164,33 +123,20 @@ def config():
     pass
 
 @config.command()
-@click.option(
-    "--config",
-    type=click.Path(path_type=Path),
-    required=True,
-    help="Path to configuration file"
-)
-def show(config: Path):
+def show():
     """Show current configuration."""
-    config_data = load_config(config)
+    config_data = load_config()
     click.echo("Current configuration:")
     click.echo(json.dumps(config_data.model_dump(), indent=2))
 
 @config.command()
-@click.option(
-    "--config",
-    type=click.Path(path_type=Path),
-    required=True,
-    help="Path to configuration file"
-)
 @click.option("--key", required=True, help="Configuration key to update")
 @click.option("--value", required=True, help="New value")
-def set(config: Path, key: str, value: str):
+def set(key: str, value: str):
     """Update configuration value."""
     config_manager = ConfigManager()
     try:
-        current_config = load_config(config)
-        updated_config = config_manager.update(config, {key: value})
+        updated_config = config_manager.update({key: value})
         click.echo("Configuration updated")
         click.echo(f"Set {key} = {value}")
     except Exception as e:
