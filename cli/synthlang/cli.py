@@ -1,5 +1,7 @@
 """Command-line interface for SynthLang."""
 import json
+import os
+import sys
 from pathlib import Path
 from typing import Optional
 
@@ -20,6 +22,25 @@ def load_config(config_path: Path) -> Config:
     except Exception as e:
         raise click.ClickException(f"Error loading configuration: {str(e)}")
 
+def get_api_key() -> str:
+    """Get OpenAI API key from environment variable or root .env file."""
+    # First check environment variable
+    api_key = os.getenv("OPENAI_API_KEY")
+    if api_key:
+        return api_key
+        
+    # Then check root .env file
+    root_env = Path("/workspaces/SynthLang/.env")
+    if root_env.exists():
+        with open(root_env) as f:
+            for line in f:
+                if line.startswith("OPENAI_API_KEY="):
+                    return line.strip().split("=", 1)[1]
+                    
+    raise click.ClickException(
+        "OPENAI_API_KEY not found in environment or .env file"
+    )
+
 @click.group()
 @click.version_option(version=__version__, prog_name="SynthLang CLI")
 def main():
@@ -38,20 +59,8 @@ def init(config: Path):
     if config.exists():
         raise click.ClickException("Configuration file already exists")
     
-    # Get API key from root .env
-    root_env = Path("/workspaces/SynthLang/.env")
-    if root_env.exists():
-        with open(root_env) as f:
-            for line in f:
-                if line.startswith("OPENAI_API_KEY="):
-                    api_key = line.strip().split("=", 1)[1]
-                    break
-    else:
-        api_key = ""  # Will be overridden by environment variable if present
-    
     config_manager = ConfigManager()
     default_config = Config(
-        openai_api_key=api_key,
         model="gpt-4o-mini",
         environment="development",
         log_level="INFO"
@@ -86,9 +95,10 @@ def translate(config: Path, source: str, target_framework: str):
         )
     
     config_data = load_config(config)
+    api_key = get_api_key()
     
     translator = FrameworkTranslator(
-        api_key=config_data.openai_api_key,
+        api_key=api_key,
         model=config_data.model
     )
     try:
@@ -114,9 +124,10 @@ def translate(config: Path, source: str, target_framework: str):
 def generate(config: Path, task: str):
     """Generate system prompts."""
     config_data = load_config(config)
+    api_key = get_api_key()
     
     generator = SystemPromptGenerator(
-        api_key=config_data.openai_api_key,
+        api_key=api_key,
         model=config_data.model
     )
     try:

@@ -1,97 +1,73 @@
-"""Configuration management for SynthLang CLI."""
-import os
-from pathlib import Path
-from typing import Dict, Any, Optional
+"""Configuration management for SynthLang."""
 import json
+from pathlib import Path
+from typing import Any, Dict, Optional
 
 from pydantic import BaseModel
 
 class Config(BaseModel):
     """Configuration model."""
-    openai_api_key: Optional[str] = None
     model: str = "gpt-4o-mini"
-    environment: str = "development"
+    environment: str = "production"
     log_level: str = "INFO"
 
 class ConfigManager:
-    """Manages configuration loading and saving."""
-
-    def load(self, config_path: Path) -> Config:
-        """Load configuration from file and environment.
+    """Configuration manager."""
+    
+    def load(self, path: Path) -> Config:
+        """Load configuration from file.
         
         Args:
-            config_path: Path to configuration file
+            path: Path to configuration file
             
         Returns:
-            Config object with loaded configuration
+            Loaded configuration
             
-        Note:
-            Environment variables take precedence over file configuration.
-            Required environment variables:
-            - OPENAI_API_KEY: OpenAI API key
+        Raises:
+            FileNotFoundError: If configuration file not found
+            ValueError: If configuration is invalid
         """
-        # Load from file if exists
-        config_data = {}
-        if config_path.exists():
-            with open(config_path) as f:
-                config_data = json.load(f)
-
-        # Override with environment variables
-        if os.getenv("OPENAI_API_KEY"):
-            config_data["openai_api_key"] = os.getenv("OPENAI_API_KEY")
-        if os.getenv("SYNTHLANG_MODEL"):
-            config_data["model"] = os.getenv("SYNTHLANG_MODEL")
-        if os.getenv("SYNTHLANG_ENV"):
-            config_data["environment"] = os.getenv("SYNTHLANG_ENV")
-        if os.getenv("SYNTHLANG_LOG_LEVEL"):
-            config_data["log_level"] = os.getenv("SYNTHLANG_LOG_LEVEL")
-
-        # Ensure API key is available
-        if not config_data.get("openai_api_key"):
-            raise ValueError(
-                "OpenAI API key not found. Set OPENAI_API_KEY environment variable."
-            )
-
-        return Config(**config_data)
-
-    def save(self, config: Config, config_path: Path) -> None:
+        if not path.exists():
+            raise FileNotFoundError(f"Configuration file not found: {path}")
+            
+        with open(path) as f:
+            try:
+                data = json.load(f)
+                return Config(**data)
+            except Exception as e:
+                raise ValueError(f"Invalid configuration: {str(e)}")
+    
+    def save(self, config: Config, path: Path) -> None:
         """Save configuration to file.
         
         Args:
             config: Configuration to save
-            config_path: Path to save configuration to
-            
-        Note:
-            Sensitive data like API keys are not saved to file.
+            path: Path to save configuration to
         """
-        # Create config directory if needed
-        config_path.parent.mkdir(parents=True, exist_ok=True)
-
-        # Save non-sensitive config
-        config_data = config.model_dump()
-        config_data.pop("openai_api_key", None)  # Don't save API key
-
-        with open(config_path, "w") as f:
-            json.dump(config_data, f, indent=2)
-
-    def update(self, config_path: Path, updates: Dict[str, Any]) -> Config:
+        with open(path, "w") as f:
+            json.dump(config.model_dump(), f, indent=2)
+    
+    def update(self, path: Path, updates: Dict[str, Any]) -> Config:
         """Update configuration values.
         
         Args:
-            config_path: Path to configuration file
+            path: Path to configuration file
             updates: Dictionary of updates to apply
             
         Returns:
             Updated configuration
+            
+        Raises:
+            ValueError: If updates are invalid
         """
-        config = self.load(config_path)
+        config = self.load(path)
         
-        # Update config
-        config_dict = config.model_dump()
-        config_dict.update(updates)
-        updated_config = Config(**config_dict)
-        
+        # Update values
+        for key, value in updates.items():
+            if not hasattr(config, key):
+                raise ValueError(f"Invalid configuration key: {key}")
+            setattr(config, key, value)
+            
         # Save updated config
-        self.save(updated_config, config_path)
-        
-        return updated_config
+        self.save(config, path)
+        return config
