@@ -1,5 +1,4 @@
 click
 dspy
-flask
 pytest
 litellm

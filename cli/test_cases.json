@@ -1,0 +1,16 @@
+{
+    "test_cases": [
+        {
+            "input": "analyze sales data for Q1",
+            "expected": "↹ data•sales\n⊕ filter>Q1 => analyze\nΣ insights + trends"
+        },
+        {
+            "input": "summarize customer feedback",
+            "expected": "↹ feedback•customer\n⊕ sentiment>0 => pos\n⊕ sentiment<0 => neg\nΣ summary + metrics"
+        },
+        {
+            "input": "generate monthly report",
+            "expected": "↹ data•monthly\n⊕ process => stats\nΣ report + insights"
+        }
+    ]
+}

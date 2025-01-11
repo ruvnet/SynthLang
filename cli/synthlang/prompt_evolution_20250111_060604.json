@@ -1,0 +1,176 @@
+[
+  {
+    "generation": 0,
+    "population": [
+      {
+        "prompt": "\u21b9 data\u2022sales\\n\u2295 analyze => insights\\n\u03a3 report",
+        "fitness": {
+          "clarity": 1.0,
+          "specificity": 0.5,
+          "task_score": 0.0,
+          "overall": 0.44999999999999996
+        }
+      }
+    ]
+  },
+  {
+    "generation": 1,
+    "population": [
+      {
+        "prompt": "\u21b9 data\u2022sales\\n\u2295 analyze => insights\\n\u03a3 report",
+        "fitness": {
+          "clarity": 1.0,
+          "specificity": 0.5,
+          "task_score": 0.0,
+          "overall": 0.44999999999999996
+        }
+      },
+      {
+        "prompt": "\u21b9 data\u2022sales\\n\u2295 analyze => insights\\n\u03a3 report",
+        "fitness": {
+          "clarity": 1.0,
+          "specificity": 0.5,
+          "task_score": 0.0,
+          "overall": 0.44999999999999996
+        }
+      },
+      {
+        "prompt": "\u21b9 data\u2022sales\\n\u2295 analyze => insights\\n\u03a3 report",
+        "fitness": {
+          "clarity": 1.0,
+          "specificity": 0.5,
+          "task_score": 0.0,
+          "overall": 0.44999999999999996
+        }
+      }
+    ]
+  },
+  {
+    "generation": 2,
+    "population": [
+      {
+        "prompt": "\u21b9 data\u2022sales\\n\u2295 analyze => insights\\n\u03a3 report",
+        "fitness": {
+          "clarity": 1.0,
+          "specificity": 0.5,
+          "task_score": 0.0,
+          "overall": 0.44999999999999996
+        }
+      },
+      {
+        "prompt": "\u21b9 data\u2022sales\\n\u2295 analyze => insights\\n\u03a3 report",
+        "fitness": {
+          "clarity": 1.0,
+          "specificity": 0.5,
+          "task_score": 0.0,
+          "overall": 0.44999999999999996
+        }
+      },
+      {
+        "prompt": "\u21b9 data\u2022sales\\n\u2295 filter>Q1 => subset\\n\u2295 analyze => insights\\n\u03a3 report + trends",
+        "fitness": {
+          "clarity": 1.0,
+          "specificity": 0.8,
+          "task_score": 0.0,
+          "overall": 0.54
+        }
+      }
+    ]
+  },
+  {
+    "generation": 3,
+    "population": [
+      {
+        "prompt": "\u21b9 data\u2022sales  \n\u2295 filter>Q1 => subset  \n\u2295 analyze\u2022trends => insights  \n\u03a3 report + metrics",
+        "fitness": {
+          "clarity": 1.0,
+          "specificity": 1.0,
+          "task_score": 0.0,
+          "overall": 0.6
+        }
+      },
+      {
+        "prompt": "\u21b9 data\u2022sales\\n\u2295 filter>Q1 => subset\\n\u2295 analyze => insights\\n\u03a3 report + trends",
+        "fitness": {
+          "clarity": 1.0,
+          "specificity": 0.8,
+          "task_score": 0.0,
+          "overall": 0.54
+        }
+      },
+      {
+        "prompt": "\u21b9 data\u2022sales\\n\u2295 filter>Q1 => subset\\n\u2295 analyze => insights\\n\u03a3 report + trends",
+        "fitness": {
+          "clarity": 1.0,
+          "specificity": 0.8,
+          "task_score": 0.0,
+          "overall": 0.54
+        }
+      }
+    ]
+  },
+  {
+    "generation": 4,
+    "population": [
+      {
+        "prompt": "\u21b9 data\u2022sales  \n\u2295 filter>Q1 => subset  \n\u2295 analyze\u2022trends => insights  \n\u2295 summarize => report  \n\u03a3 metrics + insights",
+        "fitness": {
+          "clarity": 1.0,
+          "specificity": 1.2,
+          "task_score": 0.0,
+          "overall": 0.6599999999999999
+        }
+      },
+      {
+        "prompt": "\u21b9 data\u2022sales  \n\u2295 filter>Q1 => subset  \n\u2295 analyze\u2022trends => insights  \n\u2295 summarize => report  \n\u03a3 metrics + insights",
+        "fitness": {
+          "clarity": 1.0,
+          "specificity": 1.2,
+          "task_score": 0.0,
+          "overall": 0.6599999999999999
+        }
+      },
+      {
+        "prompt": "\u21b9 data\u2022sales  \n\u2295 filter>Q1 => subset  \n\u2295 analyze\u2022trends => insights  \n\u2295 summarize => report  \n\u03a3 metrics + insights",
+        "fitness": {
+          "clarity": 1.0,
+          "specificity": 1.2,
+          "task_score": 0.0,
+          "overall": 0.6599999999999999
+        }
+      }
+    ]
+  },
+  {
+    "generation": 5,
+    "population": [
+      {
+        "prompt": "\u21b9 data\u2022sales  \n\u2295 filter>Q1 => subset  \n\u2295 analyze\u2022trends => insights  \n\u2295 summarize => report  \n\u2295 visualize => chart  \n\u03a3 metrics + insights",
+        "fitness": {
+          "clarity": 1.0,
+          "specificity": 1.4000000000000001,
+          "task_score": 0.0,
+          "overall": 0.72
+        }
+      },
+      {
+        "prompt": "\u21b9 data\u2022sales  \n\u2295 filter>Q1 => subset  \n\u2295 analyze\u2022trends => insights  \n\u2295 summarize => report  \n\u2295 visualize => chart  \n\u03a3 metrics + insights",
+        "fitness": {
+          "clarity": 1.0,
+          "specificity": 1.4000000000000001,
+          "task_score": 0.0,
+          "overall": 0.72
+        }
+      },
+      {
+        "prompt": "\u21b9 data\u2022sales  \n\u2295 filter>Q1 => subset  \n\u2295 analyze\u2022trends => insights  \n\u2295 summarize => report  \n\u03a3 metrics + insights",
+        "fitness": {
+          "clarity": 1.0,
+          "specificity": 1.2,
+          "task_score": 0.0,
+          "overall": 0.6599999999999999
+        }
+      }
+    ]
+  }
+]

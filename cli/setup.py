@@ -19,7 +19,7 @@ def get_long_description():
         return f.read()
 
 setup(
-    name="synthlang-cli",
+    name="synthlang",
     version=get_version(),
     description="Command-line interface for the SynthLang framework using DSPy",
     long_description=get_long_description(),
