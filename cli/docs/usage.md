@@ -2,123 +2,289 @@
 
 ## Installation
 
-Install the SynthLang CLI using pip:
-
+Install from PyPI:
 ```bash
-pip install synthlang-cli
+pip install synthlang
 ```
 
 Or install from source:
-
 ```bash
-git clone <repository-url>
-cd cli
+git clone https://github.com/ruvnet/SynthLang.git
+cd SynthLang/cli
 pip install -e .
 ```
 
 ## Configuration
 
-1. Copy the sample environment file:
+1. Set up environment:
 ```bash
+# Create .env file
 cp .env.sample .env
+
+# Add OpenAI API key
+echo "OPENAI_API_KEY=your-key-here" >> .env
 ```
 
-2. Edit `.env` with your settings:
+2. Initialize configuration:
 ```bash
-# Required: Your OpenAI API key
-OPENAI_API_KEY=your-api-key-here
-
-# Optional: Configure model and environment
-SYNTHLANG_MODEL=gpt-4o-mini
-SYNTHLANG_ENV=development
-SYNTHLANG_LOG_LEVEL=INFO
+synthlang init --config config.json
 ```
 
-## Basic Commands
+## Basic Usage
 
-### Translate Code Between Frameworks
+### Translation
+
+Translate natural language to SynthLang format:
+
 ```bash
-# Translate from a file
-synthlang translate --source path/to/source.js --target-framework python
-
-# Translate from stdin
-echo "function hello() { console.log('Hello') }" | synthlang translate --target-framework python
+synthlang translate \
+  --config config.json \
+  --source "analyze customer feedback data and generate insights" \
+  --target-framework synthlang
 ```
 
-### Generate System Prompts
-```bash
-synthlang generate --task "Create a chatbot that helps users learn Python"
+Output:
+```
+Translation complete
+
+Source prompt:
+analyze customer feedback data and generate insights
+
+Translated prompt:
+↹ feedback•data
+⊕ sentiment>0 => pos
+⊕ sentiment<0 => neg
+Σ insights + trends
 ```
 
-### Optimize Prompts
+### System Prompts
+
+Generate system prompts:
+
 ```bash
-synthlang optimize --prompt "You are a helpful assistant..."
+synthlang generate \
+  --config config.json \
+  --task "Create a chatbot that helps users learn Python"
 ```
 
-### Manage Configuration
-```bash
-# Show current configuration
-synthlang config show
+## SynthLang Format
 
-# Update configuration value
-synthlang config set --key model --value gpt-4o-mini
+### Core Symbols
+
+1. Input/Output Symbols:
+   - ↹ (input): Marks input data or sources
+   - ⊕ (process): Indicates processing or transformation steps
+   - Σ (output): Represents final output or results
+
+2. Operators:
+   - • (join): Connects related items
+   - => (transform): Shows data transformation
+   - +, >, <, ^ (math): Mathematical operations
+
+### Format Rules
+
+1. Line Structure:
+   - Maximum 30 characters per line
+   - Each line starts with a symbol (↹, ⊕, Σ)
+   - No quotes or descriptions
+
+2. Data Flow:
+   - Start with input (↹)
+   - Process with one or more steps (⊕)
+   - End with output (Σ)
+
+### Examples
+
+1. Basic Analysis:
+```
+↹ data•source
+⊕ process => transform
+Σ result + output
+```
+
+2. Sentiment Analysis:
+```
+↹ feedback•sources
+⊕ sentiment>0 => pos
+⊕ sentiment<0 => neg
+Σ insights + trends
+```
+
+3. Data Pipeline:
+```
+↹ stream•data
+⊕ filter>threshold
+⊕ transform => clean
+Σ output^2 + cache
+```
+
+## Advanced Features
+
+### Framework Translation
+
+1. Basic Translation:
+```bash
+synthlang translate \
+  --source "process data" \
+  --target-framework synthlang
+```
+
+2. With Format Specification:
+```bash
+synthlang translate \
+  --source "analyze logs" \
+  --target-framework synthlang \
+  --format "json"
+```
+
+3. With Multiple Steps:
+```bash
+synthlang translate \
+  --source "fetch data, analyze trends, generate report" \
+  --target-framework synthlang \
+  --steps 3
+```
+
+### System Prompts
+
+1. Basic Generation:
+```bash
+synthlang generate \
+  --task "Create documentation"
+```
+
+2. With Templates:
+```bash
+synthlang generate \
+  --task "API documentation" \
+  --template technical
+```
+
+3. With Constraints:
+```bash
+synthlang generate \
+  --task "Error handling" \
+  --max-tokens 500
+```
+
+### Optimization
+
+1. Token Optimization:
+```bash
+synthlang optimize \
+  --prompt "Long prompt here" \
+  --target-tokens 100
+```
+
+2. Format Optimization:
+```bash
+synthlang optimize \
+  --prompt "Unformatted prompt" \
+  --format strict
+```
+
+## DSPy Integration
+
+### Custom Modules
+
+Create custom DSPy modules:
+
+```python
+from synthlang.core.modules import SynthLangModule
+
+class CustomTranslator(SynthLangModule):
+    def __init__(self, api_key: str):
+        super().__init__(api_key)
+        self.predictor = dspy.Predict(CustomSignature)
+    
+    def translate(self, text: str) -> str:
+        return self.predictor(source=text).target
+```
+
+### Chain Composition
+
+Build translation chains:
+
+```python
+from synthlang.core.modules import ChainComposer
+
+chain = ChainComposer([
+    FrameworkTranslator(),
+    PromptOptimizer(),
+    FormatValidator()
+])
+
+result = chain.process("Your prompt here")
+```
+
+### Evaluation
+
+Run evaluations:
+
+```bash
+synthlang evaluate \
+  --test-file tests.json \
+  --metrics accuracy,format \
+  --output report.json
 ```
 
 ## Environment Variables
 
-The CLI supports the following environment variables:
+Required:
+- `OPENAI_API_KEY`: OpenAI API key
 
-- `OPENAI_API_KEY`: Your OpenAI API key (required)
-- `SYNTHLANG_MODEL`: Model to use (default: gpt-4o-mini)
-- `SYNTHLANG_ENV`: Environment (development, production, testing)
-- `SYNTHLANG_LOG_LEVEL`: Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-- `SYNTHLANG_LOG_FILE`: Path to log file (optional)
-
-## Examples
-
-### Framework Translation
-```bash
-# Translate React component to Vue
-synthlang translate \
-  --source "function App() { return <div>Hello</div> }" \
-  --target-framework vue
-```
-
-### System Prompt Generation
-```bash
-# Generate a prompt for code review
-synthlang generate \
-  --task "Create an AI assistant that helps with Python code review"
-```
-
-### Configuration Management
-```bash
-# Update log level
-synthlang config set --key log_level --value DEBUG
-
-# Show current settings
-synthlang config show
-```
+Optional:
+- `SYNTHLANG_MODEL`: Default model (default: gpt-4o-mini)
+- `SYNTHLANG_ENV`: Environment (default: production)
+- `SYNTHLANG_LOG_LEVEL`: Logging level (default: INFO)
 
 ## Error Handling
 
-The CLI provides detailed error messages and logs. If you encounter issues:
+Common errors and solutions:
 
-1. Check the log output (use DEBUG level for more detail)
-2. Verify your environment variables are set correctly
-3. Ensure your API key is valid
-4. Check your internet connection
+1. API Key Error:
+```
+Error: OPENAI_API_KEY not found
+Solution: Set OPENAI_API_KEY in .env or environment
+```
+
+2. Format Error:
+```
+Error: Invalid SynthLang format
+Solution: Ensure output follows format rules
+```
+
+3. Token Limit:
+```
+Error: Token limit exceeded
+Solution: Use optimize command to reduce tokens
+```
 
 ## Best Practices
 
-1. Always use version control for your prompts and translations
-2. Start with small, simple translations to verify behavior
-3. Use the DEBUG log level during development
-4. Keep your API key secure and never commit it to version control
-5. Use different .env files for different environments (e.g., .env.development, .env.production)
+1. Format Guidelines:
+   - Keep lines under 30 characters
+   - Use appropriate symbols
+   - Follow input → process → output flow
+
+2. Optimization:
+   - Use token optimization for long prompts
+   - Validate format compliance
+   - Test with example inputs
+
+3. Integration:
+   - Use environment variables
+   - Handle errors gracefully
+   - Follow DSPy patterns
+
+## Contributing
+
+See [CONTRIBUTING.md](../CONTRIBUTING.md) for:
+- Development setup
+- Testing guidelines
+- Pull request process
 
 ## Support
 
-For issues and feature requests, please visit:
-- GitHub Issues: [Link to issues]
-- Documentation: [Link to docs]
+- GitHub Issues: [SynthLang Issues](https://github.com/ruvnet/SynthLang/issues)
+- Documentation: [SynthLang Docs](https://synthlang.ai/docs)

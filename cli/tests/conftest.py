@@ -2,8 +2,10 @@
 import json
 from pathlib import Path
 from typing import Dict
+from unittest.mock import Mock
 
 import pytest
+import dspy
 from click.testing import CliRunner
 
 from synthlang.config import Config, ConfigManager
@@ -88,6 +90,32 @@ def test_system_prompt() -> str:
     2. Potential bugs
     3. Performance issues
     4. Security concerns"""
+
+@pytest.fixture
+def mock_lm():
+    """Mock DSPy language model for testing."""
+    mock = Mock(spec=dspy.LM)
+    mock.generate.return_value = {
+        'choices': [{
+            'finish_reason': 'stop',
+            'index': 0,
+            'message': {
+                'content': {
+                    'source': 'Original text', 
+                    'target': 'Translated text',
+                    'explanation': 'Translation explanation'
+                },
+                'role': 'assistant'
+            }
+        }],
+        'created': 1677858242,
+        'id': 'chatcmpl-123',
+        'model': 'gpt-4o-mini',
+        'object': 'chat.completion',
+        'usage': {'completion_tokens': 100, 'prompt_tokens': 50, 'total_tokens': 150}
+    }
+    mock.kwargs = {'temperature': 0.0}
+    return mock
 
 def pytest_configure(config):
     """Configure test environment."""

@@ -1,217 +1,247 @@
 # SynthLang CLI Development Guide
 
-## Development Setup
+## Overview
 
-1. Clone the repository:
-```bash
-git clone <repository-url>
-cd cli
-```
+The SynthLang CLI is built using DSPy, a framework for programming with language models. This guide covers the implementation details, DSPy integration, and planned features.
 
-2. Create a virtual environment:
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
+## Architecture
 
-3. Install development dependencies:
-```bash
-pip install poetry
-poetry install
-```
-
-4. Set up pre-commit hooks:
-```bash
-pre-commit install
-```
-
-5. Configure environment:
-```bash
-cp .env.sample .env
-# Edit .env with your settings
-```
-
-## Project Structure
+The CLI follows a modular architecture:
 
 ```
 cli/
-├── docs/                 # Documentation
-├── synthlang/           # Main package
-│   ├── core/            # Core functionality
-│   │   ├── modules.py   # DSPy modules
-│   │   └── ...
-│   ├── utils/           # Utilities
-│   │   ├── env.py      # Environment handling
-│   │   └── logger.py   # Logging
-│   ├── cli.py          # CLI implementation
-│   └── config.py       # Configuration
-├── tests/              # Test suite
-│   ├── conftest.py    # Test configuration
-│   └── ...
-├── .env.sample        # Environment template
-└── pyproject.toml     # Project configuration
-```
-
-## Development Workflow
-
-1. Create a new branch for your feature:
-```bash
-git checkout -b feature/your-feature-name
-```
-
-2. Make your changes following these guidelines:
-   - Follow PEP 8 style guide
-   - Add type hints to all functions
-   - Document new functions and classes
-   - Write tests for new functionality
-
-3. Run tests:
-```bash
-# Run all tests
-poetry run pytest
-
-# Run with coverage
-poetry run pytest --cov=synthlang
-
-# Run specific test file
-poetry run pytest tests/test_specific.py
-```
-
-4. Format code:
-```bash
-# Format with black
-poetry run black .
-
-# Sort imports
-poetry run isort .
-
-# Type checking
-poetry run mypy synthlang
-```
-
-## Testing
-
-### Test Organization
-
-- `test_cli.py`: CLI interface tests
-- `test_config.py`: Configuration management tests
-- `test_modules.py`: DSPy module tests
-- `test_logger.py`: Logging functionality tests
-
-### Writing Tests
-
-1. Use fixtures from `conftest.py` when possible
-2. Follow the Arrange-Act-Assert pattern
-3. Use descriptive test names
-4. Add docstrings to test functions
-5. Use appropriate markers for different test types
-
-Example:
-```python
-@pytest.mark.integration
-def test_framework_translation(env_vars):
-    """Test framework translation with actual API call."""
-    translator = FrameworkTranslator()
-    result = translator.translate("source code here")
-    assert "target" in result
+├── synthlang/
+│   ├── core/
+│   │   ├── modules.py      # DSPy module implementations
+│   │   └── signatures.py   # DSPy signatures
+│   ├── cli.py             # CLI interface
+│   ├── config.py          # Configuration management
+│   └── utils/             # Utility functions
+└── tests/                 # Test suite
 ```
 
 ## DSPy Integration
 
-### Key Components
+### Adapters
 
-1. `SynthLangModule`: Base class for DSPy modules
-2. `FrameworkTranslator`: Handles code translation
-3. `SystemPromptGenerator`: Generates system prompts
+DSPy adapters provide interfaces to different language models. SynthLang uses:
 
-### Adding New Modules
-
-1. Create a new class inheriting from `SynthLangModule`
-2. Define the signature using `@signature` decorator
-3. Implement the required methods
-4. Add tests for the new module
-
-Example:
 ```python
-@signature
-class NewModuleSignature:
-    input: str
-    output: str
+from dspy import OpenAI
 
-class NewModule(SynthLangModule):
-    def __init__(self):
-        super().__init__()
-        self.predictor = Predict(NewModuleSignature)
+# Initialize with model and API key
+lm = OpenAI(
+    model="gpt-4o-mini",  # Required model
+    api_key=api_key
+)
+```
 
-    def process(self, input_text: str) -> Dict[str, Any]:
-        # Implementation here
+Planned adapters:
+- Anthropic Claude
+- Local models via LlamaCpp
+- Azure OpenAI
+
+### Evaluation
+
+DSPy's evaluation framework will be used for:
+
+```python
+from dspy import Evaluate, Example
+
+# Define evaluation metrics
+evaluator = Evaluate(
+    metrics=['accuracy', 'format_compliance'],
+    num_threads=4
+)
+
+# Create test examples
+examples = [
+    Example(
+        source="analyze customer feedback",
+        target="↹ feedback•data\n⊕ sentiment>0 => pos\nΣ insights"
+    )
+]
+
+# Run evaluation
+results = evaluator(examples)
+```
+
+### Models
+
+Model configuration and management:
+
+```python
+class ModelConfig:
+    """Model configuration and settings."""
+    def __init__(self, name: str, context_window: int):
+        self.name = name
+        self.context_window = context_window
+        self.temperature = 0.1  # Low temperature for consistent output
+```
+
+### Modules
+
+Core DSPy modules implemented:
+
+1. FrameworkTranslator
+```python
+class FrameworkTranslator(dspy.Module):
+    """Translates natural language to SynthLang format."""
+    def forward(self, source: str) -> Dict[str, str]:
+        return {
+            "source": source,
+            "target": translated,
+            "explanation": rationale
+        }
+```
+
+2. SystemPromptGenerator
+```python
+class SystemPromptGenerator(dspy.Module):
+    """Generates system prompts from task descriptions."""
+    def forward(self, task: str) -> Dict[str, Any]:
+        return {
+            "prompt": generated,
+            "rationale": explanation,
+            "metadata": meta
+        }
+```
+
+Planned modules:
+- PromptOptimizer
+- ChainComposer
+- MetricsAnalyzer
+
+### Optimizers
+
+DSPy optimizers for improving output:
+
+```python
+from dspy import ChainOfThought, ReAct
+
+# Add reasoning capabilities
+reasoner = ChainOfThought(
+    max_steps=3,
+    temperature=0.1
+)
+
+# Add interactive refinement
+reactor = ReAct(
+    max_attempts=2,
+    reflection=True
+)
+```
+
+### Primitives
+
+Core DSPy primitives used:
+
+```python
+from dspy import Predict, Generate, TypedPredictor
+
+# Basic prediction
+predictor = Predict(signature)
+
+# Structured generation
+generator = Generate(
+    output_schema={
+        "type": "object",
+        "properties": {
+            "translation": {"type": "string"},
+            "confidence": {"type": "number"}
+        }
+    }
+)
+
+# Type-safe prediction
+typed_predictor = TypedPredictor[TranslationOutput](signature)
+```
+
+### Signatures
+
+DSPy signatures define module interfaces:
+
+```python
+class TranslateSignature(dspy.Signature):
+    """Translation signature."""
+    source = dspy.InputField(desc="Source text")
+    target = dspy.OutputField(desc="Translated text")
+    explanation = dspy.OutputField(desc="Translation rationale")
+```
+
+### Tools
+
+Planned DSPy tool integrations:
+
+```python
+from dspy import Tool
+
+# File operations
+class FileProcessor(Tool):
+    def process(self, content: str) -> str:
+        """Process file content."""
+        pass
+
+# Web retrieval
+class WebRetriever(Tool):
+    def fetch(self, url: str) -> str:
+        """Fetch web content."""
         pass
 ```
 
-## Configuration Management
+### Utils
 
-### Environment Variables
+Utility functions and helpers:
 
-Required variables:
-- `OPENAI_API_KEY`: Your OpenAI API key
+```python
+from dspy.utils import format_prompt, validate_output
 
-Optional variables (all prefixed with `SYNTHLANG_`):
-- `SYNTHLANG_MODEL`: Model to use (default: gpt-4o-mini)
-- `SYNTHLANG_ENV`: Environment (development, production, testing)
-- `SYNTHLANG_LOG_LEVEL`: Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-- `SYNTHLANG_LOG_FILE`: Path to log file
-
-### Adding New Settings
-
-1. Add the setting to the `Config` class in `config.py`
-2. Update configuration tests
-3. Document the new setting
-4. Update the sample environment file
-
-## Logging
-
-### Log Levels
-
-- DEBUG: Detailed debugging information
-- INFO: General operational events
-- WARNING: Unexpected but handled events
-- ERROR: Serious issues that need attention
-- CRITICAL: System-level failures
-
-### Best Practices
-
-1. Use appropriate log levels
-2. Include relevant context in log messages
-3. Handle exceptions properly
-4. Use structured logging when appropriate
-
-## Release Process
-
-1. Update version in `pyproject.toml`
-2. Update CHANGELOG.md
-3. Run full test suite
-4. Build distribution:
-```bash
-poetry build
+def ensure_format(text: str) -> str:
+    """Ensure output follows SynthLang format."""
+    return validate_output(
+        text,
+        schema=SYNTHLANG_SCHEMA
+    )
 ```
-5. Create a release tag
-6. Push to PyPI:
-```bash
-poetry publish
-```
+
+## Planned Features
+
+1. Advanced Translation
+   - Multi-stage translation pipeline
+   - Format validation and correction
+   - Confidence scoring
+
+2. Optimization
+   - Token usage optimization
+   - Semantic preservation checks
+   - Performance benchmarking
+
+3. Chain Composition
+   - Custom translation chains
+   - Framework combinations
+   - Pipeline optimization
+
+4. Interactive Mode
+   - REPL interface
+   - Real-time suggestions
+   - Format validation
+
+5. Integration Features
+   - Git hooks
+   - CI/CD pipeline integration
+   - API endpoints
 
 ## Contributing
 
-1. Check existing issues and pull requests
-2. Discuss major changes in issues first
-3. Follow the code style guidelines
-4. Include tests with your changes
-5. Update documentation as needed
-6. Submit a pull request
+See [CONTRIBUTING.md](../CONTRIBUTING.md) for development setup and guidelines.
 
-## Resources
+## Testing
 
-- [DSPy Documentation](https://dspy.ai/)
-- [Click Documentation](https://click.palletsprojects.com/)
-- [Poetry Documentation](https://python-poetry.org/docs/)
-- [PyTest Documentation](https://docs.pytest.org/)
+Run tests with pytest:
+```bash
+pytest cli/tests/
+```
+
+Coverage report:
+```bash
+pytest --cov=synthlang cli/tests/

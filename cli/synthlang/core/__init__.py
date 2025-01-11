@@ -1,16 +1,24 @@
-"""Core functionality for SynthLang CLI."""
-from synthlang.core.modules import (
-    SynthLangModule,
-    FrameworkTranslator,
-    SystemPromptGenerator,
-    TranslateSignature,
-    GenerateSignature
+"""Core module exports for SynthLang."""
+from .base import SynthLangModule
+from .translator import FrameworkTranslator
+from .generator import SystemPromptGenerator
+from .optimizer import PromptOptimizer
+from .types import (
+    TranslationResult,
+    GenerationResult,
+    OptimizationResult,
+    SynthLangSymbols,
+    FormatRules
 )
 
 __all__ = [
-    "SynthLangModule",
-    "FrameworkTranslator",
-    "SystemPromptGenerator",
-    "TranslateSignature",
-    "GenerateSignature"
+    'SynthLangModule',
+    'FrameworkTranslator',
+    'SystemPromptGenerator',
+    'PromptOptimizer',
+    'TranslationResult',
+    'GenerationResult',
+    'OptimizationResult',
+    'SynthLangSymbols',
+    'FormatRules'
 ]

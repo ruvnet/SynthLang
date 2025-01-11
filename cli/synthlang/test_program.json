@@ -1,0 +1,11 @@
+{
+  "config": {
+    "openai_api_key": "",
+    "model": "gpt-4o-mini",
+    "environment": "production",
+    "log_level": "INFO"
+  },
+  "version": "0.1.0",
+  "timestamp": "2025-01-11T05:55:43.065635",
+  "model": "gpt-4o-mini"
+}

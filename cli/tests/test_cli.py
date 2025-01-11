@@ -21,12 +21,18 @@ def env_vars():
     os.environ["SYNTHLANG_MODEL"] = "gpt-4o-mini"
     os.environ["SYNTHLANG_ENV"] = "testing"
     os.environ["SYNTHLANG_LOG_LEVEL"] = "INFO"
+    os.environ["SYNTHLANG_TEMPERATURE"] = "0.7"
+    os.environ["SYNTHLANG_MAX_TOKENS"] = "2048"
+    os.environ["SYNTHLANG_CONTEXT_WINDOW"] = "4096"
     yield
     # Clean up
     del os.environ["OPENAI_API_KEY"]
     del os.environ["SYNTHLANG_MODEL"]
     del os.environ["SYNTHLANG_ENV"]
     del os.environ["SYNTHLANG_LOG_LEVEL"]
+    del os.environ["SYNTHLANG_TEMPERATURE"]
+    del os.environ["SYNTHLANG_MAX_TOKENS"]
+    del os.environ["SYNTHLANG_CONTEXT_WINDOW"]
 
 def test_cli_version(runner):
     """Test version command."""
@@ -34,20 +40,33 @@ def test_cli_version(runner):
     assert result.exit_code == 0
     assert "SynthLang CLI" in result.output
 
-def test_cli_translate(runner, env_vars):
+def test_cli_translate(runner, env_vars, mock_lm):
     """Test translate command."""
-    source_code = """
-    function example() {
-        console.log("Hello");
-    }
-    """
-    result = runner.invoke(main, [
-        "translate",
-        "--source", source_code,
-        "--target-framework", "python"
-    ])
-    assert result.exit_code == 0
-    assert "Translation complete" in result.output
+    from flask import Flask, current_app
+
+    # Set up Flask test app and context
+    app = Flask(__name__) 
+    app.test_mock_lm = mock_lm
+    with app.app_context():
+        # Configure mock LM response
+        mock_lm.completion.return_value = "Translated code"
+        
+        source_code = """
+        function example() {
+            console.log("Hello");
+        }
+        """
+        result = runner.invoke(main, [
+            "translate",
+            "--source", source_code,
+            "--target-framework", "synthlang"
+        ])
+        print("\nTest output:", result.output)
+        assert result.exit_code == 0
+        assert "Translation complete" in result.output
+
+    # Verify mock was used
+    mock_lm.completion.assert_called_once()
 
 def test_cli_generate(runner, env_vars):
     """Test generate command."""
