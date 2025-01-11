@@ -1,12 +1,13 @@
 """Tests for CLI interface."""
 import json
+import os
 from pathlib import Path
 from typing import Dict
 
 import pytest
 from click.testing import CliRunner
 
-from synthlang.cli import cli
+from synthlang.cli import main
 
 @pytest.fixture
 def runner():
@@ -14,131 +15,101 @@ def runner():
     return CliRunner()
 
 @pytest.fixture
-def config_file(tmp_path):
-    """Sample config file fixture."""
-    config = {
-        "openai_api_key": "sk-test",
-        "model": "gpt-4o-mini",
-        "environment": "testing",
-        "log_level": "INFO"
-    }
-    config_path = tmp_path / "config.json"
-    config_path.write_text(json.dumps(config))
-    return config_path
+def env_vars():
+    """Environment variables fixture."""
+    os.environ["OPENAI_API_KEY"] = "sk-test"
+    os.environ["SYNTHLANG_MODEL"] = "gpt-4o-mini"
+    os.environ["SYNTHLANG_ENV"] = "testing"
+    os.environ["SYNTHLANG_LOG_LEVEL"] = "INFO"
+    yield
+    # Clean up
+    del os.environ["OPENAI_API_KEY"]
+    del os.environ["SYNTHLANG_MODEL"]
+    del os.environ["SYNTHLANG_ENV"]
+    del os.environ["SYNTHLANG_LOG_LEVEL"]
 
 def test_cli_version(runner):
     """Test version command."""
-    result = runner.invoke(cli, ["--version"])
+    result = runner.invoke(main, ["--version"])
     assert result.exit_code == 0
     assert "SynthLang CLI" in result.output
 
-def test_cli_init(runner, tmp_path):
-    """Test init command."""
-    result = runner.invoke(cli, ["init", "--config", str(tmp_path / "config.json")])
-    assert result.exit_code == 0
-    assert "Configuration initialized" in result.output
-    assert (tmp_path / "config.json").exists()
-
-def test_cli_translate(runner, config_file):
+def test_cli_translate(runner, env_vars):
     """Test translate command."""
     source_code = """
     function example() {
         console.log("Hello");
     }
     """
-    result = runner.invoke(cli, [
+    result = runner.invoke(main, [
         "translate",
-        "--config", str(config_file),
         "--source", source_code,
         "--target-framework", "python"
     ])
     assert result.exit_code == 0
     assert "Translation complete" in result.output
 
-def test_cli_generate(runner, config_file):
+def test_cli_generate(runner, env_vars):
     """Test generate command."""
     task = "Create a chatbot assistant"
-    result = runner.invoke(cli, [
+    result = runner.invoke(main, [
         "generate",
-        "--config", str(config_file),
         "--task", task
     ])
     assert result.exit_code == 0
     assert "System prompt generated" in result.output
 
-def test_cli_optimize(runner, config_file):
+def test_cli_optimize(runner, env_vars):
     """Test optimize command."""
     prompt = "You are a helpful assistant"
-    result = runner.invoke(cli, [
+    result = runner.invoke(main, [
         "optimize",
-        "--config", str(config_file),
         "--prompt", prompt
     ])
     assert result.exit_code == 0
     assert "Prompt optimized" in result.output
 
-def test_cli_config_show(runner, config_file):
+def test_cli_config_show(runner, env_vars):
     """Test config show command."""
-    result = runner.invoke(cli, [
+    result = runner.invoke(main, [
         "config",
-        "show",
-        "--config", str(config_file)
+        "show"
     ])
     assert result.exit_code == 0
     assert "Current configuration" in result.output
     assert "gpt-4o-mini" in result.output
 
-def test_cli_config_set(runner, config_file):
+def test_cli_config_set(runner, env_vars):
     """Test config set command."""
-    result = runner.invoke(cli, [
+    result = runner.invoke(main, [
         "config",
         "set",
-        "--config", str(config_file),
         "--key", "log_level",
         "--value", "DEBUG"
     ])
     assert result.exit_code == 0
     assert "Configuration updated" in result.output
+    assert os.environ["SYNTHLANG_LOG_LEVEL"] == "DEBUG"
 
-    # Verify update
-    with open(config_file) as f:
-        config = json.load(f)
-        assert config["log_level"] == "DEBUG"
-
-def test_cli_invalid_config(runner, tmp_path):
-    """Test CLI with invalid config."""
-    invalid_config = tmp_path / "invalid.json"
-    invalid_config.write_text("invalid json")
-    
-    result = runner.invoke(cli, [
+def test_cli_missing_api_key(runner):
+    """Test CLI with missing API key."""
+    result = runner.invoke(main, [
         "translate",
-        "--config", str(invalid_config),
         "--source", "code",
         "--target-framework", "python"
     ])
     assert result.exit_code != 0
-    assert "Error loading configuration" in result.output
-
-def test_cli_missing_config(runner):
-    """Test CLI with missing config."""
-    result = runner.invoke(cli, [
-        "translate",
-        "--config", "nonexistent.json",
-        "--source", "code",
-        "--target-framework", "python"
-    ])
-    assert result.exit_code != 0
-    assert "Configuration file not found" in result.output
+    assert "OPENAI_API_KEY not found" in result.output
 
 def test_cli_help(runner):
     """Test help command."""
-    result = runner.invoke(cli, ["--help"])
+    result = runner.invoke(main, ["--help"])
     assert result.exit_code == 0
     assert "Usage:" in result.output
     
     # Test subcommand help
-    commands = ["init", "translate", "generate", "optimize", "config"]
+    commands = ["translate", "generate", "optimize", "config"]
     for cmd in commands:
-        result = runner.invoke(cli, [cmd, "--help"])
+        result = runner.invoke(main, [cmd, "--help"])
         assert result.exit_code == 0
         assert "Usage:" in result.output
