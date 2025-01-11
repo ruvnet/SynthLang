@@ -25,6 +25,12 @@ poetry install
 pre-commit install
 ```
 
+5. Configure environment:
+```bash
+cp .env.sample .env
+# Edit .env with your settings
+```
+
 ## Project Structure
 
 ```
@@ -103,9 +109,9 @@ poetry run mypy synthlang
 Example:
 ```python
 @pytest.mark.integration
-def test_framework_translation(lm):
+def test_framework_translation(env_vars):
     """Test framework translation with actual API call."""
-    translator = FrameworkTranslator(lm)
+    translator = FrameworkTranslator()
     result = translator.translate("source code here")
     assert "target" in result
 ```
@@ -133,8 +139,8 @@ class NewModuleSignature:
     output: str
 
 class NewModule(SynthLangModule):
-    def __init__(self, lm):
-        super().__init__(lm)
+    def __init__(self):
+        super().__init__()
         self.predictor = Predict(NewModuleSignature)
 
     def process(self, input_text: str) -> Dict[str, Any]:
@@ -146,9 +152,14 @@ class NewModule(SynthLangModule):
 
 ### Environment Variables
 
-- Use `SYNTHLANG_` prefix for all environment variables
-- Document new variables in `.env.sample`
-- Add validation in `config.py`
+Required variables:
+- `OPENAI_API_KEY`: Your OpenAI API key
+
+Optional variables (all prefixed with `SYNTHLANG_`):
+- `SYNTHLANG_MODEL`: Model to use (default: gpt-4o-mini)
+- `SYNTHLANG_ENV`: Environment (development, production, testing)
+- `SYNTHLANG_LOG_LEVEL`: Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+- `SYNTHLANG_LOG_FILE`: Path to log file
 
 ### Adding New Settings
 
