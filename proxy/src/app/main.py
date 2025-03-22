@@ -172,7 +172,8 @@ async def create_chat_completion(
             # Include cache information for debugging
             "debug": {
                 "cache_hit": True,
-                "compressed_messages": compressed_messages
+                "compressed_messages": compressed_messages,
+                "decompressed_messages": None
             }
         }
         
@@ -208,7 +209,8 @@ async def create_chat_completion(
             async def stream_generator():
                 """Generate SSE events from the LLM streaming response."""
                 full_response = ""
-                async for chunk in response_iter():
+                # Iterate over the generator directly
+                async for chunk in response_iter:
                     if 'choices' in chunk and len(chunk['choices']) > 0:
                         if 'delta' in chunk['choices'][0]:
                             content_piece = chunk['choices'][0]['delta'].get('content', '')
@@ -280,7 +282,8 @@ async def create_chat_completion(
                 # Include debug information
                 "debug": {
                     "cache_hit": False,
-                    "compressed_messages": compressed_messages
+                    "compressed_messages": compressed_messages,
+                    "decompressed_messages": None
                 }
             }
             
