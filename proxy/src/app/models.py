@@ -4,7 +4,7 @@ Pydantic models for request and response validation.
 This module contains the Pydantic models used for validating
 API requests and responses.
 """
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 from typing import List, Literal, Optional, Dict, Any, Union
 
 
@@ -49,19 +49,22 @@ class ChatRequest(BaseModel):
     logit_bias: Optional[Dict[str, float]] = Field(None, description="Modifies likelihood of specific tokens")
     user: Optional[str] = Field(None, description="A unique identifier for the end-user")
     
-    @validator('temperature')
+    @field_validator('temperature')
+    @classmethod
     def validate_temperature(cls, v):
         if v is not None and (v < 0 or v > 2):
             raise ValueError('Temperature must be between 0 and 2')
         return v
     
-    @validator('top_p')
+    @field_validator('top_p')
+    @classmethod
     def validate_top_p(cls, v):
         if v is not None and (v < 0 or v > 1):
             raise ValueError('Top_p must be between 0 and 1')
         return v
     
-    @validator('presence_penalty', 'frequency_penalty')
+    @field_validator('presence_penalty', 'frequency_penalty')
+    @classmethod
     def validate_penalties(cls, v):
         if v is not None and (v < -2 or v > 2):
             raise ValueError('Penalty values must be between -2 and 2')

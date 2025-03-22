@@ -6,6 +6,7 @@ This module contains the FastAPI application and API endpoints.
 import time
 import logging
 from typing import List, Optional, Dict, Any
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Depends, HTTPException, Request, Response, Header
 from fastapi.responses import JSONResponse, StreamingResponse
@@ -30,31 +31,19 @@ logging.basicConfig(
 )
 logger = logging.getLogger("app")
 
-# Create FastAPI app
-app = FastAPI(
-    title="SynthLang Router API",
-    description="A high-speed LLM router and proxy with SynthLang integration",
-    version="0.1.0",
-)
 
-# Add CORS middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # In production, restrict this to specific origins
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-
-@app.on_event("startup")
-async def startup_event():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     """
-    Initialize the application on startup.
+    Lifespan context manager for the FastAPI application.
     
-    This function is called when the application starts up.
-    It initializes the database and performs other startup tasks.
+    This function is called when the application starts up and shuts down.
+    It initializes the database and performs other startup/shutdown tasks.
+    
+    Args:
+        app: The FastAPI application instance
     """
+    # Startup logic
     logger.info("Initializing application...")
     
     # Initialize the database
@@ -65,6 +54,31 @@ async def startup_event():
         logger.warning("Database initialization failed, some features may not work correctly")
     
     logger.info("Application initialization complete")
+    
+    yield  # This is where the application runs
+    
+    # Shutdown logic
+    logger.info("Shutting down application...")
+    # Add any cleanup tasks here
+    logger.info("Application shutdown complete")
+
+
+# Create FastAPI app
+app = FastAPI(
+    title="SynthLang Router API",
+    description="A high-speed LLM router and proxy with SynthLang integration",
+    version="0.1.0",
+    lifespan=lifespan,
+)
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, restrict this to specific origins
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/", response_model=APIInfo)

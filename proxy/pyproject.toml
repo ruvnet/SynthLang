@@ -53,3 +53,9 @@ check_untyped_defs = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = "test_*.py"
+filterwarnings = [
+    "ignore::DeprecationWarning:faiss.*:",
+    "ignore::DeprecationWarning:numpy.*:"
+]
+asyncio_mode = "strict"
+asyncio_default_fixture_loop_scope = "function"
