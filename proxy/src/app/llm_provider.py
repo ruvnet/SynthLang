@@ -4,12 +4,12 @@ LLM provider integration module.
 This module provides functions for interacting with LLM providers
 such as OpenAI to get chat completions and embeddings.
 """
-import os
 import logging
 from typing import List, Dict, Any, Optional, AsyncGenerator, Callable
 
 from openai import OpenAI, AsyncOpenAI
 from app.agents import registry
+from app.config import OPENAI_API_KEY, MODEL_PROVIDER
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -28,7 +28,7 @@ def get_openai_client():
     """
     global client
     if client is None:
-        api_key = os.getenv("OPENAI_API_KEY", "dummy_key_for_testing")
+        api_key = OPENAI_API_KEY or "dummy_key_for_testing"
         client = OpenAI(api_key=api_key)
     return client
 
@@ -42,7 +42,7 @@ def get_async_openai_client():
     """
     global async_client
     if async_client is None:
-        api_key = os.getenv("OPENAI_API_KEY", "dummy_key_for_testing")
+        api_key = OPENAI_API_KEY or "dummy_key_for_testing"
         async_client = AsyncOpenAI(api_key=api_key)
     return async_client
 
@@ -72,44 +72,50 @@ async def complete_chat(
     Raises:
         Exception: If the API call fails
     """
-    # Basic model routing
-    if "gpt-4o" in model:
-        llm_model = "gpt-4o-search-preview"  # Or appropriate GPT-4o model
-        
-        # Basic tool invocation for testing
-        if "search-preview" in model:
-            web_search_tool = registry.get_tool("web_search")
-            if web_search_tool:
-                logger.info(f"Invoking web_search tool for user {user_id}")
-                tool_response = web_search_tool(user_message=messages[-1]["content"])
-                logger.info(f"Web search tool invocation successful for user {user_id}")
-                
-                # Format the response to match OpenAI API format
-                return {
-                    "id": f"chatcmpl-tool-{model}",
-                    "object": "chat.completion",
-                    "created": int(__import__('time').time()),
-                    "model": model,
-                    "choices": [
-                        {
-                            "index": 0,
-                            "message": tool_response,
-                            "finish_reason": "tool_invocation"
-                        }
-                    ],
-                    "usage": {
-                        "prompt_tokens": sum(len(msg["content"].split()) for msg in messages),
-                        "completion_tokens": len(tool_response.get("content", "").split()),
-                        "total_tokens": sum(len(msg["content"].split()) for msg in messages) + 
-                                        len(tool_response.get("content", "").split())
+    # Special case for search-preview models - invoke web search tool
+    if "search-preview" in model:
+        web_search_tool = registry.get_tool("web_search")
+        if web_search_tool:
+            logger.info(f"Invoking web_search tool for user {user_id}")
+            tool_response = web_search_tool(user_message=messages[-1]["content"])
+            logger.info(f"Web search tool invocation successful for user {user_id}")
+            
+            # Format the response to match OpenAI API format
+            return {
+                "id": f"chatcmpl-tool-{model}",
+                "object": "chat.completion",
+                "created": int(__import__('time').time()),
+                "model": model,
+                "choices": [
+                    {
+                        "index": 0,
+                        "message": tool_response,
+                        "finish_reason": "tool_invocation"
                     }
+                ],
+                "usage": {
+                    "prompt_tokens": sum(len(msg["content"].split()) for msg in messages),
+                    "completion_tokens": len(tool_response.get("content", "").split()),
+                    "total_tokens": sum(len(msg["content"].split()) for msg in messages) + 
+                                    len(tool_response.get("content", "").split())
                 }
-            else:
-                logger.warning("Web search tool not found in registry.")
-    else:
-        llm_model = "o3-mini"  # Or appropriate o3-mini model
+            }
+        else:
+            logger.warning("Web search tool not found in registry.")
     
-    logger.info(f"Calling LLM API with model {llm_model} for user {user_id}")
+    # Use MODEL_PROVIDER for model routing if available
+    provider_model = model
+    if model in MODEL_PROVIDER:
+        provider = MODEL_PROVIDER[model]
+        logger.info(f"Routing model {model} to provider {provider}")
+    else:
+        # Basic model routing as fallback
+        if "gpt-4o" in model:
+            provider_model = "gpt-4o-search-preview"  # Or appropriate GPT-4o model
+        else:
+            provider_model = "o3-mini"  # Or appropriate o3-mini model
+    
+    logger.info(f"Calling LLM API with model {provider_model} for user {user_id}")
     
     try:
         # Get the async OpenAI client
@@ -117,7 +123,7 @@ async def complete_chat(
         
         # Call the OpenAI API
         response = await openai_client.chat.completions.create(
-            model=llm_model,
+            model=provider_model,
             messages=messages,
             temperature=temperature,
             top_p=top_p,
@@ -182,48 +188,54 @@ async def stream_chat(
     Raises:
         Exception: If the API call fails
     """
-    # Basic model routing
-    if "gpt-4o" in model:
-        llm_model = "gpt-4o-search-preview"  # Or appropriate GPT-4o model
-        
-        # Basic tool invocation for testing (non-streaming for now)
-        if "search-preview" in model:
-            web_search_tool = registry.get_tool("web_search")
-            if web_search_tool:
-                logger.info(f"Invoking web_search tool (non-streaming) for user {user_id}")
-                tool_response = web_search_tool(user_message=messages[-1]["content"])
-                logger.info(f"Web search tool invocation successful for user {user_id}")
-                
-                # Format the response to match OpenAI API format
-                response = {
-                    "id": f"chatcmpl-tool-{model}",
-                    "object": "chat.completion",
-                    "created": int(__import__('time').time()),
-                    "model": model,
-                    "choices": [
-                        {
-                            "index": 0,
-                            "message": tool_response,
-                            "finish_reason": "tool_invocation"
-                        }
-                    ],
-                    "usage": {
-                        "prompt_tokens": sum(len(msg["content"].split()) for msg in messages),
-                        "completion_tokens": len(tool_response.get("content", "").split()),
-                        "total_tokens": sum(len(msg["content"].split()) for msg in messages) + 
-                                        len(tool_response.get("content", "").split())
+    # Special case for search-preview models - invoke web search tool
+    if "search-preview" in model:
+        web_search_tool = registry.get_tool("web_search")
+        if web_search_tool:
+            logger.info(f"Invoking web_search tool (non-streaming) for user {user_id}")
+            tool_response = web_search_tool(user_message=messages[-1]["content"])
+            logger.info(f"Web search tool invocation successful for user {user_id}")
+            
+            # Format the response to match OpenAI API format
+            response = {
+                "id": f"chatcmpl-tool-{model}",
+                "object": "chat.completion",
+                "created": int(__import__('time').time()),
+                "model": model,
+                "choices": [
+                    {
+                        "index": 0,
+                        "message": tool_response,
+                        "finish_reason": "tool_invocation"
                     }
+                ],
+                "usage": {
+                    "prompt_tokens": sum(len(msg["content"].split()) for msg in messages),
+                    "completion_tokens": len(tool_response.get("content", "").split()),
+                    "total_tokens": sum(len(msg["content"].split()) for msg in messages) + 
+                                    len(tool_response.get("content", "").split())
                 }
-                
-                # For now, return a non-streaming response for tool invocation
-                # In the future, implement proper streaming for tool responses
-                return response
-            else:
-                logger.warning("Web search tool not found in registry.")
-    else:
-        llm_model = "o3-mini"  # Or appropriate o3-mini model
+            }
+            
+            # For now, return a non-streaming response for tool invocation
+            # In the future, implement proper streaming for tool responses
+            return response
+        else:
+            logger.warning("Web search tool not found in registry.")
     
-    logger.info(f"Calling LLM API (streaming) with model {llm_model} for user {user_id}")
+    # Use MODEL_PROVIDER for model routing if available
+    provider_model = model
+    if model in MODEL_PROVIDER:
+        provider = MODEL_PROVIDER[model]
+        logger.info(f"Routing model {model} to provider {provider}")
+    else:
+        # Basic model routing as fallback
+        if "gpt-4o" in model:
+            provider_model = "gpt-4o-search-preview"  # Or appropriate GPT-4o model
+        else:
+            provider_model = "o3-mini"  # Or appropriate o3-mini model
+    
+    logger.info(f"Calling LLM API (streaming) with model {provider_model} for user {user_id}")
     
     try:
         # Get the async OpenAI client
@@ -231,7 +243,7 @@ async def stream_chat(
         
         # Call the OpenAI API with streaming
         stream = await openai_client.chat.completions.create(
-            model=llm_model,
+            model=provider_model,
             messages=messages,
             temperature=temperature,
             top_p=top_p,

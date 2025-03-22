@@ -5,23 +5,31 @@ This module defines SQLAlchemy models and database connection setup
 for persisting interaction data.
 """
 import os
+import logging
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy import Column, String, Integer, Boolean, LargeBinary, DateTime, func
-import logging
+
+from app.config import DATABASE_URL as CONFIG_DATABASE_URL
 
 # Configure logging
 logger = logging.getLogger(__name__)
 
-# Get database configuration from environment variables
-DB_USER = os.getenv("DB_USER", "postgres")
-DB_PASSWORD = os.getenv("DB_PASSWORD", "postgres")
-DB_HOST = os.getenv("DB_HOST", "localhost")
-DB_PORT = os.getenv("DB_PORT", "5432")
-DB_NAME = os.getenv("DB_NAME", "synthlang_proxy")
-
-# Construct the database URL
-DATABASE_URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+# Use DATABASE_URL from config if available, otherwise construct from components
+if CONFIG_DATABASE_URL:
+    DATABASE_URL = CONFIG_DATABASE_URL
+    logger.info("Using DATABASE_URL from configuration")
+else:
+    # Fallback to constructing from individual components
+    DB_USER = os.getenv("DB_USER", "postgres")
+    DB_PASSWORD = os.getenv("DB_PASSWORD", "postgres")
+    DB_HOST = os.getenv("DB_HOST", "localhost")
+    DB_PORT = os.getenv("DB_PORT", "5432")
+    DB_NAME = os.getenv("DB_NAME", "synthlang_proxy")
+    
+    # Construct the database URL
+    DATABASE_URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    logger.warning("DATABASE_URL not found in configuration, constructed from components")
 
 # For testing or development, allow SQLite
 if os.getenv("USE_SQLITE", "0") == "1":
@@ -29,7 +37,7 @@ if os.getenv("USE_SQLITE", "0") == "1":
     DATABASE_URL = SQLITE_PATH
     logger.info(f"Using SQLite database at {SQLITE_PATH}")
 else:
-    logger.info(f"Using PostgreSQL database at {DB_HOST}:{DB_PORT}/{DB_NAME}")
+    logger.info(f"Using database at {DATABASE_URL}")
 
 # Create engine with echo for debugging if needed
 DEBUG_SQL = os.getenv("DEBUG_SQL", "0") == "1"

@@ -6,14 +6,14 @@ for prompt compression and decompression.
 """
 import subprocess
 import logging
-import os
 from typing import Optional
+from app.config import USE_SYNTHLANG
 
 # Configure logging
 logger = logging.getLogger(__name__)
 
-# Toggle to enable/disable SynthLang
-ENABLE_SYNTHLANG = os.environ.get("USE_SYNTHLANG", "1") == "1"
+# Toggle to enable/disable SynthLang from configuration
+ENABLE_SYNTHLANG = USE_SYNTHLANG
 
 
 def set_synthlang_enabled(enabled: bool) -> None:

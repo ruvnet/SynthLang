@@ -5,15 +5,19 @@ This module provides functions for encrypting and decrypting text data,
 as well as masking personally identifiable information (PII) in text.
 """
 from cryptography.fernet import Fernet
-import os
 import re
+import logging
+from app.config import ENCRYPTION_KEY, MASK_PII_BEFORE_LLM, MASK_PII_IN_LOGS
 
-# Get encryption key from environment variables
-FERNET_KEY = os.environ.get("ENCRYPTION_KEY")
+# Configure logging
+logger = logging.getLogger(__name__)
+
+# Get encryption key from configuration
+FERNET_KEY = ENCRYPTION_KEY
 if not FERNET_KEY:
     # Generate key if not found (for development, not production)
     FERNET_KEY = Fernet.generate_key()
-    print("Warning: ENCRYPTION_KEY not found in environment, generated a new key. Ensure to set it in production.")
+    logger.warning("ENCRYPTION_KEY not found in configuration, generated a new key. Ensure to set it in production.")
 cipher = Fernet(FERNET_KEY)  # Initialize Fernet cipher
 
 
@@ -65,3 +69,23 @@ def mask_pii(text: str) -> str:
     for pattern, placeholder in PII_PATTERNS:
         masked = pattern.sub(placeholder, masked)  # Replace PII with placeholders
     return masked
+
+
+def should_mask_pii_before_llm() -> bool:
+    """
+    Check if PII should be masked before sending to LLM.
+    
+    Returns:
+        True if PII should be masked before sending to LLM, False otherwise
+    """
+    return MASK_PII_BEFORE_LLM
+
+
+def should_mask_pii_in_logs() -> bool:
+    """
+    Check if PII should be masked in logs and database.
+    
+    Returns:
+        True if PII should be masked in logs and database, False otherwise
+    """
+    return MASK_PII_IN_LOGS
