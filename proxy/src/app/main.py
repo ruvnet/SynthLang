@@ -21,6 +21,7 @@ from app.models import (
     HealthCheck
 )
 from app import auth, synthlang, cache, llm_provider, db
+from app.database import init_db
 
 # Configure logging
 logging.basicConfig(
@@ -44,6 +45,26 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.on_event("startup")
+async def startup_event():
+    """
+    Initialize the application on startup.
+    
+    This function is called when the application starts up.
+    It initializes the database and performs other startup tasks.
+    """
+    logger.info("Initializing application...")
+    
+    # Initialize the database
+    db_initialized = await init_db()
+    if db_initialized:
+        logger.info("Database initialized successfully")
+    else:
+        logger.warning("Database initialization failed, some features may not work correctly")
+    
+    logger.info("Application initialization complete")
 
 
 @app.get("/", response_model=APIInfo)

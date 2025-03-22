@@ -8,11 +8,32 @@ import os
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy import Column, String, Integer, Boolean, LargeBinary, DateTime, func
+import logging
 
-# Database URL (placeholder, will be configured via env var later)
-# Use a valid URL format with numeric port
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://user:password@host:5432/database_name")
-engine = create_async_engine(DATABASE_URL, echo=False)  # Set echo=True for debugging SQL
+# Configure logging
+logger = logging.getLogger(__name__)
+
+# Get database configuration from environment variables
+DB_USER = os.getenv("DB_USER", "postgres")
+DB_PASSWORD = os.getenv("DB_PASSWORD", "postgres")
+DB_HOST = os.getenv("DB_HOST", "localhost")
+DB_PORT = os.getenv("DB_PORT", "5432")
+DB_NAME = os.getenv("DB_NAME", "synthlang_proxy")
+
+# Construct the database URL
+DATABASE_URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+
+# For testing or development, allow SQLite
+if os.getenv("USE_SQLITE", "0") == "1":
+    SQLITE_PATH = os.getenv("SQLITE_PATH", "sqlite+aiosqlite:///./synthlang_proxy.db")
+    DATABASE_URL = SQLITE_PATH
+    logger.info(f"Using SQLite database at {SQLITE_PATH}")
+else:
+    logger.info(f"Using PostgreSQL database at {DB_HOST}:{DB_PORT}/{DB_NAME}")
+
+# Create engine with echo for debugging if needed
+DEBUG_SQL = os.getenv("DEBUG_SQL", "0") == "1"
+engine = create_async_engine(DATABASE_URL, echo=DEBUG_SQL)
 SessionLocal = sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
 Base = declarative_base()
 
@@ -43,3 +64,20 @@ class Interaction(Base):
     prompt_tokens = Column(Integer)
     response_tokens = Column(Integer)
     timestamp = Column(DateTime(timezone=True), server_default=func.now())
+
+
+async def init_db():
+    """
+    Initialize the database by creating all tables.
+    
+    This function should be called during application startup.
+    """
+    try:
+        async with engine.begin() as conn:
+            # Create tables if they don't exist
+            await conn.run_sync(Base.metadata.create_all)
+        logger.info("Database tables created successfully")
+        return True
+    except Exception as e:
+        logger.error(f"Error initializing database: {e}")
+        return False

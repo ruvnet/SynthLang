@@ -113,18 +113,49 @@ def test_web_search_tool_error_handling():
         assert "Error performing web search" in response["content"]
 
 
-def test_file_search_tool_placeholder():
-    """Test that the file search tool returns a placeholder response."""
+def test_file_search_tool():
+    """Test that the file search tool returns an appropriate response for non-existent stores."""
     # Import here to avoid initialization issues
     from app.agents.tools import file_search
     
-    # Invoke the file search tool
+    # Invoke the file search tool with a non-existent vector store
     response = file_search.perform_file_search(query="test query", vector_store_id="test_store")
     
-    # Verify the placeholder response
+    # Verify the response
     assert isinstance(response, dict)
     assert "content" in response
-    assert "not implemented yet" in response["content"]
+    assert "Vector store 'test_store' not found" in response["content"]
+
+
+def test_file_search_tool_with_store():
+    """Test that the file search tool can create and search a vector store."""
+    # Import here to avoid initialization issues
+    from app.agents.tools import file_search
+    import numpy as np
+    
+    # Mock the embedding function
+    with patch("app.llm_provider.get_embedding", return_value=np.ones(1536, dtype='float32')):
+        # Create a test vector store
+        files = [
+            {"path": "test1.txt", "content": "This is a test file with some content"},
+            {"path": "test2.txt", "content": "Another test file with different content"}
+        ]
+        
+        # Create the vector store
+        result = file_search.create_vector_store("test_vector_store", files)
+        assert result is True
+        
+        # Search the vector store
+        response = file_search.perform_file_search(
+            query="test content", 
+            vector_store_id="test_vector_store"
+        )
+        
+        # Verify the response
+        assert isinstance(response, dict)
+        assert "content" in response
+        assert "Found" in response["content"]
+        assert "test1.txt" in response["content"] or "test2.txt" in response["content"]
 
 
 def test_tools_are_registered():
