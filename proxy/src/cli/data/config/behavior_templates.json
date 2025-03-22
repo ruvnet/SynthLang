@@ -1,0 +1,19 @@
+{
+  "templates": {
+    "analytical_decisive": {
+      "input_pattern": "↹ data•context•constraints",
+      "process_pattern": "⊕ analyze => insights\n⊕ evaluate => options\n⊕ decide => action",
+      "output_pattern": "Σ decision + justification"
+    },
+    "creative_practical": {
+      "input_pattern": "↹ requirements•constraints•resources",
+      "process_pattern": "⊕ ideate => concepts\n⊕ evaluate => feasibility\n⊕ refine => solution",
+      "output_pattern": "Σ design + implementation"
+    },
+    "systematic_thorough": {
+      "input_pattern": "↹ system•parameters•metrics",
+      "process_pattern": "⊕ analyze => patterns\n⊕ investigate => causes\n⊕ verify => findings",
+      "output_pattern": "Σ report + recommendations"
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "criteria": {
+    "clarity": {
+      "weight": 0.25,
+      "threshold": 0.8,
+      "factors": ["symbol_usage", "structure_adherence", "concept_separation"]
+    },
+    "specificity": {
+      "weight": 0.25,
+      "threshold": 0.8,
+      "factors": ["context_relevance", "constraint_incorporation", "action_precision"]
+    },
+    "agency": {
+      "weight": 0.25,
+      "threshold": 0.9,
+      "factors": ["decision_making", "autonomy_level", "goal_orientation"]
+    },
+    "effectiveness": {
+      "weight": 0.25,
+      "threshold": 0.85,
+      "factors": ["task_completion", "resource_utilization", "outcome_quality"]
+    }
+  }
+}

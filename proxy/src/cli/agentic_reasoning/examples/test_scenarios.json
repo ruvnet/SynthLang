@@ -1,0 +1,12 @@
+{
+  "scenarios": [
+    {
+      "input": "How do we ensure data consistency across microservices?",
+      "expected_properties": ["systematic", "analytical", "comprehensive"]
+    },
+    {
+      "input": "What's the best strategy for implementing zero-downtime deployments?",
+      "expected_properties": ["practical", "reliable", "efficient"]
+    }
+  ]
+}

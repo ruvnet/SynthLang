@@ -1,0 +1,51 @@
+{
+  "samples": [
+    {
+      "prompt": "Analyze the current market trends and provide strategic recommendations",
+      "context": "business_strategy",
+      "expected_behavior": "analytical_decisive",
+      "constraints": {
+        "time_frame": "quarterly",
+        "focus_areas": ["market_share", "competitor_analysis", "growth_opportunities"]
+      }
+    },
+    {
+      "prompt": "Design a new feature based on user feedback and technical constraints",
+      "context": "product_development",
+      "expected_behavior": "creative_practical",
+      "constraints": {
+        "development_time": "2_months",
+        "priority_factors": ["user_experience", "technical_feasibility", "maintenance_cost"]
+      }
+    },
+    {
+      "prompt": "Investigate the root cause of system performance degradation",
+      "context": "technical_analysis",
+      "expected_behavior": "systematic_thorough",
+      "constraints": {
+        "urgency": "high",
+        "impact_areas": ["user_experience", "system_stability", "resource_utilization"]
+      }
+    },
+    {
+      "prompt": "Develop a customer engagement strategy for the new product launch",
+      "context": "marketing_strategy",
+      "expected_behavior": "creative_strategic",
+      "constraints": {
+        "budget": "limited",
+        "channels": ["social_media", "email", "events"],
+        "target_metrics": ["engagement_rate", "conversion_rate"]
+      }
+    },
+    {
+      "prompt": "Create an automated workflow for data processing and analysis",
+      "context": "automation_development",
+      "expected_behavior": "systematic_efficient",
+      "constraints": {
+        "processing_time": "real_time",
+        "data_volume": "high",
+        "accuracy_requirement": "99.9%"
+      }
+    }
+  ]
+}

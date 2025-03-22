@@ -1,0 +1,22 @@
+{
+    "tasks": [
+        {
+            "id": 1,
+            "name": "Code Generation",
+            "description": "Generate a Python function to calculate Fibonacci sequence",
+            "complexity": "medium"
+        },
+        {
+            "id": 2,
+            "name": "Text Analysis",
+            "description": "Analyze sentiment and extract key themes from given text",
+            "complexity": "high"
+        },
+        {
+            "id": 3,
+            "name": "Data Transformation",
+            "description": "Convert JSON data to CSV format with specific rules",
+            "complexity": "medium"
+        }
+    ]
+}
