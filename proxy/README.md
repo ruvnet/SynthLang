@@ -2,6 +2,12 @@
 
 Synthlang Proxy turns any existing LLM app (OpenAi v1/Endpoint) or Coder (Cursor etc) into an agentic, hyper-optimized, self-evolving system and it's 95%+ cheaper, without any rebuild.
 
+SynthLang Proxy is an advanced, high-performance middleware solution designed to optimize interactions with Large Language Models (LLMs). It serves as an intelligent layer between your applications and LLM providers, offering significant performance improvements, cost reductions, and enhanced capabilities beyond what standard LLM APIs provide.
+
+By integrating SynthLang's SynthLang prompt compression  with semantic caching, robust security features, and an extensible agent framework, this proxy transforms how developers and organizations interact with AI language models.
+
+## Overview of Features
+
 If you’ve already built-or are using-any application that talks to an LLM, whether it’s OpenAI, OpenRouter, Together, DeepSeek, or a local endpoint that mimics the OpenAI API, you can now instantly give it agentic capabilities without even touching your existing app logic. That’s what SynthLang Proxy does. It’s a high-speed, drop-in middleware that plugs into the /v1/chat/completions endpoint and transforms static LLM apps into dynamic, self-optimizing systems.
 
 Right out of the box, SynthLang adds support for agents, tools, hard guardrails, prompt compression, and adaptive behavior that learns and improves over time.  Using existing LLM interfaces like Cursor, Cline or even Slack or Teams, it reads special inline instructions, like #tool_summarize or #agent_research and dynamically routes them to the right logic, model, or workflow. You can switch models by type /model_name , trigger background tasks #deep_reaeach, enforce safety checks, and expand capabilities, all from a single prompt, with no changes to the client.
@@ -21,12 +27,6 @@ I’ve bundled it with a simple CLI and a FastAPI backend you can deploy serverl
 There’s also a built-in benchmarking tool that I use to test and optimize the system against different models and application types, it’s all integrated, fast, and easy to use.
 
 This is SynthLang Proxy.
-
-## Introduction
-
-SynthLang Proxy is an advanced, high-performance middleware solution designed to optimize interactions with Large Language Models (LLMs). It serves as an intelligent layer between your applications and LLM providers, offering significant performance improvements, cost reductions, and enhanced capabilities beyond what standard LLM APIs provide.
-
-By integrating SynthLang's proprietary prompt compression technology with semantic caching, robust security features, and an extensible agent framework, this proxy transforms how developers and organizations interact with AI language models.
 
 ## CLI Tool
 
