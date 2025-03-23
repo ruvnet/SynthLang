@@ -10,38 +10,30 @@ import traceback
 from typing import Dict, Any, Optional
 from openai import OpenAI
 
+# Configure logging
+logger = logging.getLogger(__name__)
+
 # Add the project root to the Python path
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
-    print(f"Added {project_root} to Python path in web_search.py")
-
-# Print current Python path for debugging
-print(f"Python path in web_search.py: {sys.path}")
+    logger.debug(f"Added {project_root} to Python path")
 
 # Try to import from src.app first
 try:
-    print("Attempting to import registry from src.app.agents.registry")
     from src.app.agents.registry import register_tool
-    print("Successfully imported registry from src.app.agents.registry")
+    logger.debug("Successfully imported registry from src.app")
 except ImportError as e:
-    print(f"Error importing from src.app.agents.registry: {e}")
-    print(f"Traceback: {traceback.format_exc()}")
+    logger.error(f"Error importing from src.app.agents.registry: {e}")
     # Try to import from app
     try:
-        print("Attempting to import registry from app.agents.registry")
         from app.agents.registry import register_tool
-        print("Successfully imported registry from app.agents.registry")
+        logger.debug("Successfully imported registry from app")
     except ImportError as e2:
-        print(f"Error importing from app.agents.registry: {e2}")
-        print(f"Traceback: {traceback.format_exc()}")
+        logger.error(f"Error importing from app.agents.registry: {e2}")
         # Define a dummy register_tool function to avoid errors
         def register_tool(name, func):
-            print(f"Dummy register_tool called for {name}")
-        print("Using dummy register_tool function")
-
-# Configure logging
-logger = logging.getLogger(__name__)
+            logger.warning(f"Using dummy register_tool for {name}")
 
 # Initialize OpenAI client with API key from environment variable
 # We'll initialize this lazily to avoid errors during import
@@ -80,7 +72,6 @@ async def perform_web_search(query: str, user_message: Optional[str] = None, use
         A dictionary containing the search results
     """
     logger.info(f"Performing web search for query: {query}")
-    print(f"Performing web search for query: {query}")
     
     try:
         # Get the OpenAI client
@@ -121,8 +112,6 @@ Error: {str(e)}
 Please try again with a different query or check your internet connection."""
         
         logger.error(f"Web search error: {str(e)}")
-        print(f"Web search error: {str(e)}")
-        print(f"Traceback: {traceback.format_exc()}")
         
         return {
             "content": error_message,
@@ -133,9 +122,7 @@ Please try again with a different query or check your internet connection."""
 
 # Register the tool
 try:
-    print("Registering web_search tool")
     register_tool("web_search", perform_web_search)
-    print("Web search tool registered successfully")
+    logger.info("Web search tool registered successfully")
 except Exception as e:
-    print(f"Error registering web_search tool: {e}")
-    print(f"Traceback: {traceback.format_exc()}")
+    logger.error(f"Error registering web_search tool: {e}")

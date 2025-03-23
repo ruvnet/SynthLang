@@ -5,6 +5,8 @@ This module provides functions for encrypting and decrypting text data,
 as well as masking personally identifiable information (PII) in text.
 """
 from cryptography.fernet import Fernet
+import base64
+import os
 import re
 import logging
 from src.app.config import ENCRYPTION_KEY, MASK_PII_BEFORE_LLM, MASK_PII_IN_LOGS
@@ -12,13 +14,56 @@ from src.app.config import ENCRYPTION_KEY, MASK_PII_BEFORE_LLM, MASK_PII_IN_LOGS
 # Configure logging
 logger = logging.getLogger(__name__)
 
-# Get encryption key from configuration
-FERNET_KEY = ENCRYPTION_KEY
-if not FERNET_KEY:
-    # Generate key if not found (for development, not production)
-    FERNET_KEY = Fernet.generate_key()
-    logger.warning("ENCRYPTION_KEY not found in configuration, generated a new key. Ensure to set it in production.")
-cipher = Fernet(FERNET_KEY)  # Initialize Fernet cipher
+# Get encryption key from configuration or generate a new one
+def get_fernet_key():
+    """
+    Get a valid Fernet key from the environment or generate a new one.
+    
+    Returns:
+        A valid Fernet key
+    """
+    key = ENCRYPTION_KEY
+    
+    if not key:
+        # Generate key if not found (for development, not production)
+        logger.warning("ENCRYPTION_KEY environment variable not set. Encryption/decryption will likely fail.")
+        key = Fernet.generate_key().decode('utf-8')
+        logger.warning("ENCRYPTION_KEY not found in configuration, generated a new key. Ensure to set it in production.")
+        return key
+    
+    # Ensure the key is valid for Fernet (32 url-safe base64-encoded bytes)
+    try:
+        # If the key is already a valid Fernet key, this will work
+        Fernet(key.encode('utf-8') if isinstance(key, str) else key)
+        return key
+    except Exception:
+        # If not, try to convert it to a valid Fernet key
+        try:
+            # If it's a hex string, convert to bytes and then to base64
+            if all(c in '0123456789abcdefABCDEF' for c in key):
+                # Convert hex to bytes
+                key_bytes = bytes.fromhex(key)
+                # Ensure it's 32 bytes (pad or truncate)
+                key_bytes = key_bytes.ljust(32, b'\0')[:32]
+                # Convert to url-safe base64
+                key = base64.urlsafe_b64encode(key_bytes)
+                return key
+            else:
+                # Try to use as-is, but ensure it's 32 bytes
+                key_bytes = key.encode('utf-8') if isinstance(key, str) else key
+                key_bytes = key_bytes.ljust(32, b'\0')[:32]
+                key = base64.urlsafe_b64encode(key_bytes)
+                return key
+        except Exception as e:
+            # If all else fails, generate a new key
+            logger.error(f"Failed to create a valid Fernet key: {e}")
+            key = Fernet.generate_key()
+            logger.warning("Generated a new Fernet key. This key will not persist across restarts.")
+            return key
+
+# Initialize Fernet cipher with a valid key
+FERNET_KEY = get_fernet_key()
+cipher = Fernet(FERNET_KEY if isinstance(FERNET_KEY, bytes) else FERNET_KEY.encode('utf-8'))
 
 
 def encrypt_text(plain: str) -> bytes:

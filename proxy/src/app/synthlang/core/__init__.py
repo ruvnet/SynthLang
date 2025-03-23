@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 cli_path = Path(__file__).parent.parent.parent.parent.parent / "cli"
 if cli_path.exists() and str(cli_path) not in sys.path:
     sys.path.append(str(cli_path))
-    logger.info(f"Added CLI path to Python path: {cli_path}")
+    logger.debug(f"Added CLI path to Python path: {cli_path}")
 
 # Import core modules from CLI
 try:
@@ -49,48 +49,48 @@ try:
         'FormatRules'
     ]
     
-    logger.info("Successfully imported SynthLang core modules from CLI")
+    logger.debug("Successfully imported SynthLang core modules from CLI")
 except ImportError as e:
-    logger.error(f"Failed to import SynthLang core modules from CLI: {e}")
+    logger.debug(f"Using fallback SynthLang core modules: {e}")
     # Define empty classes as fallbacks
     class SynthLangModule:
         """Fallback SynthLangModule class."""
         def __init__(self, *args, **kwargs):
-            logger.warning("Using fallback SynthLangModule")
+            logger.debug("Using fallback SynthLangModule")
     
     class FrameworkTranslator(SynthLangModule):
         """Fallback FrameworkTranslator class."""
         def translate(self, *args, **kwargs):
-            logger.warning("Using fallback FrameworkTranslator")
+            logger.debug("Using fallback FrameworkTranslator")
             return {"source": "", "target": "", "explanation": "Core modules not available"}
     
     class SystemPromptGenerator(SynthLangModule):
         """Fallback SystemPromptGenerator class."""
         def generate(self, *args, **kwargs):
-            logger.warning("Using fallback SystemPromptGenerator")
+            logger.debug("Using fallback SystemPromptGenerator")
             return {"prompt": "", "rationale": "", "metadata": {}}
     
     class PromptOptimizer(SynthLangModule):
         """Fallback PromptOptimizer class."""
         def optimize(self, *args, **kwargs):
-            logger.warning("Using fallback PromptOptimizer")
+            logger.debug("Using fallback PromptOptimizer")
             return {"optimized": "", "improvements": [], "metrics": {}, "original": ""}
     
     class PromptEvolver(SynthLangModule):
         """Fallback PromptEvolver class."""
         def evolve(self, *args, **kwargs):
-            logger.warning("Using fallback PromptEvolver")
+            logger.debug("Using fallback PromptEvolver")
             return {"best_prompt": "", "fitness": {}, "generations": 0}
     
     class PromptManager(SynthLangModule):
         """Fallback PromptManager class."""
         def save(self, *args, **kwargs):
-            logger.warning("Using fallback PromptManager")
+            logger.debug("Using fallback PromptManager")
     
     class PromptClassifier(SynthLangModule):
         """Fallback PromptClassifier class."""
         def classify(self, *args, **kwargs):
-            logger.warning("Using fallback PromptClassifier")
+            logger.debug("Using fallback PromptClassifier")
             return {"label": "", "explanation": "Core modules not available"}
     
     # Define fallback type dictionaries
@@ -126,5 +126,3 @@ except ImportError as e:
         'SynthLangSymbols',
         'FormatRules'
     ]
-    
-    logger.warning("Using fallback SynthLang core modules")

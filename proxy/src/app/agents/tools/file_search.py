@@ -13,49 +13,39 @@ from typing import Dict, Any, List, Optional
 import numpy as np
 import faiss
 
+# Configure logging
+logger = logging.getLogger(__name__)
+
 # Add the project root to the Python path
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
-    print(f"Added {project_root} to Python path in file_search.py")
-
-# Print current Python path for debugging
-print(f"Python path in file_search.py: {sys.path}")
+    logger.debug(f"Added {project_root} to Python path")
 
 # Try to import from src.app first
 try:
-    print("Attempting to import registry from src.app.agents.registry")
     from src.app.agents.registry import register_tool
-    print("Successfully imported registry from src.app.agents.registry")
     from src.app import llm_provider
-    print("Successfully imported llm_provider from src.app")
+    logger.debug("Successfully imported registry and llm_provider from src.app")
 except ImportError as e:
-    print(f"Error importing from src.app: {e}")
-    print(f"Traceback: {traceback.format_exc()}")
+    logger.error(f"Error importing from src.app: {e}")
     # Try to import from app
     try:
-        print("Attempting to import registry from app.agents.registry")
         from app.agents.registry import register_tool
-        print("Successfully imported registry from app.agents.registry")
         from app import llm_provider
-        print("Successfully imported llm_provider from app")
+        logger.debug("Successfully imported registry and llm_provider from app")
     except ImportError as e2:
-        print(f"Error importing from app: {e2}")
-        print(f"Traceback: {traceback.format_exc()}")
+        logger.error(f"Error importing from app: {e2}")
         # Define a dummy register_tool function to avoid errors
         def register_tool(name, func):
-            print(f"Dummy register_tool called for {name}")
-        print("Using dummy register_tool function")
+            logger.warning(f"Using dummy register_tool for {name}")
         # Define a dummy llm_provider module
         class DummyLLMProvider:
             async def get_embeddings(self, texts):
-                print("Dummy get_embeddings called")
+                logger.warning("Using dummy get_embeddings")
                 return [np.zeros(1536) for _ in texts]
         llm_provider = DummyLLMProvider()
-        print("Using dummy llm_provider")
-
-# Configure logging
-logger = logging.getLogger(__name__)
+        logger.warning("Using dummy llm_provider")
 
 # In-memory vector stores for file content
 # Format: {store_id: {"index": faiss_index, "files": [{"path": path, "content": content, "id": id}]}}
@@ -75,7 +65,6 @@ async def search_files(query: str, directory: Optional[str] = None, user_message
         A dictionary containing the search results
     """
     logger.info(f"Searching files for query: {query}")
-    print(f"Searching files for query: {query}")
     
     try:
         # Use the user ID as the store ID if available, otherwise use a default
@@ -147,8 +136,6 @@ Error: {str(e)}
 Please try again with a different query or directory."""
         
         logger.error(f"File search error: {str(e)}")
-        print(f"File search error: {str(e)}")
-        print(f"Traceback: {traceback.format_exc()}")
         
         return {
             "content": error_message,
@@ -170,7 +157,6 @@ async def create_vector_store(store_id: str, directory: Optional[str] = None) ->
         The created vector store
     """
     logger.info(f"Creating vector store for store ID: {store_id}")
-    print(f"Creating vector store for store ID: {store_id}")
     
     try:
         # Use the current directory if none is specified
@@ -192,7 +178,6 @@ async def create_vector_store(store_id: str, directory: Optional[str] = None) ->
                         })
                     except Exception as e:
                         logger.error(f"Error reading file {file_path}: {e}")
-                        print(f"Error reading file {file_path}: {e}")
         
         # Get embeddings for all files
         if files:
@@ -214,12 +199,10 @@ async def create_vector_store(store_id: str, directory: Optional[str] = None) ->
             }
             
             logger.info(f"Created vector store with {len(files)} files")
-            print(f"Created vector store with {len(files)} files")
             
             return VECTOR_STORES[store_id]
         else:
             logger.warning(f"No files found in directory: {directory}")
-            print(f"No files found in directory: {directory}")
             
             # Create an empty vector store
             VECTOR_STORES[store_id] = {
@@ -231,15 +214,11 @@ async def create_vector_store(store_id: str, directory: Optional[str] = None) ->
     
     except Exception as e:
         logger.error(f"Error creating vector store: {e}")
-        print(f"Error creating vector store: {e}")
-        print(f"Traceback: {traceback.format_exc()}")
         raise
 
 # Register the tool
 try:
-    print("Registering file_search tool")
     register_tool("file_search", search_files)
-    print("File search tool registered successfully")
+    logger.info("File search tool registered successfully")
 except Exception as e:
-    print(f"Error registering file_search tool: {e}")
-    print(f"Traceback: {traceback.format_exc()}")
+    logger.error(f"Error registering file_search tool: {e}")

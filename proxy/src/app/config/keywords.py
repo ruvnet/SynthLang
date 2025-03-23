@@ -17,23 +17,18 @@ from pathlib import Path
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
-    print(f"Added {project_root} to Python path")
-
-# Print current Python path for debugging
-print(f"Python path: {sys.path}")
+    logging.getLogger(__name__).debug(f"Added {project_root} to Python path")
 
 try:
     from src.app.keywords.registry import KeywordPattern, register_pattern, KEYWORD_REGISTRY
-    print("Successfully imported from src.app.keywords.registry")
+    logging.getLogger(__name__).debug("Successfully imported from src.app.keywords.registry")
 except ImportError as e:
-    print(f"Error importing from src.app.keywords.registry: {e}")
-    print(f"Traceback: {traceback.format_exc()}")
+    logging.getLogger(__name__).error(f"Error importing from src.app.keywords.registry: {e}")
     try:
         from app.keywords.registry import KeywordPattern, register_pattern, KEYWORD_REGISTRY
-        print("Successfully imported from app.keywords.registry")
+        logging.getLogger(__name__).debug("Successfully imported from app.keywords.registry")
     except ImportError as e2:
-        print(f"Error importing from app.keywords.registry: {e2}")
-        print(f"Traceback: {traceback.format_exc()}")
+        logging.getLogger(__name__).error(f"Error importing from app.keywords.registry: {e2}")
         # Re-raise the original exception
         raise e
 
@@ -235,22 +230,20 @@ def create_default_config() -> Dict[str, Any]:
     """
     # Import default patterns
     try:
-        print("Attempting to import from src.app.keywords.default_patterns")
+        logger.debug("Attempting to import default patterns")
         from src.app.keywords.default_patterns import register_default_patterns
-        print("Successfully imported from src.app.keywords.default_patterns")
+        logger.debug("Successfully imported from src.app.keywords.default_patterns")
         register_default_patterns()
     except ImportError as e:
-        print(f"Error importing from src.app.keywords.default_patterns: {e}")
-        print(f"Traceback: {traceback.format_exc()}")
+        logger.error(f"Error importing from src.app.keywords.default_patterns: {e}")
         try:
             # Try alternative import path
-            print("Attempting to import from app.keywords.default_patterns")
+            logger.debug("Attempting to import from app.keywords.default_patterns")
             from app.keywords.default_patterns import register_default_patterns
-            print("Successfully imported from app.keywords.default_patterns")
+            logger.debug("Successfully imported from app.keywords.default_patterns")
             register_default_patterns()
         except ImportError as e2:
-            print(f"Error importing from app.keywords.default_patterns: {e2}")
-            print(f"Traceback: {traceback.format_exc()}")
+            logger.error(f"Error importing from app.keywords.default_patterns: {e2}")
             logger.error("Failed to import default patterns from any known path")
     
     # Export to TOML

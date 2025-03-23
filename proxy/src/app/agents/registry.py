@@ -24,7 +24,6 @@ def register_tool(name: str, tool_callable: Callable) -> None:
     """
     TOOL_REGISTRY[name] = tool_callable
     logger.info(f"Registered tool '{name}' in the tool registry")
-    print(f"Registered tool '{name}' in the tool registry")
 
 
 def get_tool(name: str) -> Optional[Callable]:
@@ -41,8 +40,7 @@ def get_tool(name: str) -> Optional[Callable]:
     if tool:
         logger.debug(f"Found tool '{name}' in the registry")
     else:
-        logger.warning(f"Tool '{name}' not found in the registry")
-        print(f"Tool '{name}' not found in the registry. Available tools: {list(TOOL_REGISTRY.keys())}")
+        logger.warning(f"Tool '{name}' not found in the registry. Available tools: {list(TOOL_REGISTRY.keys())}")
     return tool
 
 
@@ -55,5 +53,4 @@ def list_tools() -> Dict[str, Callable]:
     """
     tools = TOOL_REGISTRY.copy()
     logger.info(f"Available tools: {list(tools.keys())}")
-    print(f"Available tools: {list(tools.keys())}")
     return tools
