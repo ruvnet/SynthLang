@@ -1,7 +1,8 @@
 """
-SynthLang integration module.
+SynthLang module.
 
-This module provides integration with SynthLang for advanced prompt engineering capabilities.
+This module provides tools for natural language processing and generation,
+including compression, optimization, and symbolic representation.
 """
 from src.app.synthlang.compression import (
     compress_prompt,
@@ -10,11 +11,3 @@ from src.app.synthlang.compression import (
     set_synthlang_enabled,
     ENABLE_SYNTHLANG
 )
-
-__all__ = [
-    'compress_prompt',
-    'decompress_prompt',
-    'is_synthlang_available',
-    'set_synthlang_enabled',
-    'ENABLE_SYNTHLANG'
-]

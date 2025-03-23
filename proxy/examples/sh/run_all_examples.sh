@@ -70,6 +70,7 @@ run_example "08_gzip_compression_example.sh"
 run_example "09_hashtag_directive_example.sh"
 run_example "10_function_calling_example.sh"
 run_example "11_complex_example.sh"
+run_example "12_logarithmic_compression_example.sh"
 
 echo "========================================================"
 echo "All examples completed!"

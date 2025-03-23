@@ -8,20 +8,6 @@ import os
 from enum import Enum
 from typing import List, Dict, Any, Set
 
-# Import and expose core classes
-from .module import (
-    SynthLangModule,
-    FrameworkTranslator,
-    SystemPromptGenerator,
-    PromptOptimizer,
-    PromptEvolver,
-    PromptClassifier,
-    PromptManager,
-    TranslationResult,
-    GenerationResult,
-    OptimizationResult
-)
-
 
 class SynthLangSymbols:
     """
