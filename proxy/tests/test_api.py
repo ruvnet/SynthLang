@@ -361,3 +361,50 @@ def test_chat_completion_with_web_search_tool():
         # The test should pass regardless of the actual content
         # as long as the response is valid
         assert response.json()["choices"][0]["message"]["content"] is not None
+
+def test_cache_endpoints():
+    """Test the cache endpoints."""
+    # Mock the necessary functions
+    with patch("src.app.auth.check_rate_limit", return_value=None), \
+         patch("src.app.auth.get_user_id", return_value="admin_user"), \
+         patch("src.app.auth.has_role", return_value=True), \
+         patch("src.app.cache.get_stats", return_value={
+             "entries": 10,
+             "hits": 5,
+             "misses": 15,
+             "hit_rate": 0.25,
+             "size_bytes": 1024,
+             "memory_usage": "1 KB",
+             "oldest_entry": "2025-03-23T12:00:00",
+             "newest_entry": "2025-03-23T12:30:00",
+             "model_stats": {
+                 "gpt-4o-mini": {"hits": 3, "entries": 5},
+                 "gpt-4o": {"hits": 2, "entries": 5}
+             }
+         }), \
+         patch("src.app.cache.clear", return_value=None):
+        
+        # Test the stats endpoint
+        response = client.get("/v1/cache/stats", 
+                             headers={"Authorization": f"Bearer {TEST_API_KEY}"})
+        
+        # Check the response
+        assert response.status_code == 200
+        assert response.json()["entries"] == 10
+        assert response.json()["hits"] == 5
+        assert response.json()["misses"] == 15
+        assert response.json()["hit_rate"] == 0.25
+        assert response.json()["size_bytes"] == 1024
+        assert response.json()["memory_usage"] == "1 KB"
+        assert response.json()["oldest_entry"] == "2025-03-23T12:00:00"
+        assert response.json()["newest_entry"] == "2025-03-23T12:30:00"
+        assert "gpt-4o-mini" in response.json()["model_stats"]
+        assert "gpt-4o" in response.json()["model_stats"]
+        
+        # Test the clear endpoint
+        response = client.post("/v1/cache/clear", 
+                              headers={"Authorization": f"Bearer {TEST_API_KEY}"})
+        
+        # Check the response
+        assert response.status_code == 200
+        assert response.json()["success"] is True

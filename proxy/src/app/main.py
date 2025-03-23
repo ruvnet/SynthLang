@@ -73,6 +73,16 @@ async def lifespan(app: FastAPI):
     db_initialized = await init_db()
     if db_initialized:
         logger.info("Database initialized successfully")
+        
+        # Initialize user roles from the database
+        logger.info("Initializing user roles from the database...")
+        await auth.init_user_roles()
+        logger.info("User roles initialized successfully")
+        
+        # Load API keys from the database
+        logger.info("Loading API keys from the database...")
+        await auth.load_api_keys_from_db()
+        logger.info("API keys loaded successfully")
     else:
         logger.warning("Database initialization failed, some features may not work correctly")
     

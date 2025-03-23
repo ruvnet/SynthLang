@@ -4,7 +4,13 @@ Authentication and authorization for the SynthLang Proxy.
 This package provides functions for API key authentication, rate limiting,
 and role-based access control.
 """
-# Import existing authentication functions
+import asyncio
+import logging
+
+# Configure logging
+logger = logging.getLogger(__name__)
+
+# Import from the original api_keys module
 from .api_keys import (
     verify_api_key,
     get_user_id,
@@ -28,5 +34,12 @@ from .roles import (
     ROLE_HIERARCHY
 )
 
-# Initialize roles when the module is imported
-init_user_roles()
+# Import database authentication functions
+from .db_auth import (
+    load_api_keys_from_db,
+    API_KEY_CACHE
+)
+
+# Don't initialize roles when the module is imported
+# This will be done properly in the lifespan function in main.py
+# init_user_roles()
