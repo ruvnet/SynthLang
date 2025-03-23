@@ -60,7 +60,7 @@ class LLMConnectionError(LLMProviderError):
 
 
 class LLMTimeoutError(LLMProviderError):
-    """Exception raised when a request to the LLM provider times out."""
+    """Exception raised when the request to the LLM provider times out."""
     pass
 
 
@@ -80,6 +80,9 @@ def get_openai_client():
     
     Returns:
         The OpenAI client instance
+        
+    Raises:
+        LLMAuthenticationError: If the API key is not set
     """
     global client
     if client is None:
@@ -97,6 +100,9 @@ def get_async_openai_client():
     
     Returns:
         The async OpenAI client instance
+        
+    Raises:
+        LLMAuthenticationError: If the API key is not set
     """
     global async_client
     if async_client is None:
@@ -106,6 +112,46 @@ def get_async_openai_client():
             raise LLMAuthenticationError("OPENAI_API_KEY environment variable is not set")
         async_client = AsyncOpenAI(api_key=api_key)
     return async_client
+
+
+# Model-specific parameter handling
+def get_model_params(model: str, params: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Get model-specific parameters by filtering out incompatible parameters.
+    
+    Args:
+        model: The model name
+        params: The original parameters
+        
+    Returns:
+        A dictionary of compatible parameters for the model
+    """
+    # Default parameters that work with all models
+    result = {
+        "model": model,
+        "messages": params.get("messages", []),
+        "stream": params.get("stream", False),
+    }
+    
+    # Add user if provided
+    if "user" in params:
+        result["user"] = params["user"]
+    
+    # Model-specific parameter handling
+    if "gpt-4o-mini" in model:
+        # GPT-4o-mini doesn't support n, temperature, or top_p parameters
+        logger.info(f"Using limited parameters for {model}")
+    else:
+        # Add optional parameters for other models
+        if "temperature" in params:
+            result["temperature"] = params["temperature"]
+        if "top_p" in params:
+            result["top_p"] = params["top_p"]
+        if "n" in params:
+            result["n"] = params["n"]
+    
+    logger.info(f"Using parameters for {model}: {result}")
+    return result
 
 
 async def complete_chat(
@@ -157,7 +203,10 @@ async def complete_chat(
                     "choices": [
                         {
                             "index": 0,
-                            "message": tool_response,
+                            "message": {
+                                "role": "assistant",
+                                "content": tool_response.get("content", "I processed your request but couldn't generate a response.")
+                            },
                             "finish_reason": "tool_invocation"
                         }
                     ],
@@ -182,9 +231,11 @@ async def complete_chat(
     else:
         # Basic model routing as fallback
         if "gpt-4o" in model:
-            provider_model = "gpt-4o-search-preview"  # Or appropriate GPT-4o model
+            provider_model = "gpt-4o"  # Or appropriate GPT-4o model
+        elif "gpt-4o-mini" in model:
+            provider_model = "gpt-4o-mini"  # Use exact model name
         else:
-            provider_model = "o3-mini"  # Or appropriate o3-mini model
+            provider_model = "gpt-3.5-turbo"  # Default fallback
     
     logger.info(f"Calling LLM API with model {provider_model} for user {user_id}")
     
@@ -192,16 +243,21 @@ async def complete_chat(
         # Get the async OpenAI client
         openai_client = get_async_openai_client()
         
+        # Prepare parameters based on the model
+        params = {
+            "messages": messages,
+            "temperature": temperature,
+            "top_p": top_p,
+            "n": n,
+            "stream": False,  # Non-streaming
+            "user": user_id
+        }
+        
+        # Get model-specific parameters
+        model_params = get_model_params(provider_model, params)
+        
         # Call the OpenAI API
-        response = await openai_client.chat.completions.create(
-            model=provider_model,
-            messages=messages,
-            temperature=temperature,
-            top_p=top_p,
-            n=n,
-            stream=False,  # Non-streaming
-            user=user_id
-        )
+        response = await openai_client.chat.completions.create(**model_params)
         
         # Convert the response to a dictionary
         response_dict = {
@@ -303,7 +359,10 @@ async def stream_chat(
                     "choices": [
                         {
                             "index": 0,
-                            "message": tool_response,
+                            "message": {
+                                "role": "assistant",
+                                "content": tool_response.get("content", "I processed your request but couldn't generate a response.")
+                            },
                             "finish_reason": "tool_invocation"
                         }
                     ],
@@ -349,9 +408,11 @@ async def stream_chat(
     else:
         # Basic model routing as fallback
         if "gpt-4o" in model:
-            provider_model = "gpt-4o-search-preview"  # Or appropriate GPT-4o model
+            provider_model = "gpt-4o"  # Or appropriate GPT-4o model
+        elif "gpt-4o-mini" in model:
+            provider_model = "gpt-4o-mini"  # Use exact model name
         else:
-            provider_model = "o3-mini"  # Or appropriate o3-mini model
+            provider_model = "gpt-3.5-turbo"  # Default fallback
     
     logger.info(f"Calling LLM API (streaming) with model {provider_model} for user {user_id}")
     
@@ -359,16 +420,21 @@ async def stream_chat(
         # Get the async OpenAI client
         openai_client = get_async_openai_client()
         
+        # Prepare parameters based on the model
+        params = {
+            "messages": messages,
+            "temperature": temperature,
+            "top_p": top_p,
+            "n": n,
+            "stream": True,  # Streaming
+            "user": user_id
+        }
+        
+        # Get model-specific parameters
+        model_params = get_model_params(provider_model, params)
+        
         # Call the OpenAI API with streaming
-        stream = await openai_client.chat.completions.create(
-            model=provider_model,
-            messages=messages,
-            temperature=temperature,
-            top_p=top_p,
-            n=n,
-            stream=True,  # Streaming
-            user=user_id
-        )
+        stream = await openai_client.chat.completions.create(**model_params)
         
         async def stream_generator():
             """Yield chunks from the streaming response."""
@@ -450,17 +516,18 @@ def get_embedding(text: str) -> List[float]:
             input=text
         )
         
-        # Extract the embedding
+        # Extract the embedding from the response
         embedding = response.data[0].embedding
-        logger.info("Embedding API call successful")
+        
+        logger.info("OpenAI Embedding API call successful")
         return embedding
     except httpx.TimeoutException as e:
         # Handle timeout errors specifically
-        logger.error(f"Embedding API request timed out: {e}")
+        logger.error(f"OpenAI Embedding API request timed out: {e}")
         raise LLMTimeoutError(f"Request to LLM provider timed out: {str(e)}")
     except Exception as e:
         error_msg = str(e).lower()
-        logger.error(f"Embedding API call failed: {e}")
+        logger.error(f"OpenAI Embedding API call failed: {e}")
         
         # Classify the error based on the error message
         if "authentication" in error_msg or "auth" in error_msg or "invalid api key" in error_msg:
@@ -477,3 +544,52 @@ def get_embedding(text: str) -> List[float]:
             raise LLMInvalidRequestError(f"Invalid request to LLM provider: {str(e)}")
         else:
             raise LLMProviderError(f"LLM provider error: {str(e)}")
+
+
+async def get_embeddings(texts: List[str]) -> List[List[float]]:
+    """
+    Call the OpenAI Embedding API to get embeddings for multiple texts.
+    
+    Args:
+        texts: The texts to embed
+        
+    Returns:
+        A list of embedding vectors
+        
+    Raises:
+        LLMAuthenticationError: If authentication with the LLM provider fails
+        LLMRateLimitError: If the LLM provider rate limit is exceeded
+        LLMConnectionError: If there's a connection error with the LLM provider
+        LLMTimeoutError: If the request to the LLM provider times out
+        LLMModelNotFoundError: If the requested model is not found
+        LLMInvalidRequestError: If the request to the LLM provider is invalid
+        LLMProviderError: For other LLM provider errors
+    """
+    logger.info(f"Calling OpenAI Embedding API for {len(texts)} texts")
+    
+    # Process in batches to avoid rate limits
+    batch_size = 100
+    embeddings = []
+    
+    for i in range(0, len(texts), batch_size):
+        batch = texts[i:i+batch_size]
+        try:
+            # Get the OpenAI client
+            openai_client = get_openai_client()
+            
+            # Call the OpenAI API
+            response = openai_client.embeddings.create(
+                model="text-embedding-ada-002",
+                input=batch
+            )
+            
+            # Extract the embeddings from the response
+            batch_embeddings = [data.embedding for data in response.data]
+            embeddings.extend(batch_embeddings)
+            
+            logger.info(f"OpenAI Embedding API call successful for batch {i//batch_size + 1}")
+        except Exception as e:
+            logger.error(f"OpenAI Embedding API call failed for batch {i//batch_size + 1}: {e}")
+            raise
+    
+    return embeddings
