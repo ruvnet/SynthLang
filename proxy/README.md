@@ -1,399 +1,91 @@
 # SynthLang Proxy
 
+Turns out MCPs aren't the best way to do it.
+
+If you've already built—or are using—any application that talks to an LLM, whether it's OpenAI, OpenRouter, Together, DeepSeek, or a local endpoint that mimics the OpenAI API, you can now instantly give it agentic capabilities without touching your existing app logic. That's what SynthLang Proxy does. It's a high-speed, drop-in middleware that plugs into the /v1/chat/completions endpoint and transforms static LLM apps into dynamic, self-optimizing systems.
+
+Right out of the box, SynthLang adds support for agents, tools, hard guardrails, prompt compression, and self-learning behavior. It reads special inline instructions—like #tool_summarize or #agent_research—and dynamically routes them to the right logic, model, or workflow. You can switch models, trigger background tasks, enforce safety checks, and expand capabilities—all from a single prompt, with no changes to the client.
+
+It also includes SynthLang, a symbolic compression layer that uses structured abstractions based on ancient languages like Greek, Arabic, and Mandarin to reduce prompt size. Paired with gzip and token pruning, you can cut token usage by up to 99%, saving cost and improving latency. Over time, SynthLang learns from how it's used, optimizing its behavior to better match each app or use case.
+
+This turns any legacy LLM application into an agentic, hyper-optimized, self-evolving system—without rebuilding it. Whether you're running a chatbot, coding assistant, research agent, or enterprise automation tool, SynthLang brings modern agentic capabilities into your existing flow.
+
+I've bundled it with a simple CLI and a FastAPI backend you can deploy serverlessly or run on your cloud of choice. Install it with pip install spark-proxy, and you're ready to go. There's also a built-in benchmarking tool for testing and tuning performance across different models and application types—it's all integrated, fast, and easy to use.
+
+This is SynthLang Proxy.
+
 ## Introduction
 
 SynthLang Proxy is an advanced, high-performance middleware solution designed to optimize interactions with Large Language Models (LLMs). It serves as an intelligent layer between your applications and LLM providers, offering significant performance improvements, cost reductions, and enhanced capabilities beyond what standard LLM APIs provide.
 
 By integrating SynthLang's proprietary prompt compression technology with semantic caching, robust security features, and an extensible agent framework, this proxy transforms how developers and organizations interact with AI language models.
 
-## Why SynthLang Proxy?
+## CLI Tool
 
-### Cost Efficiency
-- **Reduce Token Usage**: Cut API costs by up to 70% through advanced prompt compression
-- **Semantic Caching**: Eliminate redundant API calls for semantically similar queries
-- **Optimized Request Handling**: Minimize token usage through intelligent request preprocessing
+SynthLang Proxy includes a powerful command-line interface for interacting with the proxy service and performing various prompt engineering tasks.
 
-### Enhanced Performance
-- **Faster Response Times**: Get instant responses for cached queries
-- **Reduced Latency**: Local processing for similar queries eliminates network delays
-- **Streaming Optimization**: Efficient handling of streaming responses
-
-### Advanced Capabilities
-- **Agent Framework**: Extend LLM capabilities with custom tools and integrations
-- **Vector Search**: Built-in semantic search for files and knowledge bases
-- **Web Search Integration**: Seamless access to real-time information
-- **Prompt Engineering**: Advanced prompt generation, optimization, and evolution
-- **DSPy Integration**: Leverage DSPy for sophisticated prompt programming
-
-### Enterprise-Ready
-- **Robust Security**: End-to-end encryption and PII protection
-- **Comprehensive Logging**: Detailed audit trails for all interactions
-- **Usage Analytics**: Track and analyze LLM usage patterns
-- **Rate Limiting**: Protect your resources with configurable rate limits
-
-## Key Features
-
-- **OpenAI-Compatible API**: Drop-in replacement for OpenAI's API with enhanced capabilities
-- **SynthLang Integration**: Proprietary prompt compression technology reduces token usage while preserving semantic meaning
-- **Semantic Caching**: Store and retrieve responses based on semantic similarity, not just exact matches
-- **Rate Limiting**: Configurable rate limits per user or API key
-- **Authentication**: Secure API key-based authentication with role-based access control
-- **Database Persistence**: Store interactions for analysis, auditing, and continuous improvement
-- **Security**: End-to-end encryption of sensitive data and automatic PII masking
-- **Agent SDK**: Extensible tool registry for building powerful AI agents
-- **Streaming Support**: Efficient handling of streaming responses for real-time applications
-- **Vector Search**: Built-in semantic search capabilities for files and documents
-- **Web Search**: Integrated web search capabilities using OpenAI's search API
-- **Prompt Translation**: Convert natural language to SynthLang's compact symbolic notation
-- **System Prompt Generation**: Automatically generate optimized system prompts from task descriptions
-- **Prompt Optimization**: Improve prompts using DSPy techniques for clarity, specificity, and consistency
-- **Prompt Evolution**: Evolve prompts using genetic algorithms and self-play tournaments
-- **Prompt Classification**: Classify prompts by type, domain, or purpose using fine-tuned models
-- **Prompt Management**: Store, retrieve, and compare prompts with version history
-
-## Advanced Compression Technology
-
-SynthLang Proxy implements a multi-layered compression approach to maximize token efficiency and reduce costs:
-
-### SynthLang Compression
-
-SynthLang uses a proprietary semantic compression algorithm that preserves meaning while drastically reducing token count:
-
-- **Symbolic Representation**: Converts natural language into a compact symbolic notation
-- **Semantic Preservation**: Maintains the full meaning of prompts despite significant size reduction
-- **Context Optimization**: Intelligently restructures prompts to minimize redundancy
-- **Domain-Specific Patterns**: Recognizes and compresses domain-specific language patterns
-
-### Optional Gzip Compression
-
-For maximum efficiency, SynthLang Proxy now supports additional gzip compression on top of semantic compression:
-
-- **Double Compression**: Apply gzip compression to already semantically compressed prompts
-- **Base64 Encoding**: Safely transmit and store binary compressed data as text
-- **Automatic Detection**: Seamless decompression of gzipped content
-- **Graceful Fallback**: Falls back to standard compression if gzip fails
-
-### When to Use Gzip Compression
-
-Gzip compression provides additional benefits in specific scenarios:
-
-- **Very Large Prompts**: For prompts exceeding 10,000 characters
-- **Repetitive Content**: Text with many repeated patterns or structures
-- **Batch Processing**: When processing large volumes of similar prompts
-- **Storage Optimization**: When storing prompts in databases or file systems
-- **Bandwidth Constraints**: In environments with limited network bandwidth
-
-## Compression Performance Benchmarks
-
-The following table illustrates the performance benefits of SynthLang's compression technologies based on extensive testing across various prompt types and sizes:
-
-| Metric | Original Prompt | SynthLang Compression | SynthLang + Gzip | 
-|--------|----------------|------------------------|------------------|
-| **Average Token Reduction** | 100% | 65% | 75% |
-| **Technical Documentation** | 1,000 tokens | 300 tokens (70% ↓) | 250 tokens (75% ↓) |
-| **Creative Writing** | 1,000 tokens | 400 tokens (60% ↓) | 350 tokens (65% ↓) |
-| **Code Explanation** | 1,000 tokens | 250 tokens (75% ↓) | 200 tokens (80% ↓) |
-| **API Documentation** | 1,000 tokens | 300 tokens (70% ↓) | 220 tokens (78% ↓) |
-| **Legal Text** | 1,000 tokens | 450 tokens (55% ↓) | 400 tokens (60% ↓) |
-
-### Cost Savings Analysis
-
-Based on standard OpenAI pricing for GPT-4o ($10/1M input tokens):
-
-| Scenario | Monthly Tokens | Standard Cost | With SynthLang | With SynthLang + Gzip | Annual Savings |
-|----------|---------------|--------------|----------------|----------------------|----------------|
-| Small Team | 5M | $50/month | $17.50/month | $12.50/month | $450 - $450 |
-| Medium Business | 50M | $500/month | $175/month | $125/month | $3,900 - $4,500 |
-| Enterprise | 500M | $5,000/month | $1,750/month | $1,250/month | $39,000 - $45,000 |
-| AI-First Product | 5B | $50,000/month | $17,500/month | $12,500/month | $390,000 - $450,000 |
-
-### Response Time Impact
-
-| Scenario | Direct API | With Caching | With Compression | With Both |
-|----------|------------|--------------|------------------|-----------|
-| First Request | 1,000ms | 1,000ms | 1,050ms | 1,050ms |
-| Similar Request | 1,000ms | 50ms | 1,050ms | 50ms |
-| Token Processing | 100ms/1K tokens | 100ms/1K tokens | 35ms/1K tokens | 35ms/1K tokens |
-
-## Installation
-
-### Prerequisites
-
-- Python 3.10+
-- PostgreSQL (optional, SQLite can be used for development)
-- SynthLang CLI (optional, for prompt compression)
-- DSPy (optional, for advanced prompt engineering)
-
-### Setup
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/synthlang-proxy.git
-   cd synthlang-proxy
-   ```
-
-2. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. Configure environment variables:
-   ```bash
-   cp .env.sample .env
-   # Edit .env with your configuration
-   ```
-
-4. Run the application:
-   ```bash
-   cd src
-   python -m app.main
-   ```
-
-## Usage
-
-### API Endpoints
-
-- `GET /`: API information
-- `GET /health`: Health check
-- `POST /v1/chat/completions`: Chat completions (OpenAI-compatible)
-- `POST /v1/synthlang/translate`: Translate text to SynthLang format
-- `POST /v1/synthlang/generate`: Generate system prompts from task descriptions
-- `POST /v1/synthlang/optimize`: Optimize prompts for clarity and effectiveness
-- `POST /v1/synthlang/evolve`: Evolve prompts using genetic algorithms
-- `POST /v1/synthlang/classify`: Classify prompts by type or domain
-- `POST /v1/synthlang/prompts/save`: Save prompts to the prompt manager
-- `POST /v1/synthlang/prompts/load`: Load prompts from the prompt manager
-- `GET /v1/synthlang/prompts/list`: List all saved prompts
-- `POST /v1/synthlang/prompts/delete`: Delete prompts from the prompt manager
-- `POST /v1/synthlang/prompts/compare`: Compare two prompts
-
-### Example Request
+### CLI Installation
 
 ```bash
-curl -X POST http://localhost:8000/v1/chat/completions \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer your_api_key" \
-  -d '{
-    "model": "gpt-4o",
-    "messages": [
-      {"role": "system", "content": "You are a helpful assistant."},
-      {"role": "user", "content": "Hello, how are you?"}
-    ],
-    "temperature": 0.7
-  }'
+pip install synthlang
 ```
 
-### Streaming Example
+### Core Commands
+
+| Command | Description | Example |
+|---------|-------------|---------|
+| `translate` | Convert natural language to SynthLang format | `synthlang translate --source "your prompt" --framework synthlang` |
+| `evolve` | Improve prompts using genetic algorithms | `synthlang evolve --seed "initial prompt" --generations 5` |
+| `optimize` | Optimize prompts for efficiency | `synthlang optimize --prompt "your prompt"` |
+| `classify` | Analyze and categorize prompts | `synthlang classify predict --text "prompt" --labels "categories"` |
+
+### Proxy Commands
+
+| Command | Description | Example |
+|---------|-------------|---------|
+| `proxy serve` | Start a local proxy server | `synthlang proxy serve --port 8000` |
+| `proxy login` | Save credentials for proxy service | `synthlang proxy login --api-key "your-key"` |
+| `proxy chat` | Send a chat request to the proxy | `synthlang proxy chat "Hello, world"` |
+| `proxy compress` | Compress a prompt | `synthlang proxy compress "Your prompt"` |
+| `proxy decompress` | Decompress a SynthLang-compressed prompt | `synthlang proxy decompress "↹ prompt•compressed"` |
+| `proxy clear-cache` | Clear the semantic cache | `synthlang proxy clear-cache` |
+| `proxy cache-stats` | Show cache statistics | `synthlang proxy cache-stats` |
+| `proxy tools` | List available agent tools | `synthlang proxy tools` |
+| `proxy call-tool` | Call an agent tool directly | `synthlang proxy call-tool --tool "calculate" --args '{"expression": "2+2"}'` |
+| `proxy health` | Check proxy service health | `synthlang proxy health` |
+
+### Keyword Management
+
+The CLI includes tools for managing keyword detection configurations:
 
 ```bash
-curl -X POST http://localhost:8000/v1/chat/completions \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer your_api_key" \
-  -d '{
-    "model": "gpt-4o",
-    "messages": [
-      {"role": "system", "content": "You are a helpful assistant."},
-      {"role": "user", "content": "Hello, how are you?"}
-    ],
-    "stream": true
-  }'
+# List all patterns
+synthlang keywords list
+
+# Show details for a specific pattern
+synthlang keywords show weather_query
+
+# Add a new pattern
+synthlang keywords add weather_query \
+  --pattern "(?:what's|what is)\\s+(?:the)?\\s*(?:weather)\\s+(?:in)\\s+(?P<location>[\\w\\s]+)" \
+  --tool "weather" \
+  --description "Detects weather queries" \
+  --priority 100
+
+# Edit an existing pattern
+synthlang keywords edit weather_query --priority 90 --enable
+
+# Delete a pattern
+synthlang keywords delete weather_query
 ```
 
-### Using Gzip Compression
+### Mathematical Frameworks
 
-To enable additional gzip compression for maximum efficiency, set the `use_gzip` parameter:
+The CLI supports various mathematical frameworks for prompt engineering:
 
-```bash
-curl -X POST http://localhost:8000/v1/chat/completions \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer your_api_key" \
-  -d '{
-    "model": "gpt-4o",
-    "messages": [
-      {"role": "system", "content": "You are a helpful assistant."},
-      {"role": "user", "content": "Hello, how are you?"}
-    ],
-    "use_gzip": true
-  }'
-```
+- **Set Theory**: Component combination and analysis
+- **Category Theory**: Structure-preserving transformations
+- **Topology**: Continuous transformations and boundaries
+- **Abstract Algebra**: Operation composition and invariants
 
-### Using SynthLang Prompt Translation
-
-```bash
-curl -X POST http://localhost:8000/v1/synthlang/translate \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer your_api_key" \
-  -d '{
-    "text": "Create a chatbot that helps users with programming questions",
-    "instructions": null
-  }'
-```
-
-### Using SynthLang Prompt Generation
-
-```bash
-curl -X POST http://localhost:8000/v1/synthlang/generate \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer your_api_key" \
-  -d '{
-    "task_description": "Create a system prompt for a chatbot that helps with programming"
-  }'
-```
-
-## Agent Tools
-
-The proxy includes an extensible agent SDK with built-in tools:
-
-- **Web Search**: Perform web searches using OpenAI's search capability
-- **File Search**: Search through files using semantic similarity
-
-### Using Agent Tools
-
-To use agent tools, specify a model that supports them (e.g., `gpt-4o-search-preview`):
-
-```json
-{
-  "model": "gpt-4o-search-preview",
-  "messages": [
-    {"role": "system", "content": "You are a helpful assistant with web search capabilities."},
-    {"role": "user", "content": "What's the latest news about artificial intelligence?"}
-  ]
-}
-```
-
-## Semantic Caching
-
-SynthLang Proxy uses advanced semantic caching to store and retrieve responses based on the meaning of queries, not just exact text matches:
-
-- **Similarity-Based Retrieval**: Get cached responses for semantically similar queries
-- **Configurable Thresholds**: Adjust similarity thresholds to balance precision and recall
-- **Model-Specific Caching**: Separate caches for different LLM models
-- **Automatic Invalidation**: Smart cache management to ensure freshness
-
-Example of how semantic caching works:
-
-1. User asks: "How do I implement a binary search tree in Python?"
-2. LLM generates a detailed response
-3. Later, another user asks: "Can you show me Python code for a BST implementation?"
-4. The system recognizes the semantic similarity and returns the cached response instantly
-
-## Prompt Engineering with DSPy
-
-SynthLang Proxy integrates with DSPy to provide advanced prompt engineering capabilities:
-
-- **Prompt Programming**: Use DSPy's declarative programming model for LLMs
-- **Signature-Based Design**: Define input and output fields with clear descriptions
-- **Chain-of-Thought Reasoning**: Automatically generate step-by-step reasoning
-- **Prompt Optimization**: Optimize prompts using DSPy's optimization techniques
-- **Self-Improvement**: Prompts that learn from examples and improve over time
-
-Example of DSPy integration:
-
-1. Define a signature for your task
-2. Create a module using that signature
-3. Optimize the module using examples
-4. Deploy the optimized module through the proxy
-
-## Configuration
-
-See `.env.sample` for all available configuration options.
-
-Key configurations:
-
-- `ENCRYPTION_KEY`: Secret key for encrypting sensitive data
-- `DB_*`: Database connection settings
-- `OPENAI_API_KEY`: Your OpenAI API key
-- `ENABLE_SYNTHLANG`: Enable/disable SynthLang prompt compression
-- `ENABLE_CACHE`: Enable/disable semantic caching
-- `CACHE_SIMILARITY_THRESHOLD`: Threshold for semantic cache hits (0.0-1.0)
-- `DEFAULT_RATE_LIMIT`: Default rate limit (requests per minute)
-- `ENABLE_GZIP_COMPRESSION`: Enable/disable additional gzip compression (default: false)
-- `SYNTHLANG_DEFAULT_MODEL`: Default model for SynthLang operations (default: gpt-4o-mini)
-- `SYNTHLANG_STORAGE_DIR`: Directory for storing prompts (default: /tmp/synthlang)
-
-## Development
-
-### Running Tests
-
-```bash
-python -m pytest tests -v
-```
-
-### Adding New Tools
-
-To add a new tool to the agent SDK:
-
-1. Create a new module in `src/app/agents/tools/`
-2. Implement your tool function
-3. Register it using `register_tool` from `app.agents.registry`
-
-Example:
-
-```python
-from app.agents.registry import register_tool
-
-def my_custom_tool(param1, param2):
-    # Tool implementation
-    return {"content": "Tool response"}
-
-# Register the tool
-register_tool("my_tool_name", my_custom_tool)
-```
-
-### Creating Custom Prompt Modules
-
-To create a custom prompt module using DSPy:
-
-1. Define a signature for your task
-2. Create a module using that signature
-3. Register it with the SynthLang API
-
-Example:
-
-```python
-import dspy
-from app.synthlang.api import synthlang_api
-
-# Define a signature
-class CustomSignature(dspy.Signature):
-    input = dspy.InputField()
-    output = dspy.OutputField()
-
-# Create a module
-class CustomModule(dspy.Module):
-    def __init__(self, lm):
-        super().__init__()
-        self.lm = lm
-        self.predictor = dspy.Predict(CustomSignature)
-    
-    def forward(self, input_text):
-        with dspy.context(lm=self.lm):
-            result = self.predictor(input=input_text)
-            return result.output
-
-# Register with SynthLang API
-synthlang_api.register_module("custom", CustomModule)
-```
-
-## Performance Benchmarks
-
-SynthLang Proxy has been benchmarked against direct API calls:
-
-| Metric | Direct API | With SynthLang Proxy | Improvement |
-|--------|------------|----------------------|-------------|
-| Token Usage | 100% | 30-50% | 50-70% reduction |
-| Response Time (cached) | 1-2s | <100ms | 10-20x faster |
-| Response Time (uncached) | 1-2s | 1-2.1s | Comparable |
-| Cost per 1M tokens | $10-$20 | $3-$10 | 50-70% savings |
-
-## Security Features
-
-- **End-to-End Encryption**: All sensitive data is encrypted at rest and in transit
-- **PII Detection**: Automatic detection and masking of personally identifiable information
-- **API Key Management**: Secure handling of API keys with role-based permissions
-- **Audit Logging**: Comprehensive logging of all system activities
-- **Input Validation**: Robust validation of all API inputs
-
-## License
-
-[MIT License](LICENSE)
+For detailed documentation on CLI usage and features, see the [CLI Documentation](docs/cli.md).
