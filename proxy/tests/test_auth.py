@@ -32,7 +32,7 @@ def test_verify_api_key_missing():
         verify_api_key(None)
     
     assert excinfo.value.status_code == 401
-    assert "Missing API key" in excinfo.value.detail
+    assert excinfo.value.detail["error"]["message"] == "Missing API key"
 
 
 def test_verify_api_key_invalid_format():
@@ -41,7 +41,7 @@ def test_verify_api_key_invalid_format():
         verify_api_key("sk_test_user1")  # Missing Bearer prefix
     
     assert excinfo.value.status_code == 401
-    assert "Invalid Authorization header format" in excinfo.value.detail
+    assert excinfo.value.detail["error"]["message"] == "Invalid Authorization header format"
 
 
 def test_verify_api_key_invalid_key():
@@ -50,7 +50,7 @@ def test_verify_api_key_invalid_key():
         verify_api_key("Bearer invalid_key")
     
     assert excinfo.value.status_code == 401
-    assert "Invalid API key" in excinfo.value.detail
+    assert excinfo.value.detail["error"]["message"] == "Invalid API key"
 
 
 def test_get_user_id():
@@ -123,7 +123,7 @@ def test_check_rate_limit_at_limit():
         check_rate_limit(mock_request, "sk_test_user2")
     
     assert excinfo.value.status_code == 429
-    assert "Rate limit exceeded" in excinfo.value.detail
+    assert excinfo.value.detail["error"]["message"] == "Rate limit exceeded"
     assert "Retry-After" in excinfo.value.headers
 
 
@@ -208,5 +208,5 @@ def test_allow_request_window_reset():
 
 def test_allow_request_unknown_user():
     """Test that allow_request returns False for unknown users."""
-    # This should return False
-    assert allow_request("unknown_user") is False
+    # This should return True (using default rate limit)
+    assert allow_request("unknown_user") is True

@@ -1,16 +1,24 @@
 # SynthLang Proxy
 
-Turns out MCPs aren't the best way to do it.
+Synthlang Proxy turns any existing LLM app (OpenAi v1/Endpoint) or Coder (Cursor etc) into an agentic, hyper-optimized, self-evolving system and it's 95%+ cheaper, without any rebuild.
 
-If you've already built—or are using—any application that talks to an LLM, whether it's OpenAI, OpenRouter, Together, DeepSeek, or a local endpoint that mimics the OpenAI API, you can now instantly give it agentic capabilities without touching your existing app logic. That's what SynthLang Proxy does. It's a high-speed, drop-in middleware that plugs into the /v1/chat/completions endpoint and transforms static LLM apps into dynamic, self-optimizing systems.
+If you’ve already built-or are using-any application that talks to an LLM, whether it’s OpenAI, OpenRouter, Together, DeepSeek, or a local endpoint that mimics the OpenAI API, you can now instantly give it agentic capabilities without even touching your existing app logic. 
 
-Right out of the box, SynthLang adds support for agents, tools, hard guardrails, prompt compression, and self-learning behavior. It reads special inline instructions—like #tool_summarize or #agent_research—and dynamically routes them to the right logic, model, or workflow. You can switch models, trigger background tasks, enforce safety checks, and expand capabilities—all from a single prompt, with no changes to the client.
+That’s what SynthLang Proxy does. It’s a high-speed, drop-in middleware that plugs into the /v1/chat/completions endpoint and transforms static LLM apps into dynamic, self-optimizing systems.
 
-It also includes SynthLang, a symbolic compression layer that uses structured abstractions based on ancient languages like Greek, Arabic, and Mandarin to reduce prompt size. Paired with gzip and token pruning, you can cut token usage by up to 99%, saving cost and improving latency. Over time, SynthLang learns from how it's used, optimizing its behavior to better match each app or use case.
+Right out of the box, SynthLang adds support for agents, tools, hard guardrails, prompt compression, and adaptive behavior that learns and improves over time. Using existing LLM interfaces like Cursor, Cline or even Slack or Teams, it reads special inline instructions, like #tool_summarize or #agent_research and dynamically routes them to the right logic, model, or workflow. You can switch models by type /model_name , trigger background tasks #deep_reaeach, enforce safety checks, and expand capabilities, all from a single prompt, with no changes to the client.
 
-This turns any legacy LLM application into an agentic, hyper-optimized, self-evolving system—without rebuilding it. Whether you're running a chatbot, coding assistant, research agent, or enterprise automation tool, SynthLang brings modern agentic capabilities into your existing flow.
+Nearly every LLM app already relies on some variant of the OpenAI API. By intercepting those requests directly, SynthLang Proxy lets you embed logic in plain text that dynamically unlocks new functionality. With just a few tokens, you can make any application smarter, safer, and more capable without modifying its underlying design.
 
-I've bundled it with a simple CLI and a FastAPI backend you can deploy serverlessly or run on your cloud of choice. Install it with pip install spark-proxy, and you're ready to go. There's also a built-in benchmarking tool for testing and tuning performance across different models and application types—it's all integrated, fast, and easy to use.
+It also includes SynthLang, a symbolic and semantic compression layer that uses structured abstractions based on languages like Greek, Arabic, and Mandarin to reduce prompt size while preserving meaning.  
+
+Paired with gzip compression, token pruning, semantic caching to store and retrieve responses based on meaning, and built-in vector search for fast semantic lookup across files and documents, you can cut token usage by up to 99%, saving cost and improving latency. 
+
+This means if a user asks a question similar to something previously answered, or if the system generated code earlier for a related task, it can instantly reuse that result locally without making another LLM request. Faster, more efficient, and significantly cheaper. Over time, SynthLang refines its compression patterns to better match your domain and tasks.
+
+This turns any legacy LLM application into an **agentic, hyper-optimized, self-evolving system, **without rebuilding it. Whether you’re running a chatbot, coding assistant, research agent, or enterprise automation tool, SynthLang brings modern agentic capabilities into your existing flow.
+
+I’ve bundled it with a simple CLI and a FastAPI backend you can deploy serverlessly or run on your cloud of choice. Install it with pip install spark-proxy, and you’re ready to go.  There’s also a built-in benchmarking tool that I use to test and optimize the system against different models and application types, it’s all integrated, fast, and easy to use.
 
 This is SynthLang Proxy.
 

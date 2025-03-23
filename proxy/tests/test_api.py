@@ -12,6 +12,7 @@ from fastapi import HTTPException
 
 from app.main import app
 from app import cache, llm_provider, db
+from app.keywords.registry import disable_keyword_detection
 
 
 client = TestClient(app)
@@ -74,7 +75,8 @@ def test_chat_completion_endpoint_valid_api_key():
     with patch("app.auth.check_rate_limit", return_value=None), \
          patch("app.synthlang.compress_prompt", side_effect=lambda x: f"compressed: {x}"), \
          patch("app.llm_provider.complete_chat", new_callable=AsyncMock) as mock_complete_chat, \
-         patch("app.db.save_interaction", new_callable=AsyncMock) as mock_save_interaction:
+         patch("app.db.save_interaction", new_callable=AsyncMock) as mock_save_interaction, \
+         disable_keyword_detection():
         
         # Mock the LLM response
         mock_complete_chat.return_value = {
@@ -136,7 +138,8 @@ def test_chat_completion_endpoint_rate_limit():
             headers={"Retry-After": "60"}
         )
     
-    with patch("app.auth.check_rate_limit", side_effect=mock_check_rate_limit):
+    with patch("app.auth.check_rate_limit", side_effect=mock_check_rate_limit), \
+         disable_keyword_detection():
         headers = {"Authorization": "Bearer sk_test_user1"}
         req_body = {
             "model": "test-model",
@@ -158,7 +161,8 @@ def test_chat_completion_endpoint_synthlang_compression():
          patch("app.synthlang.api.synthlang_api.compress") as mock_compress, \
          patch("app.synthlang.api.synthlang_api.decompress") as mock_decompress, \
          patch("app.llm_provider.complete_chat", new_callable=AsyncMock) as mock_complete_chat, \
-         patch("app.db.save_interaction", new_callable=AsyncMock):
+         patch("app.db.save_interaction", new_callable=AsyncMock), \
+         disable_keyword_detection():
         
         # Set up the mocks
         mock_compress.return_value = "compressed content"
@@ -234,7 +238,8 @@ def test_chat_completion_cache_miss_then_hit():
          patch("app.synthlang.decompress_prompt", side_effect=lambda x: x), \
          patch("app.cache.get_embedding", return_value=np.ones(cache.EMBED_DIM, dtype='float32')), \
          patch("app.llm_provider.complete_chat", new_callable=AsyncMock) as mock_complete_chat, \
-         patch("app.db.save_interaction", new_callable=AsyncMock) as mock_save_interaction:
+         patch("app.db.save_interaction", new_callable=AsyncMock) as mock_save_interaction, \
+         disable_keyword_detection():
         
         mock_complete_chat.return_value = {
             "id": "chatcmpl-123",
@@ -310,7 +315,8 @@ def test_chat_completion_different_model_cache_miss():
          patch("app.synthlang.decompress_prompt", side_effect=lambda x: x), \
          patch("app.cache.get_embedding", return_value=np.ones(cache.EMBED_DIM, dtype='float32')), \
          patch("app.llm_provider.complete_chat", new_callable=AsyncMock) as mock_complete_chat, \
-         patch("app.db.save_interaction", new_callable=AsyncMock):
+         patch("app.db.save_interaction", new_callable=AsyncMock), \
+         disable_keyword_detection():
         
         mock_complete_chat.return_value = {
             "id": "chatcmpl-123",
@@ -362,7 +368,8 @@ def test_chat_completion_llm_error_handling():
     """Test that errors from the LLM provider are properly handled."""
     with patch("app.auth.check_rate_limit", return_value=None), \
          patch("app.synthlang.compress_prompt", side_effect=lambda x: x), \
-         patch("app.llm_provider.complete_chat", new_callable=AsyncMock) as mock_complete_chat:
+         patch("app.llm_provider.complete_chat", new_callable=AsyncMock) as mock_complete_chat, \
+         disable_keyword_detection():
         
         # Make the LLM provider raise an exception
         mock_complete_chat.side_effect = Exception("LLM API Error")
@@ -389,7 +396,8 @@ def test_chat_completion_with_web_search_tool():
          patch("app.cache.get_embedding", return_value=np.ones(cache.EMBED_DIM, dtype='float32')), \
          patch("app.cache.get_similar_response", return_value=None), \
          patch("app.llm_provider.complete_chat", new_callable=AsyncMock) as mock_complete_chat, \
-         patch("app.db.save_interaction", new_callable=AsyncMock):
+         patch("app.db.save_interaction", new_callable=AsyncMock), \
+         disable_keyword_detection():
         
         # Mock the LLM response with tool invocation
         mock_complete_chat.return_value = {
@@ -436,7 +444,8 @@ def test_chat_completion_with_regular_model():
          patch("app.cache.get_embedding", return_value=np.ones(cache.EMBED_DIM, dtype='float32')), \
          patch("app.cache.get_similar_response", return_value=None), \
          patch("app.llm_provider.complete_chat", new_callable=AsyncMock) as mock_complete_chat, \
-         patch("app.db.save_interaction", new_callable=AsyncMock):
+         patch("app.db.save_interaction", new_callable=AsyncMock), \
+         disable_keyword_detection():
         
         # Mock the LLM response
         mock_complete_chat.return_value = {

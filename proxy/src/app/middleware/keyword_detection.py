@@ -111,6 +111,12 @@ async def apply_keyword_detection(messages: List[Dict[str, str]], user_id: str) 
     Returns:
         The tool response if a keyword is detected, None otherwise
     """
+    # Check if keyword detection is enabled - import here to get the current value
+    from app.keywords.registry import ENABLE_KEYWORD_DETECTION
+    if not ENABLE_KEYWORD_DETECTION:
+        logger.debug("Keyword detection is disabled")
+        return None
+        
     # Get the last user message
     last_message = get_last_user_message(messages)
     if not last_message:
