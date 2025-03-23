@@ -27,3 +27,4 @@ dist-ssr
 *cache*
 aider*
 venv/
+.api_keys.json

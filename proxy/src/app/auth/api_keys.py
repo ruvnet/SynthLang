@@ -3,9 +3,18 @@ API key authentication and rate limiting for the SynthLang Proxy.
 
 This module provides functions for verifying API keys and enforcing rate limits.
 """
+import os
 import time
+import json
+import logging
 from typing import Dict, Tuple, Optional
 from fastapi import HTTPException, Request
+
+# Logger for this module
+logger = logging.getLogger(__name__)
+
+# Path to store API keys
+API_KEYS_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), ".api_keys.json")
 
 # Dictionary of API keys: key -> user_id
 API_KEYS: Dict[str, str] = {
@@ -25,6 +34,39 @@ DEFAULT_RATE_LIMIT = 10  # 10 requests per minute
 # Dictionary to track request counts: user_id -> (timestamp, count)
 _request_counts: Dict[str, Tuple[float, int]] = {}
 
+def load_api_keys_from_file():
+    """
+    Load API keys from file.
+    """
+    global API_KEYS, RATE_LIMITS
+    
+    if os.path.exists(API_KEYS_FILE):
+        try:
+            with open(API_KEYS_FILE, "r") as f:
+                data = json.load(f)
+            
+            # Update API keys and rate limits
+            if "api_keys" in data:
+                API_KEYS.update(data["api_keys"])
+            
+            if "rate_limits" in data:
+                RATE_LIMITS.update(data["rate_limits"])
+                
+            logger.info(f"Loaded {len(data.get('api_keys', {}))} API keys from file")
+        except Exception as e:
+            logger.error(f"Error loading API keys from file: {e}")
+
+# Load API keys from file on module import
+load_api_keys_from_file()
+
+# Also check for API key in environment
+env_api_key = os.environ.get("API_KEY")
+if env_api_key:
+    # Add to API keys if not already present
+    if env_api_key not in API_KEYS:
+        API_KEYS[env_api_key] = "env_user"
+        logger.info("Added API key from environment")
+
 def verify_api_key(auth_header: Optional[str]) -> str:
     """
     Verify that the API key is valid.
@@ -41,7 +83,7 @@ def verify_api_key(auth_header: Optional[str]) -> str:
     if not auth_header:
         raise HTTPException(
             status_code=401,
-            detail={"error": {"message": "Missing API key", "type": "auth_error"}}
+            detail={"error": {"message": "Missing API key", "type": "auth_error", "code": 401}}
         )
     
     # Check format (should be "Bearer sk_...")

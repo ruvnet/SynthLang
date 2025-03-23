@@ -5,13 +5,16 @@ This module provides functions for interacting with LLM providers
 such as OpenAI to get chat completions and embeddings.
 """
 import logging
+import os
 from typing import List, Dict, Any, Optional, AsyncGenerator, Callable
 import time
 import httpx
+from pathlib import Path
+from dotenv import load_dotenv
 
 from openai import OpenAI, AsyncOpenAI
 from src.app.agents import registry
-from src.app.config import OPENAI_API_KEY, MODEL_PROVIDER
+from src.app.config import MODEL_PROVIDER
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -20,6 +23,20 @@ logger = logging.getLogger(__name__)
 client = None
 async_client = None
 
+# Load API key directly from .env file
+env_path = Path(__file__).resolve().parent.parent.parent / '.env'
+if env_path.exists():
+    logger.info(f"LLM Provider: Loading environment variables from {env_path}")
+    load_dotenv(dotenv_path=env_path)
+else:
+    logger.warning(f"LLM Provider: No .env file found at {env_path}")
+
+# Get API key from environment
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+if not OPENAI_API_KEY:
+    logger.error("LLM Provider: OPENAI_API_KEY environment variable is not set.")
+else:
+    logger.info("LLM Provider: OPENAI_API_KEY environment variable is set.")
 
 # Custom exception classes for more granular error handling
 class LLMProviderError(Exception):
@@ -66,7 +83,10 @@ def get_openai_client():
     """
     global client
     if client is None:
-        api_key = OPENAI_API_KEY or "dummy_key_for_testing"
+        api_key = OPENAI_API_KEY
+        if not api_key:
+            logger.error("OPENAI_API_KEY is not set. Using environment variable is required.")
+            raise LLMAuthenticationError("OPENAI_API_KEY environment variable is not set")
         client = OpenAI(api_key=api_key)
     return client
 
@@ -80,7 +100,10 @@ def get_async_openai_client():
     """
     global async_client
     if async_client is None:
-        api_key = OPENAI_API_KEY or "dummy_key_for_testing"
+        api_key = OPENAI_API_KEY
+        if not api_key:
+            logger.error("OPENAI_API_KEY is not set. Using environment variable is required.")
+            raise LLMAuthenticationError("OPENAI_API_KEY environment variable is not set")
         async_client = AsyncOpenAI(api_key=api_key)
     return async_client
 

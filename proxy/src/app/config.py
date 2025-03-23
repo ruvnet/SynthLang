@@ -6,14 +6,40 @@ and provides them as module-level constants for use throughout the application.
 """
 import os
 import logging
+from pathlib import Path
+from dotenv import load_dotenv
 
 # Configure logging
 logger = logging.getLogger(__name__)
+
+# Load environment variables from .env file
+env_path = Path(__file__).resolve().parent.parent.parent / '.env'
+logger.info(f"Looking for .env file at: {env_path} (exists: {env_path.exists()})")
+
+if env_path.exists():
+    logger.info(f"Loading environment variables from {env_path}")
+    load_dotenv(dotenv_path=env_path)
+    # Debug: Print all environment variables (excluding sensitive values)
+    for key in os.environ:
+        if key == "OPENAI_API_KEY" and os.environ.get(key):
+            logger.info(f"Environment variable {key} is set to: [REDACTED]")
+        elif key not in ["OPENAI_API_KEY", "API_KEY", "ENCRYPTION_KEY"] and os.environ.get(key):
+            logger.info(f"Environment variable {key} is set to: {os.environ.get(key)}")
+else:
+    logger.warning(f"No .env file found at {env_path}")
+    # Try to load from current directory as fallback
+    fallback_path = Path.cwd() / '.env'
+    logger.info(f"Trying fallback .env location: {fallback_path} (exists: {fallback_path.exists()})")
+    if fallback_path.exists():
+        logger.info(f"Loading environment variables from fallback location: {fallback_path}")
+        load_dotenv(dotenv_path=fallback_path)
 
 # Required configuration variables
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 if not OPENAI_API_KEY:
     logger.warning("OPENAI_API_KEY environment variable not set. API calls will likely fail.")
+else:
+    logger.info("OPENAI_API_KEY environment variable is set.")
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 if not DATABASE_URL:

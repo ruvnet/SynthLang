@@ -54,6 +54,17 @@ async def lifespan(app: FastAPI):
     # Startup logic
     logger.info("Initializing application...")
     
+    # Check required environment variables
+    from .config import OPENAI_API_KEY, DATABASE_URL, ENCRYPTION_KEY
+    
+    # Verify OpenAI API key is set
+    if not OPENAI_API_KEY:
+        logger.error("OPENAI_API_KEY environment variable is not set. API calls will fail.")
+        logger.error("Please set the OPENAI_API_KEY environment variable in the .env file.")
+        # We don't raise an exception here to allow the app to start, but it will fail on API calls
+    else:
+        logger.info("OPENAI_API_KEY environment variable is set.")
+    
     # Initialize the database
     db_initialized = await init_db()
     if db_initialized:
