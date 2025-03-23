@@ -1,147 +1,158 @@
 """
-Calculator tool for the SynthLang Proxy.
+Calculator tool for agent tools.
 
-This module provides a tool for performing mathematical calculations.
+This module provides a calculator tool for agent tools.
 """
 import logging
 import re
-import sys
-import os
-import traceback
-from typing import Dict, Any, Optional
-import math
+from typing import Dict, Any
 
-# Add the project root to the Python path
-project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
-if project_root not in sys.path:
-    sys.path.insert(0, project_root)
-    print(f"Added {project_root} to Python path in calculator.py")
+from src.app.agents.tools.registry import register_tool
 
-# Print current Python path for debugging
-print(f"Python path in calculator.py: {sys.path}")
-
-# Try to import from src.app first
-try:
-    print("Attempting to import registry from src.app.agents.registry")
-    from src.app.agents.registry import register_tool
-    print("Successfully imported registry from src.app.agents.registry")
-except ImportError as e:
-    print(f"Error importing from src.app.agents.registry: {e}")
-    print(f"Traceback: {traceback.format_exc()}")
-    # Try to import from app
-    try:
-        print("Attempting to import registry from app.agents.registry")
-        from app.agents.registry import register_tool
-        print("Successfully imported registry from app.agents.registry")
-    except ImportError as e2:
-        print(f"Error importing from app.agents.registry: {e2}")
-        print(f"Traceback: {traceback.format_exc()}")
-        # Re-raise the original exception
-        raise e
-
-# Logger for this module
+# Configure logging
 logger = logging.getLogger(__name__)
 
-async def calculate(expression: str, user_message: Optional[str] = None, user_id: Optional[str] = None) -> Dict[str, Any]:
+
+async def calculator(parameters: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Calculate the result of a mathematical expression.
+    Calculate a mathematical expression.
     
     Args:
-        expression: The mathematical expression to evaluate
-        user_message: The original user message (optional)
-        user_id: The ID of the user making the request (optional)
+        parameters: Tool parameters
+            - expression: Mathematical expression to calculate
+            
+    Returns:
+        Dictionary containing the calculation result
+    """
+    # Get expression from parameters
+    expression = parameters.get("expression", "")
+    
+    if not expression:
+        raise ValueError("Expression is required")
+    
+    # Sanitize expression to prevent code execution
+    sanitized = sanitize_expression(expression)
+    
+    # Calculate expression
+    try:
+        # Track calculation steps
+        steps = []
+        
+        # Handle parentheses first
+        while "(" in sanitized:
+            # Find innermost parentheses
+            match = re.search(r"\([^()]*\)", sanitized)
+            if not match:
+                break
+                
+            # Calculate expression inside parentheses
+            inner_expr = match.group(0)[1:-1]  # Remove parentheses
+            inner_result = calculate_simple_expression(inner_expr)
+            steps.append(f"Calculate {match.group(0)} = {inner_result}")
+            
+            # Replace parentheses with result
+            sanitized = sanitized[:match.start()] + str(inner_result) + sanitized[match.end():]
+        
+        # Calculate final expression
+        result = calculate_simple_expression(sanitized)
+        steps.append(f"Calculate {sanitized} = {result}")
+        
+        return {
+            "value": result,
+            "expression": expression,
+            "steps": steps
+        }
+    except Exception as e:
+        logger.error(f"Calculator error: {e}")
+        raise ValueError(f"Failed to calculate expression: {str(e)}")
+
+
+def sanitize_expression(expression: str) -> str:
+    """
+    Sanitize a mathematical expression to prevent code execution.
+    
+    Args:
+        expression: Mathematical expression
         
     Returns:
-        A dictionary containing the calculation result
+        Sanitized expression
     """
-    logger.info(f"Calculating expression: {expression}")
-    print(f"Calculating expression: {expression}")
+    # Remove all whitespace
+    sanitized = re.sub(r"\s+", "", expression)
     
-    # Clean the expression
-    expression = expression.strip()
+    # Only allow numbers, operators, and parentheses
+    if not re.match(r"^[0-9+\-*/().]+$", sanitized):
+        raise ValueError("Expression contains invalid characters")
     
-    # Replace common words with symbols
-    expression = expression.replace('plus', '+')
-    expression = expression.replace('minus', '-')
-    expression = expression.replace('times', '*')
-    expression = expression.replace('divided by', '/')
-    expression = expression.replace('divided', '/')
-    expression = expression.replace('over', '/')
-    expression = expression.replace('multiplied by', '*')
-    expression = expression.replace('x', '*')
-    expression = expression.replace('^', '**')
+    return sanitized
+
+
+def calculate_simple_expression(expression: str) -> float:
+    """
+    Calculate a simple mathematical expression without parentheses.
     
-    # Remove any characters that aren't allowed in mathematical expressions
-    expression = re.sub(r'[^0-9+\-*/().%\s]', '', expression)
-    
-    try:
-        # Add math functions to the evaluation context
-        safe_dict = {
-            'abs': abs,
-            'round': round,
-            'min': min,
-            'max': max,
-            'pow': pow,
-            'sqrt': math.sqrt,
-            'sin': math.sin,
-            'cos': math.cos,
-            'tan': math.tan,
-            'pi': math.pi,
-            'e': math.e
-        }
+    Args:
+        expression: Mathematical expression
         
-        # Evaluate the expression in a safe context
-        result = eval(expression, {"__builtins__": {}}, safe_dict)
+    Returns:
+        Calculation result
+    """
+    # Handle multiplication and division first
+    while "*" in expression or "/" in expression:
+        # Find multiplication or division
+        match = re.search(r"(\d+\.?\d*)[*/](\d+\.?\d*)", expression)
+        if not match:
+            break
+            
+        # Calculate result
+        a = float(match.group(1))
+        op = match.group(0)[len(match.group(1))]
+        b = float(match.group(2))
         
-        # Format the result
-        if isinstance(result, int) or (isinstance(result, float) and result.is_integer()):
-            formatted_result = str(int(result))
+        if op == "*":
+            result = a * b
         else:
-            formatted_result = str(round(result, 6))
+            if b == 0:
+                raise ValueError("Division by zero")
+            result = a / b
         
-        # Create the response
-        response = f"""Calculation result:
-
-Expression: {expression}
-Result: {formatted_result}
-
-This calculation was performed using the calculator tool."""
-        
-        print(f"Calculation result: {formatted_result}")
-        
-        return {
-            "content": response,
-            "tool": "calculator",
-            "expression": expression,
-            "result": formatted_result
-        }
+        # Replace expression with result
+        expression = expression[:match.start()] + str(result) + expression[match.end():]
     
-    except Exception as e:
-        error_message = f"""I couldn't calculate the expression "{expression}".
-
-Error: {str(e)}
-
-Please check that your expression is valid and try again. Here are some examples of valid expressions:
-- 2 + 2
-- 10 * 5
-- (3 + 4) * 2
-- 10 / 2
-- 2 ** 3 (for exponentiation)"""
+    # Handle addition and subtraction
+    while "+" in expression or "-" in expression:
+        # Find addition or subtraction
+        match = re.search(r"(\d+\.?\d*)[+\-](\d+\.?\d*)", expression)
+        if not match:
+            break
+            
+        # Calculate result
+        a = float(match.group(1))
+        op = match.group(0)[len(match.group(1))]
+        b = float(match.group(2))
         
-        print(f"Calculation error: {str(e)}")
+        if op == "+":
+            result = a + b
+        else:
+            result = a - b
         
-        return {
-            "content": error_message,
-            "tool": "calculator",
-            "expression": expression,
-            "error": str(e)
+        # Replace expression with result
+        expression = expression[:match.start()] + str(result) + expression[match.end():]
+    
+    # Return final result
+    return float(expression)
+
+
+# Register tool
+register_tool(
+    name="calculator",
+    description="Calculate a mathematical expression",
+    function=calculator,
+    parameters={
+        "expression": {
+            "type": "string",
+            "description": "Mathematical expression to calculate"
         }
-
-# Register the tool
-try:
-    print("Registering calculator tool")
-    register_tool("calculator", calculate)
-    print("Calculator tool registered successfully")
-except Exception as e:
-    print(f"Error registering calculator tool: {e}")
-    print(f"Traceback: {traceback.format_exc()}")
+    },
+    required_role="basic"
+)

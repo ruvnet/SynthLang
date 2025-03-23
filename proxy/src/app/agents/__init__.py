@@ -1,9 +1,5 @@
 """
-Agent SDK package.
+Agent tools for the SynthLang Proxy.
 
-This package provides functionality for registering and invoking tools
-such as web search and file search.
+This package provides agent tools that can be used to enhance LLM responses.
 """
-from src.app.agents import registry
-
-__all__ = ["registry"]

@@ -1,6 +1,5 @@
 """
-Middleware package for the SynthLang Proxy.
+Middleware for the SynthLang Proxy.
 
-This package contains middleware components for the SynthLang Proxy.
+This package provides middleware for the FastAPI application.
 """
-from .keyword_detection import apply_keyword_detection

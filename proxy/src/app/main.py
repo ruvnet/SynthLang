@@ -30,6 +30,10 @@ from . import auth, cache, llm_provider, db
 from .database import init_db
 from .synthlang import is_synthlang_available
 from .synthlang.endpoints import router as synthlang_router
+from .openai.endpoints import router as openai_router
+from .cache.endpoints import router as cache_router
+from .agents.endpoints import router as tools_router
+from .keywords.endpoints import router as keywords_router
 from .config.keywords import initialize_from_config
 
 # Configure logging
@@ -111,8 +115,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include SynthLang API router
+# Include API routers
 app.include_router(synthlang_router)
+app.include_router(openai_router)
+app.include_router(cache_router)
+app.include_router(tools_router)
+app.include_router(keywords_router)
 
 
 @app.get("/", response_model=APIInfo)
@@ -506,4 +514,4 @@ async def general_exception_handler(request: Request, exc: Exception):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("src.app.main:app", host="0.0.0.0", port=8000, reload=True)

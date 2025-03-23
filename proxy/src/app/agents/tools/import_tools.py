@@ -1,88 +1,43 @@
 """
-Import tools module for the SynthLang Proxy.
+Import all tools.
 
-This module explicitly imports all tools to ensure they are registered.
+This module imports all tools to ensure they are registered.
 """
 import logging
-import sys
+import importlib
 import os
-import traceback
+import pkgutil
+from typing import List
 
-# Add the project root to the Python path
-project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
-if project_root not in sys.path:
-    sys.path.insert(0, project_root)
-    print(f"Added {project_root} to Python path in import_tools.py")
-
-# Print current Python path for debugging
-print(f"Python path in import_tools.py: {sys.path}")
-
-# Logger for this module
+# Configure logging
 logger = logging.getLogger(__name__)
 
-def import_all_tools():
+
+def import_all_tools() -> int:
     """
     Import all tools to ensure they are registered.
     
-    This function should be called during application startup.
+    Returns:
+        Number of tools imported
     """
-    logger.info("Importing all tools...")
-    print("Importing all tools...")
+    # Get the directory of this file
+    tools_dir = os.path.dirname(os.path.abspath(__file__))
     
-    tool_count = 0
+    # Get all Python files in the directory
+    tool_modules = []
+    for _, name, is_pkg in pkgutil.iter_modules([tools_dir]):
+        if not is_pkg and name != "registry" and name != "import_tools":
+            tool_modules.append(name)
     
-    # Try importing with src.app prefix
-    try:
-        print("Attempting to import tools with src.app prefix")
-        from src.app.agents.tools.web_search import perform_web_search
-        from src.app.agents.tools.weather import get_weather
-        from src.app.agents.tools.calculator import calculate
-        print("Successfully imported tools with src.app prefix")
-        tool_count = 3
-        
-        # Try to import file_search if it exists
+    # Import each module
+    imported_count = 0
+    for module_name in tool_modules:
         try:
-            from src.app.agents.tools.file_search import search_files
-            tool_count = 4
-            print("Successfully imported file_search tool")
-        except ImportError as e:
-            print(f"File search tool not available: {e}")
-    except ImportError as e:
-        print(f"Error importing tools with src.app prefix: {e}")
-        print(f"Traceback: {traceback.format_exc()}")
-        
-        # Try importing with app prefix
-        try:
-            print("Attempting to import tools with app prefix")
-            from app.agents.tools.web_search import perform_web_search
-            from app.agents.tools.weather import get_weather
-            from app.agents.tools.calculator import calculate
-            print("Successfully imported tools with app prefix")
-            tool_count = 3
-            
-            # Try to import file_search if it exists
-            try:
-                from app.agents.tools.file_search import search_files
-                tool_count = 4
-                print("Successfully imported file_search tool")
-            except ImportError as e:
-                print(f"File search tool not available: {e}")
-        except ImportError as e2:
-            print(f"Error importing tools with app prefix: {e2}")
-            print(f"Traceback: {traceback.format_exc()}")
-            logger.error(f"Failed to import tools from any known path: {e2}")
-    except Exception as e:
-        print(f"Unexpected error importing tools: {e}")
-        print(f"Traceback: {traceback.format_exc()}")
-        logger.error(f"Unexpected error importing tools: {e}")
+            importlib.import_module(f"src.app.agents.tools.{module_name}")
+            imported_count += 1
+            logger.debug(f"Imported tool module: {module_name}")
+        except Exception as e:
+            logger.error(f"Failed to import tool module {module_name}: {e}")
     
-    # Log success
-    if tool_count > 0:
-        logger.info(f"Successfully imported {tool_count} tools")
-        print(f"Successfully imported {tool_count} tools")
-    else:
-        logger.warning("No tools were imported")
-        print("No tools were imported")
-    
-    # Return the number of tools imported
-    return tool_count
+    logger.info(f"Imported {imported_count} tool modules")
+    return imported_count
