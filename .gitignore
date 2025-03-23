@@ -28,3 +28,4 @@ dist-ssr
 aider*
 venv/
 .api_keys.json
+synthlang_proxy.db

@@ -6,25 +6,84 @@ SynthLang Proxy is an advanced, high-performance middleware solution designed to
 
 By integrating SynthLang's SynthLang prompt compression  with semantic caching, robust security features, and an extensible agent framework, this proxy transforms how developers and organizations interact with AI language models.
 
+## Quick Start
+
+### 1. Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/synthlang-proxy.git
+cd synthlang-proxy/proxy
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Copy and configure environment variables
+cp .env.sample .env
+# Edit .env with your configuration
+```
+
+### 2. Generate API Key
+
+Before using the proxy, you need to generate an API key:
+
+```bash
+# Generate a new API key
+python -m src.cli.api_keys create --user-id "your_username" --rate-limit 100 --save-env
+
+# Or use the CLI tool
+python -m synthlang.cli proxy apikey create --user-id "your_username" --rate-limit 100 --save-env
+```
+
+This will:
+- Create a new API key with the specified rate limit
+- Save it to your .env file
+- Display the key in the terminal
+
+### 3. Start the Server
+
+```bash
+# Start the proxy server
+python -m src.app.main
+
+# Or use the CLI tool
+python -m synthlang.cli proxy serve
+```
+
+### 4. Make API Requests
+
+```bash
+# Example API request
+curl -X POST http://localhost:8000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [
+      {"role": "user", "content": "Hello, how are you?"}
+    ]
+  }'
+```
+
 ## Overview of Features
 
-If you’ve already built-or are using-any application that talks to an LLM, whether it’s OpenAI, OpenRouter, Together, DeepSeek, or a local endpoint that mimics the OpenAI API, you can now instantly give it agentic capabilities without even touching your existing app logic. That’s what SynthLang Proxy does. It’s a high-speed, drop-in middleware that plugs into the /v1/chat/completions endpoint and transforms static LLM apps into dynamic, self-optimizing systems.
+If you've already built-or are using-any application that talks to an LLM, whether it's OpenAI, OpenRouter, Together, DeepSeek, or a local endpoint that mimics the OpenAI API, you can now instantly give it agentic capabilities without even touching your existing app logic. That's what SynthLang Proxy does. It's a high-speed, drop-in middleware that plugs into the /v1/chat/completions endpoint and transforms static LLM apps into dynamic, self-optimizing systems.
 
-Right out of the box, SynthLang adds support for agents, tools, hard guardrails, prompt compression, and adaptive behavior that learns and improves over time.  Using existing LLM interfaces like Cursor, Cline or even Slack or Teams, it reads special inline instructions, like #tool_summarize or #agent_research and dynamically routes them to the right logic, model, or workflow. You can switch models by type /model_name , trigger background tasks #deep_reaeach, enforce safety checks, and expand capabilities, all from a single prompt, with no changes to the client.
+Right out of the box, SynthLang adds support for agents, tools, hard guardrails, prompt compression, and adaptive behavior that learns and improves over time.  Using existing LLM interfaces like Cursor, Cline or even Slack or Teams, it reads special inline instructions, like #tool_summarize or #agent_research and dynamically routes them to the right logic, model, or workflow. You can switch models by type /model_name , trigger background tasks #deep_reaeach, enforce safety checks, and expand capabilities, all from a single prompt, with no changes to the client.
 
 Nearly every LLM app already relies on some variant of the OpenAI API. By intercepting those requests directly, SynthLang Proxy lets you embed logic in plain text that dynamically unlocks new functionality. With just a few tokens, you can make any application smarter, safer, and more capable without modifying its underlying design.
 
-It also includes SynthLang, a symbolic and semantic compression layer that uses structured abstractions based on languages like Greek, Arabic, and Mandarin to reduce prompt size while preserving meaning.  
+It also includes SynthLang, a symbolic and semantic compression layer that uses structured abstractions based on languages like Greek, Arabic, and Mandarin to reduce prompt size while preserving meaning.  
 
 Paired with gzip compression, token pruning, semantic caching to store and retrieve responses based on meaning, and built-in vector search for fast semantic lookup across files and documents, you can cut token usage by up to 99%, saving cost and improving latency. 
 
 This means if a user asks a question similar to something previously answered, or if the system generated code earlier for a related task, it can instantly reuse that result locally without making another LLM request. Faster, more efficient, and significantly cheaper. Over time, SynthLang refines its compression patterns to better match your domain and tasks.
 
-This turns any legacy LLM application into an **agentic, hyper-optimized, self-evolving system, **without rebuilding it. Whether you’re running a chatbot, coding assistant, research agent, or enterprise automation tool, SynthLang brings modern agentic capabilities into your existing flow.
+This turns any legacy LLM application into an **agentic, hyper-optimized, self-evolving system, **without rebuilding it. Whether you're running a chatbot, coding assistant, research agent, or enterprise automation tool, SynthLang brings modern agentic capabilities into your existing flow.
 
-I’ve bundled it with a simple CLI and a FastAPI backend you can deploy serverlessly or run on your cloud of choice. Install it with pip install spark-proxy, and you’re ready to go. 
+I've bundled it with a simple CLI and a FastAPI backend you can deploy serverlessly or run on your cloud of choice. Install it with pip install spark-proxy, and you're ready to go. 
 
-There’s also a built-in benchmarking tool that I use to test and optimize the system against different models and application types, it’s all integrated, fast, and easy to use.
+There's also a built-in benchmarking tool that I use to test and optimize the system against different models and application types, it's all integrated, fast, and easy to use.
 
 This is SynthLang Proxy.
 
@@ -280,6 +339,9 @@ pip install synthlang
 | `proxy tools` | List available agent tools | `synthlang proxy tools` |
 | `proxy call-tool` | Call an agent tool directly | `synthlang proxy call-tool --tool "calculate" --args '{"expression": "2+2"}'` |
 | `proxy health` | Check proxy service health | `synthlang proxy health` |
+| `proxy apikey list` | List all API keys | `synthlang proxy apikey list` |
+| `proxy apikey create` | Create a new API key | `synthlang proxy apikey create --user-id "test_user" --rate-limit 100` |
+| `proxy apikey delete` | Delete an API key | `synthlang proxy apikey delete "sk_1234567890abcdef"` |
 
 ### Keyword Management
 
@@ -294,7 +356,7 @@ synthlang keywords show weather_query
 
 # Add a new pattern
 synthlang keywords add weather_query \
-  --pattern "(?:what's|what is)\\s+(?:the)?\\s*(?:weather)\\s+(?:in)\\s+(?P<location>[\\w\\s]+)" \
+  --pattern "(?:what's|what is)\s+(?:the)?\s*(?:weather)\s+(?:in)\s+(?P<location>[\w\s]+)" \
   --tool "weather" \
   --description "Detects weather queries" \
   --priority 100
@@ -345,7 +407,12 @@ For detailed documentation on CLI usage and features, see the [CLI Documentation
    # Edit .env with your configuration
    ```
 
-4. Run the application:
+4. Generate an API key:
+   ```bash
+   python -m src.cli.api_keys create --user-id "your_username" --rate-limit 100 --save-env
+   ```
+
+5. Run the application:
    ```bash
    cd src
    python -m app.main
@@ -620,5 +687,3 @@ custom_pattern = KeywordPattern(
 
 # Register the pattern
 register_pattern(custom_pattern)
-```
-
