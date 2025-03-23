@@ -127,6 +127,37 @@ class LogarithmicSymbolicCompressor(BaseCompressor):
             (r'\bfrom\b', self.symbols['TRANSFORM']),
             (r'\bconvert\b', self.symbols['TRANSFORM']),
             (r'\btransform\b', self.symbols['TRANSFORM']),
+            
+            # Extended symbols from documentation
+            (r'\bsubset of\b', self.symbols['SUBSET']),
+            (r'\bincluded in\b', self.symbols['SUBSET']),
+            (r'\bpart of\b', self.symbols['SUBSET']),
+            (r'\bcontained in\b', self.symbols['SUBSET']),
+            
+            (r'\bflow\b', self.symbols['FLOW']),
+            (r'\bsequence\b', self.symbols['FLOW']),
+            (r'\bsteps\b', self.symbols['FLOW']),
+            (r'\bpipeline\b', self.symbols['FLOW']),
+            
+            (r'\bis defined as\b', self.symbols['EQUIVALENCE']),
+            (r'\bis equivalent to\b', self.symbols['EQUIVALENCE']),
+            (r'\bmeans\b', self.symbols['EQUIVALENCE']),
+            (r'\bis the same as\b', self.symbols['EQUIVALENCE']),
+            
+            (r'\btherefore\b', self.symbols['THEREFORE']),
+            (r'\bhence\b', self.symbols['THEREFORE']),
+            (r'\bconsequently\b', self.symbols['THEREFORE']),
+            (r'\bas a result\b', self.symbols['THEREFORE']),
+            
+            (r'\bfor all\b', self.symbols['FORALL']),
+            (r'\ball\b', self.symbols['FORALL']),
+            (r'\bevery\b', self.symbols['FORALL']),
+            (r'\beach\b', self.symbols['FORALL']),
+            
+            (r'\bthere exists\b', self.symbols['EXISTS']),
+            (r'\bsome\b', self.symbols['EXISTS']),
+            (r'\bat least one\b', self.symbols['EXISTS']),
+            (r'\bexists\b', self.symbols['EXISTS']),
         ]
         
         # Compile regex patterns for better performance

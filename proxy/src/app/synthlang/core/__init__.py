@@ -55,6 +55,14 @@ class SynthLangSymbols:
     POWER = "^"
     EQUAL = "="
     
+    # Extended symbols from the documentation
+    SUBSET = "⊂"
+    FLOW = "→"
+    EQUIVALENCE = "≡"
+    THEREFORE = "∴"
+    FORALL = "∀"
+    EXISTS = "∃"
+    
     @classmethod
     def get_all_symbols(cls) -> Dict[str, str]:
         """Get all SynthLang symbols as a dictionary."""
