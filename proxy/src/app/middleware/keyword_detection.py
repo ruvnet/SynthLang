@@ -7,9 +7,9 @@ import logging
 import re
 from typing import Dict, Any, List, Optional, Tuple, Union
 
-from app.keywords.registry import KEYWORD_REGISTRY, KeywordPattern
-from app.agents.registry import get_tool
-from app.auth.roles import get_user_roles
+from src.app.keywords.registry import KEYWORD_REGISTRY, KeywordPattern
+from src.app.agents.registry import get_tool
+from src.app.auth.roles import get_user_roles
 
 # Logger for this module
 logger = logging.getLogger(__name__)
@@ -112,7 +112,7 @@ async def apply_keyword_detection(messages: List[Dict[str, str]], user_id: str) 
         The tool response if a keyword is detected, None otherwise
     """
     # Check if keyword detection is enabled - import here to get the current value
-    from app.keywords.registry import ENABLE_KEYWORD_DETECTION
+    from src.app.keywords.registry import ENABLE_KEYWORD_DETECTION
     if not ENABLE_KEYWORD_DETECTION:
         logger.debug("Keyword detection is disabled")
         return None

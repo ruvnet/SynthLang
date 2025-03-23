@@ -10,8 +10,8 @@ import time
 import httpx
 
 from openai import OpenAI, AsyncOpenAI
-from app.agents import registry
-from app.config import OPENAI_API_KEY, MODEL_PROVIDER
+from src.app.agents import registry
+from src.app.config import OPENAI_API_KEY, MODEL_PROVIDER
 
 # Configure logging
 logger = logging.getLogger(__name__)

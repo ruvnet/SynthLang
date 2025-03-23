@@ -3,6 +3,11 @@ Main FastAPI application.
 
 This module contains the FastAPI application and API endpoints.
 """
+# Import path_fix first to ensure correct module resolution
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
 import time
 import logging
 from typing import List, Optional, Dict, Any
@@ -13,7 +18,7 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.status import HTTP_401_UNAUTHORIZED
 
-from app.models import (
+from .models import (
     ChatRequest,
     ChatResponse,
     ChatResponseChoice,
@@ -21,11 +26,11 @@ from app.models import (
     APIInfo,
     HealthCheck
 )
-from app import auth, cache, llm_provider, db
-from app.database import init_db
-from app.synthlang import is_synthlang_available
-from app.synthlang.endpoints import router as synthlang_router
-from app.config.keywords import initialize_from_config
+from . import auth, cache, llm_provider, db
+from .database import init_db
+from .synthlang import is_synthlang_available
+from .synthlang.endpoints import router as synthlang_router
+from .config.keywords import initialize_from_config
 
 # Configure logging
 logging.basicConfig(
@@ -166,7 +171,7 @@ async def create_chat_completion(
     logger.info(f"Chat completion request from user {user_id} for model {request.model}")
     
     # Check for keyword patterns in the last user message
-    from app.middleware.keyword_detection import apply_keyword_detection
+    from .middleware.keyword_detection import apply_keyword_detection
     keyword_response = await apply_keyword_detection(
         [msg.dict() for msg in request.messages], 
         user_id
@@ -231,7 +236,7 @@ async def create_chat_completion(
     for msg in request.messages:
         if msg.role in ("user", "system"):
             # Use the new API for compression
-            from app.synthlang.api import synthlang_api
+            from .synthlang.api import synthlang_api
             compressed_content = synthlang_api.compress(msg.content)
             compressed_messages.append({"role": msg.role, "content": compressed_content})
         else:
@@ -300,7 +305,7 @@ async def create_chat_completion(
     for msg in compressed_messages:
         if msg["role"] in ("user", "system"):
             # Use the new API for decompression
-            from app.synthlang.api import synthlang_api
+            from .synthlang.api import synthlang_api
             final_messages.append({"role": msg["role"], "content": synthlang_api.decompress(msg["content"])})
         else:
             final_messages.append(msg)
@@ -413,7 +418,6 @@ async def create_chat_completion(
                 }
             }
         )
-
 
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException):

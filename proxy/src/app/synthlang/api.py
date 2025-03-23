@@ -7,9 +7,9 @@ import logging
 from typing import Any, Dict, List, Optional, Union
 import os
 
-from app.config import USE_SYNTHLANG
-from app.synthlang.compression import compress_prompt, decompress_prompt
-from app.synthlang.core import (
+from src.app.config import USE_SYNTHLANG
+from src.app.synthlang.compression import compress_prompt, decompress_prompt
+from src.app.synthlang.core import (
     SynthLangModule,
     FrameworkTranslator,
     SystemPromptGenerator,

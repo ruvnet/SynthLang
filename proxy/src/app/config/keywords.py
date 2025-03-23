@@ -11,7 +11,7 @@ import tomli_w
 from typing import Dict, List, Any, Optional
 from pathlib import Path
 
-from app.keywords.registry import KeywordPattern, register_pattern, KEYWORD_REGISTRY
+from src.app.keywords.registry import KeywordPattern, register_pattern, KEYWORD_REGISTRY
 
 # Logger for this module
 logger = logging.getLogger(__name__)
@@ -210,7 +210,7 @@ def create_default_config() -> Dict[str, Any]:
         A default configuration dictionary
     """
     # Import default patterns
-    from app.keywords.default_patterns import register_default_patterns
+    from src.app.keywords.default_patterns import register_default_patterns
     register_default_patterns()
     
     # Export to TOML

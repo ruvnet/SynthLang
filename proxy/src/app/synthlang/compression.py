@@ -9,7 +9,7 @@ import logging
 import gzip
 import base64
 from typing import Optional
-from app.config import USE_SYNTHLANG
+from src.app.config import USE_SYNTHLANG
 
 # Configure logging
 logger = logging.getLogger(__name__)

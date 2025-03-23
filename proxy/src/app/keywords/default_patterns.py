@@ -3,7 +3,7 @@ Default keyword patterns for the SynthLang Proxy.
 
 This module registers default keyword patterns for common tools.
 """
-from app.keywords.registry import KeywordPattern, register_pattern
+from src.app.keywords.registry import KeywordPattern, register_pattern
 
 # Weather patterns
 weather_pattern = KeywordPattern(

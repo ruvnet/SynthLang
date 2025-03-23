@@ -7,7 +7,7 @@ as well as masking personally identifiable information (PII) in text.
 from cryptography.fernet import Fernet
 import re
 import logging
-from app.config import ENCRYPTION_KEY, MASK_PII_BEFORE_LLM, MASK_PII_IN_LOGS
+from src.app.config import ENCRYPTION_KEY, MASK_PII_BEFORE_LLM, MASK_PII_IN_LOGS
 
 # Configure logging
 logger = logging.getLogger(__name__)

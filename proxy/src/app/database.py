@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy import Column, String, Integer, Boolean, LargeBinary, DateTime, func
 
-from app.config import DATABASE_URL as CONFIG_DATABASE_URL
+from src.app.config import DATABASE_URL as CONFIG_DATABASE_URL
 
 # Configure logging
 logger = logging.getLogger(__name__)

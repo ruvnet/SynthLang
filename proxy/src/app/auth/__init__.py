@@ -5,7 +5,7 @@ This package provides functions for API key authentication, rate limiting,
 and role-based access control.
 """
 # Import existing authentication functions
-from app.auth.api_keys import (
+from .api_keys import (
     verify_api_key,
     get_user_id,
     get_rate_limit,
@@ -16,7 +16,7 @@ from app.auth.api_keys import (
 )
 
 # Import role-based access control functions
-from app.auth.roles import (
+from .roles import (
     init_user_roles,
     get_user_roles,
     has_role,

@@ -4,8 +4,8 @@ Database interaction functions.
 This module provides functions for interacting with the database,
 including saving interaction data with encryption.
 """
-from app.database import SessionLocal, Interaction
-from app import security  # Import security module for encryption
+from src.app.database import SessionLocal, Interaction
+from src.app import security  # Import security module for encryption
 
 
 async def save_interaction(user_id: str, model: str, messages: list, response_text: str, cache_hit: bool):
