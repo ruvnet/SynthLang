@@ -142,6 +142,40 @@ Remove saved credentials for the SynthLang Proxy service.
 synthlang proxy logout
 ```
 
+### Proxy API Key Management
+
+Manage API keys for the proxy server.
+
+#### List API Keys
+
+List all API keys registered with the proxy server.
+
+```bash
+synthlang proxy apikey list
+```
+
+#### Create API Key
+
+Create a new API key for the proxy server.
+
+```bash
+synthlang proxy apikey create --user-id "test_user" --rate-limit 100 --save-env
+```
+
+Options:
+- `--user-id`, `-u`: User ID associated with the API key (required)
+- `--rate-limit`, `-r`: Rate limit in requests per minute
+- `--prefix`, `-p`: API key prefix (default: "sk_")
+- `--save-env`, `-s`: Save API key to .env file
+
+#### Delete API Key
+
+Delete an API key from the proxy server.
+
+```bash
+synthlang proxy apikey delete "sk_1234567890abcdef"
+```
+
 ### Proxy Chat
 
 Send a chat request to the proxy service.
@@ -300,249 +334,101 @@ python keywords.py delete weather_query
 Import patterns from another configuration file.
 
 ```bash
-python keywords.py import /path/to/other/config.toml --overwrite
+python keywords.py import /path/to/config.toml
 ```
-
-Options:
-- `--overwrite`, `-o`: Overwrite existing patterns
 
 ### Export Configuration
 
 Export patterns to another configuration file.
 
 ```bash
-python keywords.py export /path/to/export/config.toml
+python keywords.py export /path/to/config.toml
 ```
 
-### Create Default Configuration
+## Examples
 
-Create a default configuration with predefined patterns.
+### Basic Translation
 
 ```bash
-python keywords.py create-default
+synthlang translate --source "Create a function to calculate the factorial of a number" --framework synthlang
 ```
 
-### Show Settings
-
-Show current keyword detection settings.
+### Using the Proxy Service
 
 ```bash
-python keywords.py settings
+# Login to the proxy service
+synthlang proxy login --api-key "your-api-key"
+
+# Send a chat request
+synthlang proxy chat "What is the capital of France?"
+
+# Call a tool
+synthlang proxy call-tool --tool "calculate" --args '{"expression": "2+2"}'
 ```
 
-### Update Settings
-
-Update keyword detection settings.
+### Managing API Keys
 
 ```bash
-python keywords.py update-settings --enable-detection true --detection-threshold 0.8 --default-role "basic"
+# Create a new API key
+synthlang proxy apikey create --user-id "test_user" --rate-limit 100 --save-env
+
+# List all API keys
+synthlang proxy apikey list
+
+# Delete an API key
+synthlang proxy apikey delete "sk_1234567890abcdef"
 ```
 
-Options:
-- `--enable-detection`, `-e`: Enable or disable keyword detection
-- `--detection-threshold`, `-t`: Detection threshold (0.0 to 1.0)
-- `--default-role`, `-r`: Default role for users
+### Working with Compression
 
-## Mathematical Frameworks
+```bash
+# Compress a prompt
+synthlang proxy compress "This is a long prompt that will be compressed"
 
-The SynthLang CLI supports various mathematical frameworks for prompt engineering:
-
-### Set Theory
-
-Component combination and analysis.
-
-Example pattern:
+# Decompress a prompt
+synthlang proxy decompress "↹ prompt•compressed"
 ```
-↹ components•sets
-⊕ combine => union
-Σ result + validation
-```
-
-### Category Theory
-
-Structure-preserving transformations.
-
-Example pattern:
-```
-↹ source•target•mapping
-⊕ preserve => properties
-Σ transformed + verified
-```
-
-### Topology
-
-Continuous transformations and boundaries.
-
-Example pattern:
-```
-↹ system•changes•boundaries
-⊕ maintain => continuity
-Σ robust + stable
-```
-
-### Abstract Algebra
-
-Operation composition and invariants.
-
-Example pattern:
-```
-↹ operations•elements
-⊕ compose => structure
-Σ result + properties
-```
-
-## Example Scripts
-
-The CLI includes several example scripts to demonstrate its capabilities:
-
-- `basic_translation.sh`: Basic prompt translation examples
-- `advanced_translation.sh`: Advanced translation with metrics
-- `optimization_examples.sh`: Prompt optimization scenarios
-- `evolution_examples.sh`: Prompt evolution with parameters
-- `classification_examples.sh`: Pattern classification examples
-- `pipeline_example.sh`: Multi-step processing pipeline
-- `mathematical_pattern_examples.sh`: Mathematical framework examples
-- `agentic_reasoning_pipeline.sh`: Agentic reasoning demonstration
-
-## Performance Metrics
-
-SynthLang provides significant improvements over traditional prompt engineering:
-
-| Metric | Traditional | SynthLang | Improvement |
-|--------|-------------|-----------|-------------|
-| Token Usage | ~150 tokens/step | ~25 tokens/step | 83% reduction |
-| Processing Speed | Baseline | 40% faster | 40% improvement |
-| Structure Consistency | Variable | 90% consistent | 90% improvement |
-| Pattern Recognition | 70% accuracy | 95% accuracy | 25% improvement |
-
-## Best Practices
-
-### Pattern Design
-
-| Aspect | Recommendation | Example |
-|--------|----------------|---------|
-| Input | Clear context definition | `↹ domain•constraints•requirements` |
-| Process | Step-by-step transformation | `⊕ analyze => result` |
-| Output | Explicit deliverables | `Σ solution + validation` |
-
-### Pattern Application
-
-| Phase | Action | Tool |
-|-------|--------|------|
-| Analysis | Understand requirements | `translate` command |
-| Evolution | Improve patterns | `evolve` command |
-| Validation | Verify properties | `classify` command |
-| Optimization | Enhance efficiency | `optimize` command |
-| Integration | Connect to services | `proxy` commands |
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **API Key Issues**
-   - Ensure your OpenAI API key is set correctly
-   - Check that your SynthLang Proxy API key is valid
+1. **API Key Not Found**: Make sure you've set your API key using the `login` command or environment variables.
+2. **Connection Refused**: Check that the proxy server is running and accessible at the specified URL.
+3. **Permission Denied**: Ensure your API key has the necessary permissions for the operation.
 
-2. **Connection Problems**
-   - Verify the proxy URL is correct
-   - Check that the proxy server is running
-   - Ensure your network allows connections to the proxy
+### Getting Help
 
-3. **Permission Errors**
-   - Verify you have the required role for the operation
-   - Check file permissions if writing to output files
-
-### Logging
-
-Enable debug logging for more detailed information:
+For more information about a specific command, use the `--help` flag:
 
 ```bash
-synthlang --log-level debug [command]
+synthlang --help
+synthlang proxy --help
+synthlang proxy apikey --help
 ```
 
-## Development
+## Advanced Usage
 
-### Project Structure
+### Scripting
 
-```
-cli/
-├── docs/                    # Documentation
-│   ├── mathematical_patterns.md
-│   └── tutorials/          # Detailed tutorials
-├── scripts/                # Example scripts
-│   ├── basic_translation.sh
-│   ├── advanced_translation.sh
-│   └── ...
-├── examples/               # Example outputs
-├── synthlang/              # Main package
-│   ├── __init__.py
-│   ├── cli.py              # CLI entry point
-│   ├── config.py           # Configuration handling
-│   └── core/               # Core functionality
-└── tests/                  # Test cases
-```
-
-### Adding New Commands
-
-To add a new command to the CLI:
-
-1. Create a new module in the appropriate package
-2. Implement the command functionality
-3. Register the command in the CLI entry point
-
-Example:
-
-```python
-import click
-
-@click.command()
-@click.argument("input_text")
-@click.option("--output", "-o", help="Output file")
-def my_command(input_text, output):
-    """My custom command description."""
-    result = process_input(input_text)
-    if output:
-        with open(output, "w") as f:
-            f.write(result)
-    else:
-        click.echo(result)
-
-# In cli.py
-cli.add_command(my_command)
-```
-
-### Testing
-
-Run the test suite:
+The CLI can be used in scripts for automation:
 
 ```bash
-pytest
+#!/bin/bash
+# Example script to process multiple prompts
+
+PROMPTS=("prompt1.txt" "prompt2.txt" "prompt3.txt")
+
+for prompt in "${PROMPTS[@]}"; do
+  echo "Processing $prompt..."
+  synthlang optimize --prompt "$(cat $prompt)" --output "${prompt%.txt}_optimized.txt"
+done
 ```
 
-Run tests with coverage:
+### Integration with Other Tools
+
+The CLI can be integrated with other tools in your workflow:
 
 ```bash
-pytest --cov=synthlang
-```
-
-## Version History
-
-- **0.2.0** (2025-03-23)
-  - Added proxy integration and advanced features
-  - Implemented agent SDK and tool registry
-  - Added advanced prompt compression
-  - Added semantic caching
-  - Improved CLI structure with command groups
-
-- **0.1.0** (2024-01-01)
-  - Initial release of SynthLang CLI
-  - Core DSPy module implementation
-  - Framework translation functionality
-  - System prompt generation
-  - Configuration management
-  - Logging system
-  - Command-line interface
-
-## License
-
-MIT License - see [LICENSE](LICENSE) file for details
+# Example: Pipe output to jq for JSON processing
+synthlang proxy call-tool --tool "weather" --args '{"location": "New York"}' | jq '.temperature'

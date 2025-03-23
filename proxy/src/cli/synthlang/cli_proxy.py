@@ -73,6 +73,98 @@ def register_proxy_commands(main):
         except Exception as e:
             raise click.ClickException(f"Failed to clear credentials: {str(e)}")
 
+    @proxy.group()
+    def apikey():
+        """Manage API keys for the proxy server."""
+        pass
+
+    @apikey.command()
+    def list():
+        """List all API keys.
+        
+        Example:
+            synthlang proxy apikey list
+        """
+        try:
+            import sys
+            import os
+            
+            # Add the parent directory to the Python path
+            sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), "")))
+            
+            from src.cli.api_keys import list_keys
+            
+            # Create a mock args object
+            class Args:
+                pass
+            
+            args = Args()
+            list_keys(args)
+        except Exception as e:
+            raise click.ClickException(f"Failed to list API keys: {str(e)}")
+
+    @apikey.command()
+    @click.option("--user-id", "-u", required=True, help="User ID")
+    @click.option("--rate-limit", "-r", type=int, help="Rate limit in requests per minute")
+    @click.option("--prefix", "-p", default="sk_", help="API key prefix")
+    @click.option("--save-env", "-s", is_flag=True, help="Save API key to .env file")
+    def create(user_id: str, rate_limit: Optional[int], prefix: str, save_env: bool):
+        """Create a new API key.
+        
+        Example:
+            synthlang proxy apikey create --user-id "test_user" --rate-limit 100 --save-env
+        """
+        try:
+            import sys
+            import os
+            
+            # Add the parent directory to the Python path
+            sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), "")))
+            
+            from src.cli.api_keys import create_key
+            
+            # Create a mock args object
+            class Args:
+                pass
+            
+            args = Args()
+            args.user_id = user_id
+            args.rate_limit = rate_limit
+            args.prefix = prefix
+            args.save_env = save_env
+            
+            create_key(args)
+        except Exception as e:
+            raise click.ClickException(f"Failed to create API key: {str(e)}")
+
+    @apikey.command()
+    @click.argument("api_key")
+    def delete(api_key: str):
+        """Delete an API key.
+        
+        Example:
+            synthlang proxy apikey delete "sk_1234567890abcdef"
+        """
+        try:
+            import sys
+            import os
+            
+            # Add the parent directory to the Python path
+            sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), "")))
+            
+            from src.cli.api_keys import delete_key
+            
+            # Create a mock args object
+            class Args:
+                pass
+            
+            args = Args()
+            args.api_key = api_key
+            
+            delete_key(args)
+        except Exception as e:
+            raise click.ClickException(f"Failed to delete API key: {str(e)}")
+
     @proxy.command()
     @click.option("--model", help="Model to use")
     @click.option("--system", help="System message")
