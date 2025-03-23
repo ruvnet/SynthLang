@@ -1,6 +1,6 @@
 # SynthLang CLI
 
-A powerful command-line interface for mathematical prompt engineering, framework translation, and optimization using symbolic notation.
+A powerful command-line interface for mathematical prompt engineering, framework translation, optimization, and proxy integration.
 
 ## Installation
 
@@ -16,6 +16,21 @@ pip install synthlang
 | `evolve` | Improve prompts using genetic algorithms | `synthlang evolve --seed "initial prompt" --generations 5` |
 | `optimize` | Optimize prompts for efficiency | `synthlang optimize --prompt "your prompt"` |
 | `classify` | Analyze and categorize prompts | `synthlang classify predict --text "prompt" --labels "categories"` |
+
+## Proxy Commands
+
+| Command | Description | Example |
+|---------|-------------|---------|
+| `proxy serve` | Start a local proxy server | `synthlang proxy serve --port 8000` |
+| `proxy login` | Save credentials for proxy service | `synthlang proxy login --api-key "your-key"` |
+| `proxy chat` | Send a chat request to the proxy | `synthlang proxy chat "Hello, world"` |
+| `proxy compress` | Compress a prompt | `synthlang proxy compress "Your prompt"` |
+| `proxy decompress` | Decompress a prompt | `synthlang proxy decompress "↹ prompt"` |
+| `proxy clear-cache` | Clear the semantic cache | `synthlang proxy clear-cache` |
+| `proxy cache-stats` | Show cache statistics | `synthlang proxy cache-stats` |
+| `proxy tools` | List available agent tools | `synthlang proxy tools` |
+| `proxy call-tool` | Call an agent tool | `synthlang proxy call-tool --tool "calculate" --args '{"expression": "2+2"}'` |
+| `proxy health` | Check proxy service health | `synthlang proxy health` |
 
 ## Mathematical Frameworks
 
@@ -46,6 +61,7 @@ pip install synthlang
 | Mathematical Patterns | Using mathematical concepts in prompts | `docs/mathematical_patterns.md` |
 | Pattern Validation | Testing and validating patterns | `docs/tutorials/pattern_validation_tutorial.md` |
 | Mathematical Patterns | Practical mathematical examples | `docs/tutorials/mathematical_patterns_tutorial.md` |
+| Proxy Integration | Using the proxy capabilities | `docs/tutorials/proxy_integration_tutorial.md` |
 
 ## Performance Metrics
 
@@ -96,6 +112,19 @@ synthlang evolve \
 # Output shows evolution of pattern through generations
 ```
 
+### 4. Using the Proxy Server
+
+```bash
+# Start a local proxy server
+synthlang proxy serve --port 8000
+
+# In another terminal, send a chat request
+synthlang proxy chat "What is the capital of France?"
+
+# Compress a prompt
+synthlang proxy compress "This is a long prompt that will be compressed using SynthLang compression techniques"
+```
+
 ## Directory Structure
 
 ```
@@ -138,6 +167,7 @@ cli/
 | Evolution | Improve patterns | `evolve` command |
 | Validation | Verify properties | `classify` command |
 | Optimization | Enhance efficiency | `optimize` command |
+| Integration | Connect to services | `proxy` commands |
 
 ## Next Steps
 
@@ -145,6 +175,7 @@ cli/
 2. Try the example scripts in `scripts/`
 3. Run the test cases in `tests/`
 4. Create your own patterns using the frameworks
+5. Set up a local proxy server with `proxy serve`
 
 ## Contributing
 

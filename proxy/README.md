@@ -22,6 +22,8 @@ By integrating SynthLang's proprietary prompt compression technology with semant
 - **Agent Framework**: Extend LLM capabilities with custom tools and integrations
 - **Vector Search**: Built-in semantic search for files and knowledge bases
 - **Web Search Integration**: Seamless access to real-time information
+- **Prompt Engineering**: Advanced prompt generation, optimization, and evolution
+- **DSPy Integration**: Leverage DSPy for sophisticated prompt programming
 
 ### Enterprise-Ready
 - **Robust Security**: End-to-end encryption and PII protection
@@ -42,6 +44,12 @@ By integrating SynthLang's proprietary prompt compression technology with semant
 - **Streaming Support**: Efficient handling of streaming responses for real-time applications
 - **Vector Search**: Built-in semantic search capabilities for files and documents
 - **Web Search**: Integrated web search capabilities using OpenAI's search API
+- **Prompt Translation**: Convert natural language to SynthLang's compact symbolic notation
+- **System Prompt Generation**: Automatically generate optimized system prompts from task descriptions
+- **Prompt Optimization**: Improve prompts using DSPy techniques for clarity, specificity, and consistency
+- **Prompt Evolution**: Evolve prompts using genetic algorithms and self-play tournaments
+- **Prompt Classification**: Classify prompts by type, domain, or purpose using fine-tuned models
+- **Prompt Management**: Store, retrieve, and compare prompts with version history
 
 ## Advanced Compression Technology
 
@@ -114,6 +122,7 @@ Based on standard OpenAI pricing for GPT-4o ($10/1M input tokens):
 - Python 3.10+
 - PostgreSQL (optional, SQLite can be used for development)
 - SynthLang CLI (optional, for prompt compression)
+- DSPy (optional, for advanced prompt engineering)
 
 ### Setup
 
@@ -147,6 +156,16 @@ Based on standard OpenAI pricing for GPT-4o ($10/1M input tokens):
 - `GET /`: API information
 - `GET /health`: Health check
 - `POST /v1/chat/completions`: Chat completions (OpenAI-compatible)
+- `POST /v1/synthlang/translate`: Translate text to SynthLang format
+- `POST /v1/synthlang/generate`: Generate system prompts from task descriptions
+- `POST /v1/synthlang/optimize`: Optimize prompts for clarity and effectiveness
+- `POST /v1/synthlang/evolve`: Evolve prompts using genetic algorithms
+- `POST /v1/synthlang/classify`: Classify prompts by type or domain
+- `POST /v1/synthlang/prompts/save`: Save prompts to the prompt manager
+- `POST /v1/synthlang/prompts/load`: Load prompts from the prompt manager
+- `GET /v1/synthlang/prompts/list`: List all saved prompts
+- `POST /v1/synthlang/prompts/delete`: Delete prompts from the prompt manager
+- `POST /v1/synthlang/prompts/compare`: Compare two prompts
 
 ### Example Request
 
@@ -198,6 +217,29 @@ curl -X POST http://localhost:8000/v1/chat/completions \
   }'
 ```
 
+### Using SynthLang Prompt Translation
+
+```bash
+curl -X POST http://localhost:8000/v1/synthlang/translate \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer your_api_key" \
+  -d '{
+    "text": "Create a chatbot that helps users with programming questions",
+    "instructions": null
+  }'
+```
+
+### Using SynthLang Prompt Generation
+
+```bash
+curl -X POST http://localhost:8000/v1/synthlang/generate \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer your_api_key" \
+  -d '{
+    "task_description": "Create a system prompt for a chatbot that helps with programming"
+  }'
+```
+
 ## Agent Tools
 
 The proxy includes an extensible agent SDK with built-in tools:
@@ -235,6 +277,23 @@ Example of how semantic caching works:
 3. Later, another user asks: "Can you show me Python code for a BST implementation?"
 4. The system recognizes the semantic similarity and returns the cached response instantly
 
+## Prompt Engineering with DSPy
+
+SynthLang Proxy integrates with DSPy to provide advanced prompt engineering capabilities:
+
+- **Prompt Programming**: Use DSPy's declarative programming model for LLMs
+- **Signature-Based Design**: Define input and output fields with clear descriptions
+- **Chain-of-Thought Reasoning**: Automatically generate step-by-step reasoning
+- **Prompt Optimization**: Optimize prompts using DSPy's optimization techniques
+- **Self-Improvement**: Prompts that learn from examples and improve over time
+
+Example of DSPy integration:
+
+1. Define a signature for your task
+2. Create a module using that signature
+3. Optimize the module using examples
+4. Deploy the optimized module through the proxy
+
 ## Configuration
 
 See `.env.sample` for all available configuration options.
@@ -249,6 +308,8 @@ Key configurations:
 - `CACHE_SIMILARITY_THRESHOLD`: Threshold for semantic cache hits (0.0-1.0)
 - `DEFAULT_RATE_LIMIT`: Default rate limit (requests per minute)
 - `ENABLE_GZIP_COMPRESSION`: Enable/disable additional gzip compression (default: false)
+- `SYNTHLANG_DEFAULT_MODEL`: Default model for SynthLang operations (default: gpt-4o-mini)
+- `SYNTHLANG_STORAGE_DIR`: Directory for storing prompts (default: /tmp/synthlang)
 
 ## Development
 
@@ -277,6 +338,41 @@ def my_custom_tool(param1, param2):
 
 # Register the tool
 register_tool("my_tool_name", my_custom_tool)
+```
+
+### Creating Custom Prompt Modules
+
+To create a custom prompt module using DSPy:
+
+1. Define a signature for your task
+2. Create a module using that signature
+3. Register it with the SynthLang API
+
+Example:
+
+```python
+import dspy
+from app.synthlang.api import synthlang_api
+
+# Define a signature
+class CustomSignature(dspy.Signature):
+    input = dspy.InputField()
+    output = dspy.OutputField()
+
+# Create a module
+class CustomModule(dspy.Module):
+    def __init__(self, lm):
+        super().__init__()
+        self.lm = lm
+        self.predictor = dspy.Predict(CustomSignature)
+    
+    def forward(self, input_text):
+        with dspy.context(lm=self.lm):
+            result = self.predictor(input=input_text)
+            return result.output
+
+# Register with SynthLang API
+synthlang_api.register_module("custom", CustomModule)
 ```
 
 ## Performance Benchmarks

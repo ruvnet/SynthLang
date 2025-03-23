@@ -21,8 +21,10 @@ from app.models import (
     APIInfo,
     HealthCheck
 )
-from app import auth, synthlang, cache, llm_provider, db
+from app import auth, cache, llm_provider, db
 from app.database import init_db
+from app.synthlang import is_synthlang_available
+from app.synthlang.endpoints import router as synthlang_router
 
 # Configure logging
 logging.basicConfig(
@@ -80,6 +82,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Include SynthLang API router
+app.include_router(synthlang_router)
+
 
 @app.get("/", response_model=APIInfo)
 async def root():
@@ -108,7 +113,7 @@ async def health_check():
     return {
         "status": "healthy",
         "timestamp": int(time.time()),
-        "synthlang_available": synthlang.is_synthlang_available(),
+        "synthlang_available": is_synthlang_available(),
         "version": "0.1.0"
     }
 
@@ -156,7 +161,9 @@ async def create_chat_completion(
     compressed_messages = []
     for msg in request.messages:
         if msg.role in ("user", "system"):
-            compressed_content = synthlang.compress_prompt(msg.content)
+            # Use the new API for compression
+            from app.synthlang.api import synthlang_api
+            compressed_content = synthlang_api.compress(msg.content)
             compressed_messages.append({"role": msg.role, "content": compressed_content})
         else:
             compressed_messages.append({"role": msg.role, "content": msg.content})
@@ -223,7 +230,9 @@ async def create_chat_completion(
     final_messages = []
     for msg in compressed_messages:
         if msg["role"] in ("user", "system"):
-            final_messages.append({"role": msg["role"], "content": synthlang.decompress_prompt(msg["content"])})
+            # Use the new API for decompression
+            from app.synthlang.api import synthlang_api
+            final_messages.append({"role": msg["role"], "content": synthlang_api.decompress(msg["content"])})
         else:
             final_messages.append(msg)
     

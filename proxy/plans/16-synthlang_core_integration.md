@@ -1,273 +1,422 @@
-# Phase 16: SynthLang Core Integration (16-synthlang_core_integration.md)
+# SynthLang Core Integration Plan
 
-## Objective
-Integrate the SynthLang core module from `proxy/src/cli/synthlang/core` into the proxy/src structure to provide advanced prompt engineering capabilities directly within the proxy service.
+## Overview
 
-## Current State Analysis
+This plan outlines the integration of the SynthLang core modules from the CLI into the proxy service. The goal is to provide a clean API interface for the core functionality and expose it through FastAPI endpoints.
 
-The SynthLang core module currently exists in `proxy/src/cli/synthlang/core` and includes several powerful components:
+## Objectives
 
-1. **Base Module**: `SynthLangModule` - Base class for all SynthLang modules
-2. **Translator**: `FrameworkTranslator` - Translates natural language to SynthLang format
-3. **Generator**: `SystemPromptGenerator` - Generates system prompts from task descriptions
-4. **Optimizer**: `PromptOptimizer` - Optimizes prompts using DSPy techniques
-5. **Evolver**: `PromptEvolver` - Evolves prompts using genetic algorithms
-6. **Classifier**: `PromptClassifier` - Classifies prompts using DSPy
-7. **Prompt Manager**: `PromptManager` - Manages storage and retrieval of prompts
-8. **Types**: Type definitions and symbols for SynthLang format
+1. Import and use the existing SynthLang core modules from the CLI
+2. Create a clean API interface for the core functionality
+3. Expose the functionality through FastAPI endpoints
+4. Maintain backward compatibility with the existing compression/decompression functionality
+5. Add comprehensive tests and documentation
 
-Currently, the proxy only uses SynthLang CLI for basic prompt compression and decompression via subprocess calls in `app/synthlang.py`.
+## Architecture
 
-## Integration Plan
-
-### 1. Create a Dedicated SynthLang Module Structure
-
-Create a proper module structure for SynthLang within the proxy:
+The SynthLang integration will follow a modular architecture:
 
 ```
-proxy/src/
-  ├── app/
-  │   ├── synthlang/
-  │   │   ├── __init__.py
-  │   │   ├── compression.py  # Current compression/decompression functionality
-  │   │   ├── core/           # Core modules from cli/synthlang/core
-  │   │   │   ├── __init__.py
-  │   │   │   ├── base.py
-  │   │   │   ├── translator.py
-  │   │   │   ├── generator.py
-  │   │   │   ├── optimizer.py
-  │   │   │   ├── evolver.py
-  │   │   │   ├── classifier.py
-  │   │   │   ├── prompt_manager.py
-  │   │   │   ├── signatures.py
-  │   │   │   └── types.py
-  │   │   ├── api.py          # API endpoints for SynthLang functionality
-  │   │   └── utils.py        # Utility functions
+proxy/src/app/synthlang/
+  ├── __init__.py           # Exports main functionality
+  ├── compression.py        # Original compression/decompression functionality
+  ├── api.py                # API interface for SynthLang core
+  ├── endpoints.py          # FastAPI endpoints
+  ├── models.py             # Pydantic models for API
+  ├── utils.py              # Utility functions
+  └── core/                 # Core modules from CLI
+      └── __init__.py       # Imports core modules from CLI
 ```
 
-### 2. Refactor Current SynthLang Integration
+## Implementation Steps
 
-1. Move the current `app/synthlang.py` functionality to `app/synthlang/compression.py`
-2. Create a new `app/synthlang/__init__.py` that exports the main functionality
-3. Update imports in other modules to use the new structure
+### 1. Create Core Module
 
-### 3. Integrate Core Modules
-
-1. Copy and adapt the core modules from `proxy/src/cli/synthlang/core` to `app/synthlang/core/`
-2. Ensure proper imports and dependencies are maintained
-3. Adapt modules to work within the proxy context (e.g., use proxy's logging, config)
-
-### 4. Create API Interface
-
-Create a clean API interface in `app/synthlang/api.py` that exposes the core functionality:
+Create a core module that imports the SynthLang core modules from the CLI:
 
 ```python
-# app/synthlang/api.py
-from typing import Dict, List, Optional, Any
+# proxy/src/app/synthlang/core/__init__.py
+"""
+SynthLang core module.
+
+This module imports and re-exports the core modules from the CLI implementation.
+"""
+import sys
+import os
+from pathlib import Path
+import logging
+
+# Configure logging
+logger = logging.getLogger(__name__)
+
+# Add the CLI directory to the Python path to import the core modules
+cli_path = Path(__file__).parent.parent.parent.parent.parent / "cli"
+if cli_path.exists() and str(cli_path) not in sys.path:
+    sys.path.append(str(cli_path))
+    logger.info(f"Added CLI path to Python path: {cli_path}")
+
+# Import core modules from CLI
+try:
+    from cli.synthlang.core import (
+        SynthLangModule,
+        FrameworkTranslator,
+        SystemPromptGenerator,
+        PromptOptimizer,
+        PromptEvolver,
+        PromptManager,
+        PromptClassifier,
+        TranslationResult,
+        GenerationResult,
+        OptimizationResult,
+        SynthLangSymbols,
+        FormatRules
+    )
+    
+    logger.info("Successfully imported SynthLang core modules from CLI")
+except ImportError as e:
+    logger.error(f"Failed to import SynthLang core modules from CLI: {e}")
+    # Define fallback classes
+    # ...
+```
+
+### 2. Create API Interface
+
+Create an API interface for the SynthLang core functionality:
+
+```python
+# proxy/src/app/synthlang/api.py
+"""
+SynthLang API interface.
+
+This module provides a clean API interface to the SynthLang core functionality.
+"""
+import logging
+from typing import Any, Dict, List, Optional, Union
+import os
+
+from app.config import USE_SYNTHLANG
+from app.synthlang.compression import compress_prompt, decompress_prompt
 from app.synthlang.core import (
+    SynthLangModule,
     FrameworkTranslator,
     SystemPromptGenerator,
     PromptOptimizer,
     PromptEvolver,
     PromptClassifier,
-    PromptManager
+    PromptManager,
+    TranslationResult,
+    GenerationResult,
+    OptimizationResult,
+    SynthLangSymbols,
+    FormatRules
 )
+
+# Configure logging
+logger = logging.getLogger(__name__)
+
+# Toggle to enable/disable SynthLang from configuration
+ENABLE_SYNTHLANG = USE_SYNTHLANG
+
 
 class SynthLangAPI:
     """API interface for SynthLang functionality."""
     
-    def __init__(self, lm: Any = None):
-        """Initialize SynthLang API with optional language model."""
-        self.lm = lm
-        self.translator = FrameworkTranslator(lm) if lm else None
-        self.generator = SystemPromptGenerator(lm) if lm else None
-        self.optimizer = PromptOptimizer(lm) if lm else None
-        self.evolver = PromptEvolver(lm) if lm else None
-        self.classifier = None  # Initialize on demand with labels
-        self.prompt_manager = PromptManager()
+    def __init__(self, lm: Optional[Any] = None, storage_dir: Optional[str] = None):
+        """
+        Initialize SynthLang API with optional language model.
         
-    # Methods for each functionality...
+        Args:
+            lm: Optional language model instance
+            storage_dir: Optional directory for prompt storage
+        """
+        self.lm = lm
+        self.enabled = ENABLE_SYNTHLANG
+        
+        # Initialize core modules if enabled
+        if self.enabled:
+            try:
+                self.translator = FrameworkTranslator(lm) if lm else None
+                self.generator = SystemPromptGenerator(lm) if lm else None
+                self.optimizer = PromptOptimizer(lm) if lm else None
+                self.evolver = PromptEvolver(lm) if lm else None
+                self.classifier = None  # Initialize on demand with labels
+                self.prompt_manager = PromptManager(storage_dir)
+                logger.info("SynthLang API initialized with core modules")
+            except Exception as e:
+                logger.error(f"Failed to initialize SynthLang API: {e}")
+                self.enabled = False
+    
+    # API methods
+    # ...
 ```
 
-### 5. Create FastAPI Endpoints
+### 3. Create Pydantic Models
 
-Create FastAPI endpoints in `app/main.py` to expose SynthLang functionality:
+Create Pydantic models for the API endpoints:
 
 ```python
-# app/main.py (additions)
-from app.synthlang.api import SynthLangAPI
+# proxy/src/app/synthlang/models.py
+"""
+SynthLang API models.
 
-# Initialize SynthLangAPI with default LM
-synthlang_api = SynthLangAPI()
+This module defines the Pydantic models for SynthLang API endpoints.
+"""
+from typing import Dict, List, Optional, Any, Union
+from pydantic import BaseModel, Field
 
-# SynthLang endpoints
-@app.post("/v1/synthlang/translate")
-async def translate_prompt(request: dict, api_key: str = Depends(auth.verify_api_key)):
-    """Translate natural language to SynthLang format."""
-    # Implementation...
 
-@app.post("/v1/synthlang/generate")
-async def generate_prompt(request: dict, api_key: str = Depends(auth.verify_api_key)):
-    """Generate a system prompt from task description."""
-    # Implementation...
+class TranslateRequest(BaseModel):
+    """Request model for translation endpoint."""
+    text: str = Field(..., description="Text to translate to SynthLang format")
+    instructions: Optional[str] = Field(None, description="Optional custom translation instructions")
 
-# More endpoints...
+
+class TranslateResponse(BaseModel):
+    """Response model for translation endpoint."""
+    source: str = Field(..., description="Original text")
+    target: str = Field(..., description="Translated text in SynthLang format")
+    explanation: str = Field(..., description="Explanation of the translation")
+    version: str = Field(..., description="API version")
+    timestamp: str = Field(..., description="Timestamp of the response")
+
+# More models
+# ...
 ```
 
-### 6. Add Configuration Options
+### 4. Create FastAPI Endpoints
 
-Add configuration options in `app/config.py` for SynthLang features:
+Create FastAPI endpoints for the SynthLang functionality:
 
 ```python
-# app/config.py (additions)
-SYNTHLANG_FEATURES_ENABLED = os.getenv("SYNTHLANG_FEATURES_ENABLED", "true").lower() == "true"
-SYNTHLANG_DEFAULT_MODEL = os.getenv("SYNTHLANG_DEFAULT_MODEL", "gpt-4o-mini")
-SYNTHLANG_STORAGE_DIR = os.getenv("SYNTHLANG_STORAGE_DIR", "/tmp/synthlang")
+# proxy/src/app/synthlang/endpoints.py
+"""
+SynthLang API endpoints.
+
+This module defines the FastAPI endpoints for SynthLang functionality.
+"""
+import logging
+import time
+from typing import List, Dict, Any, Optional
+from datetime import datetime
+
+from fastapi import APIRouter, Depends, HTTPException, Header
+from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_404_NOT_FOUND
+
+from app import auth
+from app.synthlang.api import synthlang_api
+from app.synthlang.models import (
+    TranslateRequest, TranslateResponse,
+    GenerateRequest, GenerateResponse,
+    OptimizeRequest, OptimizeResponse,
+    EvolveRequest, EvolveResponse,
+    ClassifyRequest, ClassifyResponse,
+    SavePromptRequest, SavePromptResponse,
+    LoadPromptRequest, LoadPromptResponse,
+    ListPromptsResponse,
+    DeletePromptRequest, DeletePromptResponse,
+    ComparePromptsRequest, ComparePromptsResponse
+)
+from app.synthlang.utils import (
+    get_dspy_lm,
+    format_synthlang_response
+)
+
+# Configure logging
+logger = logging.getLogger(__name__)
+
+# Create router
+router = APIRouter(prefix="/v1/synthlang", tags=["synthlang"])
+
+# Endpoints
+# ...
 ```
 
-### 7. Create Utility Functions
+### 5. Update Main Application
 
-Create utility functions in `app/synthlang/utils.py` for common operations:
+Update the main application to include the SynthLang API endpoints:
 
 ```python
-# app/synthlang/utils.py
+# proxy/src/app/main.py
+# ...
+from app.synthlang.endpoints import router as synthlang_router
+
+# ...
+
+# Include SynthLang API router
+app.include_router(synthlang_router)
+```
+
+### 6. Create Utility Functions
+
+Create utility functions for the SynthLang integration:
+
+```python
+# proxy/src/app/synthlang/utils.py
+"""
+SynthLang utility functions.
+
+This module provides utility functions for SynthLang integration.
+"""
 import os
-from typing import Any, Dict, Optional
-import dspy
+import logging
+import importlib.util
+from typing import Any, Dict, Optional, List, Union
+import json
 
-def get_dspy_lm(model_name: str = None) -> Any:
-    """Get a DSPy language model instance."""
-    # Implementation...
+# Configure logging
+logger = logging.getLogger(__name__)
 
-def format_synthlang_response(result: Dict) -> Dict:
-    """Format SynthLang result for API response."""
-    # Implementation...
+
+def get_dspy_lm(model_name: Optional[str] = None) -> Optional[Any]:
+    """
+    Get a DSPy language model instance.
+    
+    Args:
+        model_name: Optional model name to use
+        
+    Returns:
+        DSPy language model instance or None if not available
+    """
+    # Check if DSPy is available
+    if importlib.util.find_spec("dspy") is None:
+        logger.warning("DSPy is not installed")
+        return None
+        
+    try:
+        import dspy
+        from dspy.openai import OpenAI
+        
+        # Use environment variables for API key
+        api_key = os.environ.get("OPENAI_API_KEY")
+        if not api_key:
+            logger.warning("OPENAI_API_KEY environment variable not set")
+            return None
+            
+        # Use the specified model or default
+        model = model_name or os.environ.get("SYNTHLANG_DEFAULT_MODEL", "gpt-4o-mini")
+        
+        # Create OpenAI LM
+        lm = OpenAI(api_key=api_key, model=model)
+        logger.info(f"Created DSPy OpenAI LM with model: {model}")
+        
+        return lm
+    except ImportError as e:
+        logger.error(f"Failed to import DSPy or OpenAI: {e}")
+        return None
+    except Exception as e:
+        logger.error(f"Failed to create DSPy LM: {e}")
+        return None
+
+# More utility functions
+# ...
 ```
 
-### 8. Testing Strategy
+### 7. Create Tests
 
-Create comprehensive tests for the SynthLang integration:
+Create tests for the SynthLang integration:
 
-1. **Unit Tests**:
-   - Test each core module individually
-   - Test the API interface
-   - Test utility functions
+```python
+# proxy/tests/test_synthlang_integration.py
+"""
+Tests for SynthLang integration.
 
-2. **Integration Tests**:
-   - Test the FastAPI endpoints
-   - Test interaction between modules
+This module contains tests for the SynthLang integration with the proxy.
+"""
+import os
+import sys
+import pytest
+from unittest.mock import patch, MagicMock
+import json
+from fastapi.testclient import TestClient
 
-3. **End-to-End Tests**:
-   - Test complete workflows using the SynthLang functionality
+# Add the src directory to the Python path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-Test files:
-```
-proxy/tests/
-  ├── test_synthlang_compression.py  # Tests for compression/decompression
-  ├── test_synthlang_translator.py   # Tests for translator module
-  ├── test_synthlang_generator.py    # Tests for generator module
-  ├── test_synthlang_optimizer.py    # Tests for optimizer module
-  ├── test_synthlang_evolver.py      # Tests for evolver module
-  ├── test_synthlang_classifier.py   # Tests for classifier module
-  ├── test_synthlang_api.py          # Tests for API interface
-  └── test_synthlang_endpoints.py    # Tests for FastAPI endpoints
-```
+from app.main import app
+from app.synthlang.api import synthlang_api
+from app.synthlang.utils import get_dspy_lm
 
-### 9. Documentation
 
-Create comprehensive documentation for the SynthLang integration:
+# Create test client
+client = TestClient(app)
 
-1. **API Documentation**:
-   - Document all API endpoints
-   - Document request/response formats
-   - Provide examples
-
-2. **Usage Documentation**:
-   - Document how to use SynthLang features
-   - Provide examples for common use cases
-
-3. **Developer Documentation**:
-   - Document the module structure
-   - Document how to extend the functionality
-
-Documentation files:
-```
-proxy/docs/
-  ├── synthlang_integration.md       # Overview of SynthLang integration
-  ├── synthlang_api.md               # API documentation
-  ├── synthlang_usage.md             # Usage documentation
-  └── synthlang_development.md       # Developer documentation
+# Tests
+# ...
 ```
 
-## Implementation Steps
+### 8. Create Documentation
 
-### Phase 1: Setup and Refactoring
+Create documentation for the SynthLang integration:
 
-1. Create the directory structure for the SynthLang module
-2. Refactor the current `app/synthlang.py` to `app/synthlang/compression.py`
-3. Create `app/synthlang/__init__.py` to export the main functionality
-4. Update imports in other modules
+```markdown
+# SynthLang Integration
 
-### Phase 2: Core Module Integration
+This document describes the integration of SynthLang core functionality into the proxy service.
 
-1. Copy and adapt the core modules from `proxy/src/cli/synthlang/core`
-2. Ensure proper imports and dependencies
-3. Adapt modules to work within the proxy context
+## Overview
 
-### Phase 3: API Interface and Endpoints
+SynthLang is a powerful prompt engineering framework that provides advanced capabilities for working with LLM prompts. The integration brings these capabilities directly into the proxy service, allowing for more sophisticated prompt manipulation, optimization, and management.
 
-1. Create the API interface in `app/synthlang/api.py`
-2. Create FastAPI endpoints in `app/main.py`
-3. Add configuration options in `app/config.py`
-4. Create utility functions in `app/synthlang/utils.py`
+## Features
 
-### Phase 4: Testing and Documentation
+The SynthLang integration provides the following features:
 
-1. Create unit tests for each module
-2. Create integration tests for the API interface and endpoints
-3. Create end-to-end tests for complete workflows
-4. Create comprehensive documentation
+1. Prompt Compression and Decompression
+2. Prompt Translation
+3. System Prompt Generation
+4. Prompt Optimization
+5. Prompt Evolution
+6. Prompt Classification
+7. Prompt Management
 
-## Benefits
+## API Endpoints
 
-1. **Enhanced Functionality**: Provides advanced prompt engineering capabilities directly within the proxy
-2. **Improved Performance**: Eliminates subprocess calls to the SynthLang CLI
-3. **Better Integration**: Tighter integration with the proxy's authentication, rate limiting, and caching
-4. **Extensibility**: Easier to extend with new SynthLang features
-5. **Testability**: More comprehensive testing of SynthLang functionality
-6. **Documentation**: Better documentation for users and developers
+The SynthLang integration exposes the following API endpoints:
 
-## Risks and Mitigations
+- `/v1/synthlang/translate`
+- `/v1/synthlang/generate`
+- `/v1/synthlang/optimize`
+- `/v1/synthlang/evolve`
+- `/v1/synthlang/classify`
+- `/v1/synthlang/prompts/save`
+- `/v1/synthlang/prompts/load`
+- `/v1/synthlang/prompts/list`
+- `/v1/synthlang/prompts/delete`
+- `/v1/synthlang/prompts/compare`
 
-1. **Dependency Management**: 
-   - Risk: The SynthLang core modules have dependencies that may conflict with the proxy's dependencies
-   - Mitigation: Carefully manage dependencies and use virtual environments
+## Usage Examples
 
-2. **Performance Impact**:
-   - Risk: The SynthLang core modules may impact the performance of the proxy
-   - Mitigation: Profile and optimize the integration, consider async processing for heavy operations
+...
+```
 
-3. **Maintenance Overhead**:
-   - Risk: Maintaining two copies of the SynthLang core modules (in CLI and proxy)
-   - Mitigation: Consider creating a shared package for the core modules
+## Testing Strategy
 
-4. **Backward Compatibility**:
-   - Risk: Breaking changes to the current SynthLang integration
-   - Mitigation: Maintain backward compatibility with the current API
+1. Unit tests for each component
+2. Integration tests for the API endpoints
+3. Mock tests for the DSPy language model
+4. End-to-end tests for the full integration
 
-## Success Criteria
+## Deployment Considerations
 
-1. All tests pass
-2. Documentation is complete and accurate
-3. Performance is acceptable (benchmarks show no significant degradation)
-4. All SynthLang features are accessible through the API
-5. Backward compatibility is maintained
+1. Ensure the CLI directory is accessible to the proxy service
+2. Install the required dependencies (DSPy, etc.)
+3. Set the required environment variables (OPENAI_API_KEY, etc.)
+4. Configure the storage directory for prompt management
 
-## Next Steps
+## Future Enhancements
 
-After successful integration of the SynthLang core module, consider:
+1. Add support for more language models (Claude, Llama, etc.)
+2. Add support for fine-tuning SynthLang models
+3. Add a web UI for SynthLang functionality
+4. Add support for prompt templates and variables
+5. Add support for prompt versioning and history
 
-1. Enhancing the proxy with more advanced SynthLang features
-2. Creating a shared package for the SynthLang core modules
-3. Providing a web UI for SynthLang functionality
-4. Integrating SynthLang with other proxy features (e.g., caching, rate limiting)
+## Timeline
+
+1. Core module implementation: 1 day
+2. API interface implementation: 1 day
+3. FastAPI endpoints implementation: 1 day
+4. Testing and documentation: 1 day
+5. Integration and deployment: 1 day
+
+Total: 5 days

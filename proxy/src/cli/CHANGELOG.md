@@ -5,6 +5,39 @@ All notable changes to the SynthLang CLI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2025-03-23
+
+### Added
+- Proxy service integration
+  - Local proxy server with `proxy serve` command
+  - API client for remote proxy services
+  - Authentication with `proxy login` and `proxy logout` commands
+  - Chat completion with `proxy chat` command
+- Advanced prompt compression
+  - SynthLang compression algorithm
+  - Optional gzip compression
+  - Compression metrics and statistics
+- Semantic caching
+  - Automatic caching of API responses
+  - Cache management commands
+  - Cache statistics
+- Agent SDK and tool registry
+  - Built-in tools for common tasks
+  - Tool discovery and execution from CLI
+  - Extensible tool registry
+- Proxy integration with existing commands
+  - `--use-proxy` flag for translate and optimize commands
+  - Fallback to local implementation when proxy unavailable
+- Documentation
+  - Proxy integration tutorial
+  - Updated README with proxy commands
+  - Command help text
+
+### Changed
+- Updated dependencies to support proxy functionality
+- Improved error handling and logging
+- Enhanced CLI structure with command groups
+
 ## [0.1.0] - 2024-01-01
 
 ### Added
@@ -45,28 +78,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - None (initial release)
 
-## [Unreleased]
-
-### Added
-- Placeholder for future features
-
-### Changed
-- None
-
-### Deprecated
-- None
-
-### Removed
-- None
-
-### Fixed
-- None
-
-### Security
-- None
-
 ## Version History
 
+- 0.2.0 (2025-03-23)
+  - Added proxy integration and advanced features
 - 0.1.0 (2024-01-01)
   - Initial release
 
@@ -76,9 +91,3 @@ SynthLang CLI follows semantic versioning:
 - MAJOR version for incompatible API changes
 - MINOR version for new functionality in a backward compatible manner
 - PATCH version for backward compatible bug fixes
-
-## Issue References
-
-Each change should reference any relevant issues or pull requests. For example:
-- Fixed configuration loading (#123)
-- Added new translation feature (#456)
