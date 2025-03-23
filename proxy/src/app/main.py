@@ -76,6 +76,11 @@ async def lifespan(app: FastAPI):
     try:
         pattern_count = initialize_from_config()
         logger.info(f"Keyword detection system initialized with {pattern_count} patterns")
+        
+        # Import all tools to ensure they are registered
+        from src.app.agents.tools.import_tools import import_all_tools
+        tool_count = import_all_tools()
+        logger.info(f"Imported {tool_count} tools")
     except Exception as e:
         logger.error(f"Error initializing keyword detection system: {e}")
     

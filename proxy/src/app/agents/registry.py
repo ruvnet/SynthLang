@@ -5,7 +5,10 @@ This module provides functionality for registering and retrieving tools
 that can be invoked by the agent SDK.
 """
 from typing import Dict, Any, Callable, Optional
+import logging
 
+# Configure logger
+logger = logging.getLogger(__name__)
 
 # Tool registry dictionary to store registered tools
 TOOL_REGISTRY: Dict[str, Callable] = {}
@@ -20,6 +23,8 @@ def register_tool(name: str, tool_callable: Callable) -> None:
         tool_callable: The function to execute when the tool is invoked
     """
     TOOL_REGISTRY[name] = tool_callable
+    logger.info(f"Registered tool '{name}' in the tool registry")
+    print(f"Registered tool '{name}' in the tool registry")
 
 
 def get_tool(name: str) -> Optional[Callable]:
@@ -32,7 +37,13 @@ def get_tool(name: str) -> Optional[Callable]:
     Returns:
         The tool callable if found, None otherwise
     """
-    return TOOL_REGISTRY.get(name)
+    tool = TOOL_REGISTRY.get(name)
+    if tool:
+        logger.debug(f"Found tool '{name}' in the registry")
+    else:
+        logger.warning(f"Tool '{name}' not found in the registry")
+        print(f"Tool '{name}' not found in the registry. Available tools: {list(TOOL_REGISTRY.keys())}")
+    return tool
 
 
 def list_tools() -> Dict[str, Callable]:
@@ -42,4 +53,7 @@ def list_tools() -> Dict[str, Callable]:
     Returns:
         A dictionary of all registered tools
     """
-    return TOOL_REGISTRY.copy()
+    tools = TOOL_REGISTRY.copy()
+    logger.info(f"Available tools: {list(tools.keys())}")
+    print(f"Available tools: {list(tools.keys())}")
+    return tools

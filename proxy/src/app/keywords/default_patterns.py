@@ -3,7 +3,33 @@ Default keyword patterns for the SynthLang Proxy.
 
 This module registers default keyword patterns for common tools.
 """
-from src.app.keywords.registry import KeywordPattern, register_pattern
+import os
+import sys
+import traceback
+
+# Add the project root to the Python path
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+    print(f"Added {project_root} to Python path in default_patterns.py")
+
+# Print current Python path for debugging
+print(f"Python path in default_patterns.py: {sys.path}")
+
+try:
+    from src.app.keywords.registry import KeywordPattern, register_pattern
+    print("Successfully imported from src.app.keywords.registry in default_patterns.py")
+except ImportError as e:
+    print(f"Error importing from src.app.keywords.registry in default_patterns.py: {e}")
+    print(f"Traceback: {traceback.format_exc()}")
+    try:
+        from app.keywords.registry import KeywordPattern, register_pattern
+        print("Successfully imported from app.keywords.registry in default_patterns.py")
+    except ImportError as e2:
+        print(f"Error importing from app.keywords.registry in default_patterns.py: {e2}")
+        print(f"Traceback: {traceback.format_exc()}")
+        # Re-raise the original exception
+        raise e
 
 # Weather patterns
 weather_pattern = KeywordPattern(
@@ -45,10 +71,17 @@ admin_pattern = KeywordPattern(
 # Register all patterns
 def register_default_patterns():
     """Register all default keyword patterns."""
+    print("Registering default patterns...")
     register_pattern(weather_pattern)
     register_pattern(web_search_pattern)
     register_pattern(calculator_pattern)
     register_pattern(admin_pattern)
+    print("Default patterns registered successfully")
 
 # Register patterns when this module is imported
-register_default_patterns()
+try:
+    register_default_patterns()
+    print("Default patterns registered on import")
+except Exception as e:
+    print(f"Error registering default patterns on import: {e}")
+    print(f"Traceback: {traceback.format_exc()}")

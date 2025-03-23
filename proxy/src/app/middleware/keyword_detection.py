@@ -5,11 +5,67 @@ This module provides middleware for detecting keywords in user messages and invo
 """
 import logging
 import re
+import sys
+import os
+import traceback
 from typing import Dict, Any, List, Optional, Tuple, Union
 
-from src.app.keywords.registry import KEYWORD_REGISTRY, KeywordPattern
-from src.app.agents.registry import get_tool
-from src.app.auth.roles import get_user_roles
+# Add the project root to the Python path
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+    print(f"Added {project_root} to Python path in keyword_detection.py")
+
+# Print current Python path for debugging
+print(f"Python path in keyword_detection.py: {sys.path}")
+
+try:
+    print("Attempting to import from src.app.keywords.registry")
+    from src.app.keywords.registry import KEYWORD_REGISTRY, KeywordPattern
+    print("Successfully imported from src.app.keywords.registry")
+except ImportError as e:
+    print(f"Error importing from src.app.keywords.registry: {e}")
+    print(f"Traceback: {traceback.format_exc()}")
+    try:
+        print("Attempting to import from app.keywords.registry")
+        from app.keywords.registry import KEYWORD_REGISTRY, KeywordPattern
+        print("Successfully imported from app.keywords.registry")
+    except ImportError as e2:
+        print(f"Error importing from app.keywords.registry: {e2}")
+        print(f"Traceback: {traceback.format_exc()}")
+        raise e
+
+try:
+    print("Attempting to import from src.app.agents.registry")
+    from src.app.agents.registry import get_tool
+    print("Successfully imported from src.app.agents.registry")
+except ImportError as e:
+    print(f"Error importing from src.app.agents.registry: {e}")
+    print(f"Traceback: {traceback.format_exc()}")
+    try:
+        print("Attempting to import from app.agents.registry")
+        from app.agents.registry import get_tool
+        print("Successfully imported from app.agents.registry")
+    except ImportError as e2:
+        print(f"Error importing from app.agents.registry: {e2}")
+        print(f"Traceback: {traceback.format_exc()}")
+        raise e
+
+try:
+    print("Attempting to import from src.app.auth.roles")
+    from src.app.auth.roles import get_user_roles
+    print("Successfully imported from src.app.auth.roles")
+except ImportError as e:
+    print(f"Error importing from src.app.auth.roles: {e}")
+    print(f"Traceback: {traceback.format_exc()}")
+    try:
+        print("Attempting to import from app.auth.roles")
+        from app.auth.roles import get_user_roles
+        print("Successfully imported from app.auth.roles")
+    except ImportError as e2:
+        print(f"Error importing from app.auth.roles: {e2}")
+        print(f"Traceback: {traceback.format_exc()}")
+        raise e
 
 # Logger for this module
 logger = logging.getLogger(__name__)
@@ -63,11 +119,13 @@ async def process_message_with_keywords(message: str, user_id: str) -> Optional[
         match = re.search(pattern.pattern, message, re.IGNORECASE)
         if match:
             logger.info(f"Matched pattern '{pattern.name}' for user '{user_id}'")
+            print(f"Matched pattern '{pattern.name}' for user '{user_id}'")
             
             # Get the tool
             tool_func = get_tool(pattern.tool)
             if not tool_func:
                 logger.error(f"Tool '{pattern.tool}' not found for pattern '{pattern.name}'")
+                print(f"Tool '{pattern.tool}' not found for pattern '{pattern.name}'")
                 continue
             
             try:
@@ -80,6 +138,7 @@ async def process_message_with_keywords(message: str, user_id: str) -> Optional[
                 
                 # Call the tool with the extracted parameters
                 logger.info(f"Invoking tool '{pattern.tool}' with parameters: {kwargs}")
+                print(f"Invoking tool '{pattern.tool}' with parameters: {kwargs}")
                 result = await tool_func(**kwargs)
                 
                 # Add metadata to the result
@@ -90,6 +149,8 @@ async def process_message_with_keywords(message: str, user_id: str) -> Optional[
                 return result
             except Exception as e:
                 logger.exception(f"Error invoking tool '{pattern.tool}': {str(e)}")
+                print(f"Error invoking tool '{pattern.tool}': {str(e)}")
+                print(f"Traceback: {traceback.format_exc()}")
                 return {
                     "content": f"I encountered an error while trying to process your request: {str(e)}",
                     "pattern_name": pattern.name,
@@ -112,9 +173,25 @@ async def apply_keyword_detection(messages: List[Dict[str, str]], user_id: str) 
         The tool response if a keyword is detected, None otherwise
     """
     # Check if keyword detection is enabled - import here to get the current value
-    from src.app.keywords.registry import ENABLE_KEYWORD_DETECTION
+    try:
+        print("Attempting to import ENABLE_KEYWORD_DETECTION from src.app.keywords.registry")
+        from src.app.keywords.registry import ENABLE_KEYWORD_DETECTION
+        print(f"Successfully imported ENABLE_KEYWORD_DETECTION: {ENABLE_KEYWORD_DETECTION}")
+    except ImportError as e:
+        print(f"Error importing ENABLE_KEYWORD_DETECTION from src.app.keywords.registry: {e}")
+        try:
+            print("Attempting to import ENABLE_KEYWORD_DETECTION from app.keywords.registry")
+            from app.keywords.registry import ENABLE_KEYWORD_DETECTION
+            print(f"Successfully imported ENABLE_KEYWORD_DETECTION: {ENABLE_KEYWORD_DETECTION}")
+        except ImportError as e2:
+            print(f"Error importing ENABLE_KEYWORD_DETECTION from app.keywords.registry: {e2}")
+            # Default to enabled if we can't import
+            ENABLE_KEYWORD_DETECTION = True
+            print(f"Using default value for ENABLE_KEYWORD_DETECTION: {ENABLE_KEYWORD_DETECTION}")
+    
     if not ENABLE_KEYWORD_DETECTION:
         logger.debug("Keyword detection is disabled")
+        print("Keyword detection is disabled")
         return None
         
     # Get the last user message

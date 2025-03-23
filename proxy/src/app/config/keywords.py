@@ -8,10 +8,34 @@ import os
 import logging
 import tomli
 import tomli_w
+import traceback
+import sys
 from typing import Dict, List, Any, Optional
 from pathlib import Path
 
-from src.app.keywords.registry import KeywordPattern, register_pattern, KEYWORD_REGISTRY
+# Add the project root to the Python path
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+    print(f"Added {project_root} to Python path")
+
+# Print current Python path for debugging
+print(f"Python path: {sys.path}")
+
+try:
+    from src.app.keywords.registry import KeywordPattern, register_pattern, KEYWORD_REGISTRY
+    print("Successfully imported from src.app.keywords.registry")
+except ImportError as e:
+    print(f"Error importing from src.app.keywords.registry: {e}")
+    print(f"Traceback: {traceback.format_exc()}")
+    try:
+        from app.keywords.registry import KeywordPattern, register_pattern, KEYWORD_REGISTRY
+        print("Successfully imported from app.keywords.registry")
+    except ImportError as e2:
+        print(f"Error importing from app.keywords.registry: {e2}")
+        print(f"Traceback: {traceback.format_exc()}")
+        # Re-raise the original exception
+        raise e
 
 # Logger for this module
 logger = logging.getLogger(__name__)
@@ -210,8 +234,24 @@ def create_default_config() -> Dict[str, Any]:
         A default configuration dictionary
     """
     # Import default patterns
-    from src.app.keywords.default_patterns import register_default_patterns
-    register_default_patterns()
+    try:
+        print("Attempting to import from src.app.keywords.default_patterns")
+        from src.app.keywords.default_patterns import register_default_patterns
+        print("Successfully imported from src.app.keywords.default_patterns")
+        register_default_patterns()
+    except ImportError as e:
+        print(f"Error importing from src.app.keywords.default_patterns: {e}")
+        print(f"Traceback: {traceback.format_exc()}")
+        try:
+            # Try alternative import path
+            print("Attempting to import from app.keywords.default_patterns")
+            from app.keywords.default_patterns import register_default_patterns
+            print("Successfully imported from app.keywords.default_patterns")
+            register_default_patterns()
+        except ImportError as e2:
+            print(f"Error importing from app.keywords.default_patterns: {e2}")
+            print(f"Traceback: {traceback.format_exc()}")
+            logger.error("Failed to import default patterns from any known path")
     
     # Export to TOML
     config = export_patterns_to_toml()
