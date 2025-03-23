@@ -25,6 +25,7 @@ from app import auth, cache, llm_provider, db
 from app.database import init_db
 from app.synthlang import is_synthlang_available
 from app.synthlang.endpoints import router as synthlang_router
+from app.config.keywords import initialize_from_config
 
 # Configure logging
 logging.basicConfig(
@@ -54,6 +55,13 @@ async def lifespan(app: FastAPI):
         logger.info("Database initialized successfully")
     else:
         logger.warning("Database initialization failed, some features may not work correctly")
+    
+    # Initialize keyword detection system
+    try:
+        pattern_count = initialize_from_config()
+        logger.info(f"Keyword detection system initialized with {pattern_count} patterns")
+    except Exception as e:
+        logger.error(f"Error initializing keyword detection system: {e}")
     
     logger.info("Application initialization complete")
     
@@ -156,6 +164,67 @@ async def create_chat_completion(
     
     # Log the request
     logger.info(f"Chat completion request from user {user_id} for model {request.model}")
+    
+    # Check for keyword patterns in the last user message
+    from app.middleware.keyword_detection import apply_keyword_detection
+    keyword_response = await apply_keyword_detection(
+        [msg.dict() for msg in request.messages], 
+        user_id
+    )
+    
+    if keyword_response:
+        logger.info(f"Keyword detected in message from user {user_id}, using tool response")
+        
+        # Create a response with the tool's content
+        response = {
+            "id": f"chatcmpl-{int(time.time())}",
+            "object": "chat.completion",
+            "created": int(time.time()),
+            "model": request.model,
+            "choices": [
+                {
+                    "index": 0,
+                    "message": {
+                        "role": "assistant",
+                        "content": keyword_response.get("content", "I processed your request but couldn't generate a response.")
+                    },
+                    "finish_reason": "tool_invocation"
+                }
+            ],
+            "usage": {
+                "prompt_tokens": sum(len(msg.content.split()) for msg in request.messages),
+                "completion_tokens": len(keyword_response.get("content", "").split()),
+                "total_tokens": sum(len(msg.content.split()) for msg in request.messages) + 
+                                len(keyword_response.get("content", "").split())
+            },
+            # Include keyword detection information for debugging
+            "debug": {
+                "keyword_detection": True,
+                "tool_used": keyword_response.get("tool", "unknown"),
+                "pattern_matched": keyword_response.get("pattern", "unknown")
+            }
+        }
+        
+        # Save interaction to database
+        await db.save_interaction(
+            user_id, 
+            request.model, 
+            [msg.dict() for msg in request.messages], 
+            keyword_response.get("content", ""), 
+            cache_hit=False
+        )
+        
+        # Return streaming response if requested
+        if request.stream:
+            async def yield_keyword_response():
+                """Generate SSE events from the keyword response."""
+                content = keyword_response.get("content", "")
+                yield f"data: {content}\n\n"
+                yield "data: [DONE]\n\n"
+            
+            return StreamingResponse(yield_keyword_response(), media_type="text/event-stream")
+        
+        return response
     
     # 1. Compress user and system messages using SynthLang
     compressed_messages = []

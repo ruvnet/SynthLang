@@ -1,0 +1,113 @@
+# SynthLang Proxy Advanced Keyword Detection Configuration
+#
+# This is an advanced configuration example with additional patterns
+# and more complex regex patterns.
+
+[settings]
+enable_keyword_detection = true
+detection_threshold = 0.8
+default_role = "basic"
+
+# Standard patterns
+[patterns.web_search]
+pattern = "(?:search|find|look up|google|research)\\s+(?:for|about)?\\s+(?P<query>.+)"
+tool = "web_search"
+description = "Detects requests to search the web for information"
+priority = 100
+enabled = true
+
+[patterns.file_search]
+pattern = "(?:search|find|look up)\\s+(?:in|within|inside)?\\s+(?:files?|documents?|vector store)\\s+(?:for|about)?\\s+(?P<query>.+)"
+tool = "file_search"
+description = "Detects requests to search within files or documents"
+priority = 90
+enabled = true
+
+# Advanced patterns with more complex regex
+[patterns.image_generation]
+pattern = "(?:generate|create|make|draw)\\s+(?:an?|some)?\\s*(?:image|picture|photo|illustration|artwork)\\s+(?:of|showing|depicting|with)\\s+(?P<subject>.+?)(?:\\s+(?:in the style of|like|similar to)\\s+(?P<style>.+))?"
+tool = "image_generation"
+description = "Detects requests to generate images with optional style specification"
+priority = 85
+required_role = "premium"
+enabled = true
+
+[patterns.translation]
+pattern = "(?:translate|convert)\\s+(?:this|the following|this text|\"(?P<text>[^\"]+)\"|'(?P<text2>[^']+)')\\s+(?:from\\s+(?P<source_lang>[\\w\\s]+))?\\s*(?:to|into)\\s+(?P<target_lang>[\\w\\s]+)"
+tool = "translation"
+description = "Detects requests to translate text between languages"
+priority = 75
+enabled = true
+
+[patterns.summarization]
+pattern = "(?:summarize|summarise|give me a summary of|tldr)\\s+(?:this|the following|this text|this article|this document|\"(?P<text>[^\"]+)\"|'(?P<text2>[^']+)')"
+tool = "summarization"
+description = "Detects requests to summarize text"
+priority = 65
+enabled = true
+
+[patterns.sentiment_analysis]
+pattern = "(?:analyze|analyse|what is|determine)\\s+(?:the)?\\s*(?:sentiment|tone|emotion|feeling)\\s+(?:of|in|for)\\s+(?:this|the following|this text|\"(?P<text>[^\"]+)\"|'(?P<text2>[^']+)')"
+tool = "sentiment_analysis"
+description = "Detects requests to analyze sentiment in text"
+priority = 55
+required_role = "premium"
+enabled = true
+
+# Domain-specific patterns
+[patterns.stock_price]
+pattern = "(?:what is|what's|get|check|tell me|show me)\\s+(?:the)?\\s*(?:stock price|share price|price)\\s+(?:of|for)\\s+(?P<symbol>[A-Z]+|[A-Za-z\\s\\.]+)"
+tool = "stock_price"
+description = "Detects requests for stock price information"
+priority = 80
+enabled = true
+
+[patterns.crypto_price]
+pattern = "(?:what is|what's|get|check|tell me|show me)\\s+(?:the)?\\s*(?:price|value|exchange rate)\\s+(?:of|for)\\s+(?P<symbol>[A-Za-z]+|[A-Za-z\\s]+)(?:\\s+(?:in|to)\\s+(?P<currency>USD|EUR|GBP|JPY|[A-Za-z]+))?"
+tool = "crypto_price"
+description = "Detects requests for cryptocurrency price information"
+priority = 78
+enabled = true
+
+# Technical patterns
+[patterns.database_query]
+pattern = "(?:query|search|find|select|get)\\s+(?:from|in)\\s+(?:the|our|my)?\\s*(?:database|db|data store)\\s+(?:where|with|having)\\s+(?P<condition>.+)"
+tool = "database_query"
+description = "Detects requests to query a database"
+priority = 45
+required_role = "admin"
+enabled = true
+
+[patterns.system_status]
+pattern = "(?:check|get|what is|what's|show me)\\s+(?:the)?\\s*(?:status|health|state)\\s+(?:of|for)\\s+(?:the|our|my)?\\s*(?:system|server|application|app|service|cluster|database|db)(?:\\s+(?P<component>[\\w\\s]+))?"
+tool = "system_status"
+description = "Detects requests to check system status"
+priority = 190
+required_role = "admin"
+enabled = true
+
+# Multi-tool patterns
+[patterns.data_visualization]
+pattern = "(?:visualize|visualise|create|generate|make|plot|draw)\\s+(?:a|an)?\\s*(?P<chart_type>chart|graph|plot|histogram|scatter plot|bar chart|pie chart|line graph|heatmap)\\s+(?:of|for|showing|depicting|with)\\s+(?P<data_source>.+)"
+tool = "data_visualization"
+description = "Detects requests to create data visualizations"
+priority = 70
+required_role = "premium"
+enabled = true
+
+# Contextual patterns that depend on conversation history
+[patterns.follow_up_search]
+pattern = "(?:also|additionally|furthermore|moreover)\\s+(?:search|find|look up)\\s+(?:for|about)?\\s+(?P<query>.+)"
+tool = "web_search"
+description = "Detects follow-up search requests"
+priority = 95
+enabled = true
+
+# Experimental patterns (disabled by default)
+[patterns.experimental_code_review]
+pattern = "(?:review|analyze|check|examine)\\s+(?:this|the following|my)?\\s*(?:code|function|program|script)(?:\\s+(?:in|written in)\\s+(?P<language>[a-zA-Z\\+\\#]+))?(?:\\s+for\\s+(?P<aspect>bugs|errors|performance|security|style|best practices))?"
+tool = "code_review"
+description = "Detects requests to review code (experimental)"
+priority = 40
+required_role = "premium"
+enabled = false

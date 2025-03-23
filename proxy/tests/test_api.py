@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock, AsyncMock
 import numpy as np
 import time
+from fastapi import HTTPException
 
 from app.main import app
 from app import cache, llm_provider, db
@@ -128,7 +129,14 @@ def test_chat_completion_endpoint_valid_api_key():
 def test_chat_completion_endpoint_rate_limit():
     """Test that the chat completion endpoint enforces rate limits."""
     # Mock the rate limit check to simulate rate limiting
-    with patch("app.auth.allow_request", return_value=False):
+    def mock_check_rate_limit(*args, **kwargs):
+        raise HTTPException(
+            status_code=429,
+            detail="Rate limit exceeded. Please try again later.",
+            headers={"Retry-After": "60"}
+        )
+    
+    with patch("app.auth.check_rate_limit", side_effect=mock_check_rate_limit):
         headers = {"Authorization": "Bearer sk_test_user1"}
         req_body = {
             "model": "test-model",

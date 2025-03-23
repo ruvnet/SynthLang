@@ -1,0 +1,76 @@
+# SynthLang Proxy Keyword Detection Configuration
+#
+# This file configures the keyword detection system for the SynthLang Proxy.
+# It defines patterns for detecting keywords in user messages and the tools
+# to invoke when those patterns match.
+
+[settings]
+# Enable or disable keyword detection
+enable_keyword_detection = true
+
+# Confidence threshold for keyword detection (0.0 to 1.0)
+detection_threshold = 0.7
+
+# Default role assigned to all users
+default_role = "basic"
+
+# Pattern Definitions
+# Each pattern has the following attributes:
+# - pattern: Regular expression pattern to match
+# - tool: Name of the tool to invoke when the pattern matches
+# - description: Description of what the pattern detects
+# - priority: Priority of the pattern (higher values are checked first)
+# - required_role: Role required to use this pattern (optional)
+# - enabled: Whether the pattern is enabled (default: true)
+
+[patterns.web_search]
+pattern = "(?:search|find|look up|google|research)\\s+(?:for|about)?\\s+(?P<query>.+)"
+tool = "web_search"
+description = "Detects requests to search the web for information"
+priority = 100
+enabled = true
+
+[patterns.file_search]
+pattern = "(?:search|find|look up)\\s+(?:in|within|inside)?\\s+(?:files?|documents?|vector store)\\s+(?:for|about)?\\s+(?P<query>.+)"
+tool = "file_search"
+description = "Detects requests to search within files or documents"
+priority = 90
+enabled = true
+
+[patterns.weather]
+pattern = "(?:what's|what is|how's|how is|get|check|tell me about)\\s+(?:the)?\\s*(?:weather|temperature|forecast)\\s+(?:in|at|for)?\\s+(?P<location>[^?]+)"
+tool = "weather"
+description = "Detects requests for weather information"
+priority = 80
+enabled = true
+
+[patterns.calculator]
+pattern = "(?:calculate|compute|what is|solve)\\s+(?P<expression>[\\d\\s\\+\\-\\*\\/\\(\\)\\^\\%\\.]+)"
+tool = "calculator"
+description = "Detects requests to calculate mathematical expressions"
+priority = 70
+enabled = true
+
+[patterns.code_generation]
+pattern = "(?:write|generate|create|give me)\\s+(?:some|a)?\\s*(?:code|function|program|script)\\s+(?:in|using)?\\s+(?P<language>[a-zA-Z\\+\\#]+)(?:\\s+to\\s+(?P<task>.+))?"
+tool = "code_generation"
+description = "Detects requests to generate code in a specific language"
+priority = 60
+required_role = "premium"
+enabled = true
+
+[patterns.data_analysis]
+pattern = "(?:analyze|examine|study|investigate)\\s+(?:the|this|my)?\\s*(?:data|dataset|information|stats|statistics)\\s+(?:about|on|for)?\\s+(?P<topic>.+)"
+tool = "data_analysis"
+description = "Detects requests to analyze data on a specific topic"
+priority = 50
+required_role = "premium"
+enabled = true
+
+[patterns.system_admin]
+pattern = "(?:admin|system|configure|setup|manage)\\s+(?:the|this)?\\s*(?:system|server|application|app|service)\\s+(?:to|for)?\\s+(?P<action>[^?]+)"
+tool = "system_admin"
+description = "Detects requests for system administration tasks"
+priority = 200
+required_role = "admin"
+enabled = true
