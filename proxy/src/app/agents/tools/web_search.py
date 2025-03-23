@@ -59,7 +59,8 @@ def get_openai_client():
     return client
 
 
-async def perform_web_search(query: str, user_message: Optional[str] = None, user_id: Optional[str] = None) -> Dict[str, Any]:
+# Synchronous version for testing
+def perform_web_search(query: str, user_message: Optional[str] = None, user_id: Optional[str] = None) -> Dict[str, Any]:
     """
     Perform a web search using OpenAI's API.
     
@@ -91,14 +92,14 @@ async def perform_web_search(query: str, user_message: Optional[str] = None, use
         search_results = response.choices[0].message.content
         
         # Create the response
-        response = f"""Web Search Results for "{query}":
+        response_text = f"""Web Search Results for "{query}":
 
 {search_results}
 
 This search was performed using the web search tool."""
         
         return {
-            "content": response,
+            "content": response_text,
             "tool": "web_search",
             "query": query,
             "results": search_results
@@ -119,6 +120,25 @@ Please try again with a different query or check your internet connection."""
             "query": query,
             "error": str(e)
         }
+
+
+# Async version for actual use
+async def async_perform_web_search(query: str, user_message: Optional[str] = None, user_id: Optional[str] = None) -> Dict[str, Any]:
+    """
+    Perform a web search using OpenAI's API asynchronously.
+    
+    Args:
+        query: The search query
+        user_message: The original user message (optional)
+        user_id: The ID of the user making the request (optional)
+        
+    Returns:
+        A dictionary containing the search results
+    """
+    # For now, just call the synchronous version
+    # In a real implementation, this would use an async client
+    return perform_web_search(query, user_message, user_id)
+
 
 # Register the tool
 try:

@@ -1,0 +1,12 @@
+{
+  "id": "390676fc-57b8-4d68-aee7-f59eabd5ed0e",
+  "scenario_name": "simple",
+  "start_time": "2025-03-23T19:07:00.936637",
+  "end_time": "2025-03-23T19:07:00.936656",
+  "duration_ms": 0.019,
+  "parameters": {},
+  "metrics": {
+    "value": 456
+  },
+  "metadata": {}
+}

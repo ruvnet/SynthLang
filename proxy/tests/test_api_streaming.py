@@ -13,6 +13,7 @@ import asyncio
 
 from app.main import app
 from app import cache, llm_provider, db
+from app.keywords.registry import disable_keyword_detection
 
 
 client = TestClient(app)
@@ -40,10 +41,10 @@ async def test_chat_completion_stream_cache_miss():
     with patch("app.auth.check_rate_limit", return_value=None), \
          patch("app.synthlang.compress_prompt", side_effect=lambda x: x), \
          patch("app.synthlang.decompress_prompt", side_effect=lambda x: x), \
-         patch("app.cache.get_embedding", return_value=np.ones(cache.EMBED_DIM, dtype='float32')), \
          patch("app.cache.get_similar_response", return_value=None), \
          patch("app.llm_provider.stream_chat", new_callable=AsyncMock) as mock_stream_chat, \
-         patch("app.db.save_interaction", new_callable=AsyncMock):
+         patch("app.db.save_interaction", new_callable=AsyncMock), \
+         disable_keyword_detection():
         
         # Set up the mock streaming response
         chunks = [
@@ -87,17 +88,16 @@ async def test_chat_completion_stream_cache_miss():
 async def test_chat_completion_stream_cache_hit():
     """Test streaming response for a cache hit."""
     # Reset the cache for this test
-    cache._index = cache.faiss.IndexFlatIP(cache.EMBED_DIM)
-    cache._cached_pairs = []
+    cache.clear()
     
     # Mock the necessary functions
     with patch("app.auth.check_rate_limit", return_value=None), \
          patch("app.synthlang.compress_prompt", side_effect=lambda x: x), \
          patch("app.synthlang.decompress_prompt", side_effect=lambda x: x), \
-         patch("app.cache.get_embedding", return_value=np.ones(cache.EMBED_DIM, dtype='float32')), \
          patch("app.cache.get_similar_response", side_effect=lambda *args: "Cached response content"), \
          patch("app.llm_provider.complete_chat", new_callable=AsyncMock) as mock_complete_chat, \
-         patch("app.db.save_interaction", new_callable=AsyncMock):
+         patch("app.db.save_interaction", new_callable=AsyncMock), \
+         disable_keyword_detection():
         
         headers = {"Authorization": "Bearer sk_test_user1"}
         

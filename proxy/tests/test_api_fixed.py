@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock, AsyncMock
 import numpy as np
 import time
+import json
 from fastapi import HTTPException
 
 from app.main import app
@@ -46,15 +47,13 @@ def test_chat_completion_endpoint_rate_limit():
 
 def test_chat_completion_cache_miss_then_hit():
     """Test that the first request is a cache miss and the second is a hit, and both are saved to database."""
-    # Reset the cache for this test
-    cache._index = cache.faiss.IndexFlatIP(cache.EMBED_DIM)
-    cache._cached_pairs = []
+    # Reset the cache
+    cache.clear()
     
-    # Mock the rate limit check and embedding function
+    # Mock the rate limit check and LLM provider
     with patch("app.auth.check_rate_limit", return_value=None), \
          patch("app.synthlang.compress_prompt", side_effect=lambda x: x), \
          patch("app.synthlang.decompress_prompt", side_effect=lambda x: x), \
-         patch("app.cache.get_embedding", return_value=np.ones(cache.EMBED_DIM, dtype='float32')), \
          patch("app.llm_provider.complete_chat", new_callable=AsyncMock) as mock_complete_chat, \
          patch("app.db.save_interaction", new_callable=AsyncMock) as mock_save_interaction, \
          disable_keyword_detection():
@@ -98,7 +97,7 @@ def test_chat_completion_cache_miss_then_hit():
         mock_complete_chat.reset_mock()
         mock_save_interaction.reset_mock()
         
-        # Override cache.get_similar_response to simulate a cache hit
+        # Mock get_similar_response to simulate a cache hit
         with patch("app.cache.get_similar_response", return_value="Paris is the capital of France."):
             # Second request with the same query should be a cache hit
             response2 = client.post("/v1/chat/completions", json=req_body, headers=headers)
@@ -123,15 +122,13 @@ def test_chat_completion_cache_miss_then_hit():
 
 def test_chat_completion_different_model_cache_miss():
     """Test that using a different model results in a cache miss."""
-    # Reset the cache for this test
-    cache._index = cache.faiss.IndexFlatIP(cache.EMBED_DIM)
-    cache._cached_pairs = []
+    # Reset the cache
+    cache.clear()
     
-    # Mock the rate limit check and embedding function
+    # Mock the rate limit check and LLM provider
     with patch("app.auth.check_rate_limit", return_value=None), \
          patch("app.synthlang.compress_prompt", side_effect=lambda x: x), \
          patch("app.synthlang.decompress_prompt", side_effect=lambda x: x), \
-         patch("app.cache.get_embedding", return_value=np.ones(cache.EMBED_DIM, dtype='float32')), \
          patch("app.llm_provider.complete_chat", new_callable=AsyncMock) as mock_complete_chat, \
          patch("app.db.save_interaction", new_callable=AsyncMock), \
          disable_keyword_detection():
