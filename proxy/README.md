@@ -2,13 +2,9 @@
 
 Synthlang Proxy turns any existing LLM app (OpenAi v1/Endpoint) or Coder (Cursor etc) into an agentic, hyper-optimized, self-evolving system and it's 95%+ cheaper, without any rebuild.
 
-If you’ve already built-or are using-any application that talks to an LLM, whether it’s OpenAI, OpenRouter, Together, DeepSeek, or a local endpoint that mimics the OpenAI API, you can now instantly give it agentic capabilities without even touching your existing app logic. 
+If you’ve already built-or are using-any application that talks to an LLM, whether it’s OpenAI, OpenRouter, Together, DeepSeek, or a local endpoint that mimics the OpenAI API, you can now instantly give it agentic capabilities without even touching your existing app logic. That’s what SynthLang Proxy does. It’s a high-speed, drop-in middleware that plugs into the /v1/chat/completions endpoint and transforms static LLM apps into dynamic, self-optimizing systems.
 
-That’s what SynthLang Proxy does. It’s a high-speed, drop-in middleware that plugs into the /v1/chat/completions endpoint and transforms static LLM apps into dynamic, self-optimizing systems.
-
-Right out of the box, SynthLang adds support for agents, tools, hard guardrails, prompt compression, and adaptive behavior that learns and improves over time. 
-
-Using existing LLM interfaces like Cursor, Cline or even Slack or Teams, it reads special inline instructions, like #tool_summarize or #agent_research and dynamically routes them to the right logic, model, or workflow. You can switch models by type /model_name , trigger background tasks #deep_reaeach, enforce safety checks, and expand capabilities, all from a single prompt, with no changes to the client.
+Right out of the box, SynthLang adds support for agents, tools, hard guardrails, prompt compression, and adaptive behavior that learns and improves over time.  Using existing LLM interfaces like Cursor, Cline or even Slack or Teams, it reads special inline instructions, like #tool_summarize or #agent_research and dynamically routes them to the right logic, model, or workflow. You can switch models by type /model_name , trigger background tasks #deep_reaeach, enforce safety checks, and expand capabilities, all from a single prompt, with no changes to the client.
 
 Nearly every LLM app already relies on some variant of the OpenAI API. By intercepting those requests directly, SynthLang Proxy lets you embed logic in plain text that dynamically unlocks new functionality. With just a few tokens, you can make any application smarter, safer, and more capable without modifying its underlying design.
 
@@ -18,7 +14,7 @@ Paired with gzip compression, token pruning, semantic caching to store and retri
 
 This means if a user asks a question similar to something previously answered, or if the system generated code earlier for a related task, it can instantly reuse that result locally without making another LLM request. Faster, more efficient, and significantly cheaper. Over time, SynthLang refines its compression patterns to better match your domain and tasks.
 
-This turns any legacy LLM application into an **agentic, hyper-optimized, self-evolving system, without rebuilding it. Whether you’re running a chatbot, coding assistant, research agent, or enterprise automation tool, SynthLang brings modern agentic capabilities into your existing flow.
+This turns any legacy LLM application into an **agentic, hyper-optimized, self-evolving system, **without rebuilding it. Whether you’re running a chatbot, coding assistant, research agent, or enterprise automation tool, SynthLang brings modern agentic capabilities into your existing flow.
 
 I’ve bundled it with a simple CLI and a FastAPI backend you can deploy serverlessly or run on your cloud of choice. Install it with pip install spark-proxy, and you’re ready to go. 
 
@@ -64,27 +60,29 @@ pip install synthlang
 | `proxy cache-stats` | Show cache statistics | `synthlang proxy cache-stats` |
 | `proxy tools` | List available agent tools | `synthlang proxy tools` |
 | `proxy call-tool` | Call an agent tool directly | `synthlang proxy call-tool --tool "calculate" --args '{"expression": "2+2"}'` |
-| `proxy health` | Check proxy service health | `synthlang proxy health` |
 
-### Keyword Management
+### Security & Access Control
 
-The CLI includes tools for managing keyword detection configurations:
+| Category | Feature | Description |
+|----------|---------|-------------|
+| **Authentication** | API Key Management | Secure API key-based authentication system |
+| | Role-Based Access Control | Hierarchical role system for fine-grained permission management |
+| **Rate Limiting** | User-Based Limits | Configurable rate limits per user or API key |
+| | Adaptive Throttling | Intelligent request throttling based on usage patterns |
+| **Data Protection** | End-to-End Encryption | All sensitive data is encrypted at rest and in transit |
+| | PII Detection & Masking | Automatic detection and masking of personally identifiable information |
+| **Content Safety** | Harmful Content Detection | Automatically detect and block harmful requests |
+| | Jailbreak Prevention | Detect attempts to bypass system constraints |
+| | Toxic Language Filtering | Respond appropriately to offensive language |
 
-```bash
-# List all patterns
-synthlang keywords list
+### Intelligence Features
 
-# Show details for a specific pattern
-synthlang keywords show weather_query
-
-# Add a new pattern
-synthlang keywords add weather_query \
-  --pattern "(?:what's|what is)\\s+(?:the)?\\s*(?:weather)\\s+(?:in)\\s+(?P<location>[\\w\\s]+)" \
-  --tool "weather" \
-  --description "Detects weather queries" \
-  --priority 100
-
-# Edit an existing pattern
+| Category | Feature | Description |
+|----------|---------|-------------|
+| **Keyword Detection** | Pattern Recognition | Intelligent pattern recognition for automatic tool invocation |
+| | Parameter Extraction | Automatically extract relevant parameters from user messages |
+| | Priority-Based Matching | Higher priority patterns are checked first |
+| **Agent Tools** | Web Search | Integrated web search capabilities using OpenAI's search API |
 | | File Search | Search through files using semantic similarity |
 | | Weather | Get weather information for a location |
 | | Calculator | Perform calculations and conversions |
