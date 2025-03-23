@@ -28,52 +28,6 @@ There’s also a built-in benchmarking tool that I use to test and optimize the 
 
 This is SynthLang Proxy.
 
-## CLI Tool
-
-SynthLang Proxy includes a powerful command-line interface for interacting with the proxy service and performing various prompt engineering tasks.
-
-### CLI Installation
-
-```bash
-pip install synthlang
-```
-
-### Core Commands
-
-| Command | Description | Example |
-|---------|-------------|---------|
-| `translate` | Convert natural language to SynthLang format | `synthlang translate --source "your prompt" --framework synthlang` |
-| `evolve` | Improve prompts using genetic algorithms | `synthlang evolve --seed "initial prompt" --generations 5` |
-| `optimize` | Optimize prompts for efficiency | `synthlang optimize --prompt "your prompt"` |
-| `classify` | Analyze and categorize prompts | `synthlang classify predict --text "prompt" --labels "categories"` |
-
-### Proxy Commands
-
-| Command | Description | Example |
-|---------|-------------|---------|
-| `proxy serve` | Start a local proxy server | `synthlang proxy serve --port 8000` |
-| `proxy login` | Save credentials for proxy service | `synthlang proxy login --api-key "your-key"` |
-| `proxy chat` | Send a chat request to the proxy | `synthlang proxy chat "Hello, world"` |
-| `proxy compress` | Compress a prompt | `synthlang proxy compress "Your prompt"` |
-| `proxy decompress` | Decompress a SynthLang-compressed prompt | `synthlang proxy decompress "↹ prompt•compressed"` |
-| `proxy clear-cache` | Clear the semantic cache | `synthlang proxy clear-cache` |
-| `proxy cache-stats` | Show cache statistics | `synthlang proxy cache-stats` |
-| `proxy tools` | List available agent tools | `synthlang proxy tools` |
-| `proxy call-tool` | Call an agent tool directly | `synthlang proxy call-tool --tool "calculate" --args '{"expression": "2+2"}'` |
-
-### Security & Access Control
-
-| Category | Feature | Description |
-|----------|---------|-------------|
-| **Authentication** | API Key Management | Secure API key-based authentication system |
-| | Role-Based Access Control | Hierarchical role system for fine-grained permission management |
-| **Rate Limiting** | User-Based Limits | Configurable rate limits per user or API key |
-| | Adaptive Throttling | Intelligent request throttling based on usage patterns |
-| **Data Protection** | End-to-End Encryption | All sensitive data is encrypted at rest and in transit |
-| | PII Detection & Masking | Automatic detection and masking of personally identifiable information |
-| **Content Safety** | Harmful Content Detection | Automatically detect and block harmful requests |
-| | Jailbreak Prevention | Detect attempts to bypass system constraints |
-| | Toxic Language Filtering | Respond appropriately to offensive language |
 
 ### Intelligence Features
 
@@ -89,6 +43,20 @@ pip install synthlang
 | **Multi-Step Processing** | Data Analysis Pipeline | Complete data analysis workflow orchestration |
 | | Research Assistant | Comprehensive research across multiple sources |
 | | Content Creation | Complex content generation with multiple components |
+
+### Security & Access Control
+
+| Category | Feature | Description |
+|----------|---------|-------------|
+| **Authentication** | API Key Management | Secure API key-based authentication system |
+| | Role-Based Access Control | Hierarchical role system for fine-grained permission management |
+| **Rate Limiting** | User-Based Limits | Configurable rate limits per user or API key |
+| | Adaptive Throttling | Intelligent request throttling based on usage patterns |
+| **Data Protection** | End-to-End Encryption | All sensitive data is encrypted at rest and in transit |
+| | PII Detection & Masking | Automatic detection and masking of personally identifiable information |
+| **Content Safety** | Harmful Content Detection | Automatically detect and block harmful requests |
+| | Jailbreak Prevention | Detect attempts to bypass system constraints |
+| | Toxic Language Filtering | Respond appropriately to offensive language |
 
 ### Prompt Engineering
 
