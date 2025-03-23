@@ -6,6 +6,8 @@ for prompt compression and decompression.
 """
 import subprocess
 import logging
+import gzip
+import base64
 from typing import Optional
 from app.config import USE_SYNTHLANG
 
@@ -52,15 +54,22 @@ def is_synthlang_available() -> bool:
         return False
 
 
-def compress_prompt(text: str) -> str:
+def compress_prompt(text: str, use_gzip: bool = False) -> str:
     """
-    Compress a prompt using SynthLang CLI.
+    Compress a prompt using SynthLang CLI with optional gzip compression.
     
     Args:
         text: The text to compress
+        use_gzip: Whether to apply additional gzip compression (default: False)
         
     Returns:
         The compressed text, or the original text if compression fails
+        
+    Benefits of gzip compression:
+        - Further reduces token count for very large prompts
+        - Provides better compression for repetitive text patterns
+        - Reduces API costs for large batch processing
+        - Useful for storing compressed prompts in databases
     """
     if not text or not ENABLE_SYNTHLANG:
         return text  # No compression if disabled or empty text
@@ -81,6 +90,26 @@ def compress_prompt(text: str) -> str:
             logger.warning("SynthLang compression returned empty result")
             return text
         
+        # Apply additional gzip compression if requested
+        if use_gzip and compressed:
+            try:
+                # Convert to bytes, compress with gzip, then encode as base64 string
+                compressed_bytes = compressed.encode('utf-8')
+                gzipped = gzip.compress(compressed_bytes)
+                b64_compressed = base64.b64encode(gzipped).decode('ascii')
+                
+                # Add a prefix to indicate this is gzipped
+                final_compressed = f"gz:{b64_compressed}"
+                
+                logger.info(f"Compressed text from {len(text)} to {len(compressed)} chars with SynthLang, "
+                           f"then to {len(final_compressed)} chars with gzip")
+                return final_compressed
+            except Exception as e:
+                logger.error(f"Gzip compression failed: {e}")
+                # Fall back to regular SynthLang compression
+                logger.info(f"Compressed text from {len(text)} to {len(compressed)} characters")
+                return compressed
+        
         logger.info(f"Compressed text from {len(text)} to {len(compressed)} characters")
         return compressed
     except subprocess.TimeoutExpired:
@@ -96,7 +125,7 @@ def compress_prompt(text: str) -> str:
 
 def decompress_prompt(text: str) -> str:
     """
-    Decompress a prompt using SynthLang CLI.
+    Decompress a prompt using SynthLang CLI, with automatic gzip decompression if needed.
     
     Args:
         text: The compressed text to decompress
@@ -106,6 +135,19 @@ def decompress_prompt(text: str) -> str:
     """
     if not text or not ENABLE_SYNTHLANG:
         return text  # No decompression if disabled or empty text
+    
+    # Check if this is a gzipped compressed text
+    if text.startswith("gz:"):
+        try:
+            # Extract the base64 encoded gzipped data
+            b64_data = text[3:]  # Skip the "gz:" prefix
+            gzipped = base64.b64decode(b64_data)
+            decompressed_bytes = gzip.decompress(gzipped)
+            text = decompressed_bytes.decode('utf-8')
+            logger.info(f"Decompressed gzipped text from {len(b64_data)} to {len(text)} characters")
+        except Exception as e:
+            logger.error(f"Gzip decompression failed: {e}")
+            # Continue with regular decompression if gzip fails
     
     try:
         # Run the synthlang CLI to decompress the text
