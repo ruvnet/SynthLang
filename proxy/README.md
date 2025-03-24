@@ -20,6 +20,8 @@ Paired with gzip compression, token pruning, semantic caching to store and retri
 
 This means if a user asks a question similar to something previously answered, or if the system generated code earlier for a related task, it can instantly reuse that result locally without making another LLM request. Faster, more efficient, and significantly cheaper. Over time, SynthLang refines its compression patterns to better match your domain and tasks.
 
+PII masking is a security feature that replaces sensitive information with placeholders to protect user privacy. SynthLang includes a PII masking implementation that can mask PII before sending to LLMs and Mask logs and database records.  
+
 This turns any legacy LLM application into an agentic, hyper-optimized, self-evolving system, without rebuilding it. Whether you're running a chatbot, coding assistant, research agent, or enterprise automation tool, SynthLang brings modern agentic capabilities into your existing flow.
 
 I've bundled it with a simple CLI and a FastAPI backend you can deploy serverlessly or run on your cloud of choice. Install it with pip install synthlang-proxy, and you're ready to go. 
