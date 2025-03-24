@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  proxy:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - HOST=0.0.0.0
+      - DEBUG=false
+      - USE_SQLITE=${USE_SQLITE:-1}
+      - SQLITE_PATH=sqlite+aiosqlite:///./synthlang_proxy.db
+      - USE_SYNTHLANG=${USE_SYNTHLANG:-1}
+      - MASK_PII_BEFORE_LLM=${MASK_PII_BEFORE_LLM:-0}
+      - MASK_PII_IN_LOGS=${MASK_PII_IN_LOGS:-1}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - DEFAULT_MODEL=${DEFAULT_MODEL:-gpt-4o-mini}
+      - LLM_TIMEOUT=${LLM_TIMEOUT:-30}
+      - ENABLE_CACHE=${ENABLE_CACHE:-1}
+      - CACHE_SIMILARITY_THRESHOLD=${CACHE_SIMILARITY_THRESHOLD:-0.95}
+      - CACHE_MAX_ITEMS=${CACHE_MAX_ITEMS:-1000}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - LOG_FILE=${LOG_FILE:-proxy.log}
+      - API_KEY=${API_KEY}
+      - ADMIN_API_KEY=${ADMIN_API_KEY}
+      # For PostgreSQL (optional)
+      - DATABASE_URL=${DATABASE_URL:-postgresql+asyncpg://postgres:postgres@db:5432/synthlang_proxy}
+    volumes:
+      - ./synthlang_proxy.db:/app/synthlang_proxy.db
+      - ./.api_keys.json:/app/.api_keys.json
+    depends_on:
+      - db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=synthlang_proxy
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
