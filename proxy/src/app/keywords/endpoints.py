@@ -8,7 +8,7 @@ import time
 from typing import Dict, Any, Optional, List
 
 from fastapi import APIRouter, Depends, HTTPException, Header, Body, Path
-from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST
+from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
 
 from src.app import auth
 from src.app.keywords.registry import (
@@ -75,7 +75,17 @@ async def get_patterns(
     auth.check_rate_limit(None, api_key)
     
     # Check if user has required role
-    auth.require_role(user_id, "admin")
+    if not auth.has_role(user_id, "admin"):
+        raise HTTPException(
+            status_code=HTTP_403_FORBIDDEN,
+            detail={
+                "error": {
+                    "message": f"User '{user_id}' does not have required role 'admin'",
+                    "type": "permission_error",
+                    "code": HTTP_403_FORBIDDEN
+                }
+            }
+        )
     
     # Log the request
     logger.info(f"List patterns request from user {user_id}")
@@ -127,7 +137,17 @@ async def create_pattern(
     auth.check_rate_limit(None, api_key)
     
     # Check if user has required role
-    auth.require_role(user_id, "admin")
+    if not auth.has_role(user_id, "admin"):
+        raise HTTPException(
+            status_code=HTTP_403_FORBIDDEN,
+            detail={
+                "error": {
+                    "message": f"User '{user_id}' does not have required role 'admin'",
+                    "type": "permission_error",
+                    "code": HTTP_403_FORBIDDEN
+                }
+            }
+        )
     
     # Log the request
     logger.info(f"Create pattern request from user {user_id}")
@@ -212,7 +232,17 @@ async def update_pattern_endpoint(
     auth.check_rate_limit(None, api_key)
     
     # Check if user has required role
-    auth.require_role(user_id, "admin")
+    if not auth.has_role(user_id, "admin"):
+        raise HTTPException(
+            status_code=HTTP_403_FORBIDDEN,
+            detail={
+                "error": {
+                    "message": f"User '{user_id}' does not have required role 'admin'",
+                    "type": "permission_error",
+                    "code": HTTP_403_FORBIDDEN
+                }
+            }
+        )
     
     # Log the request
     logger.info(f"Update pattern request from user {user_id}")
@@ -317,7 +347,17 @@ async def delete_pattern_endpoint(
     auth.check_rate_limit(None, api_key)
     
     # Check if user has required role
-    auth.require_role(user_id, "admin")
+    if not auth.has_role(user_id, "admin"):
+        raise HTTPException(
+            status_code=HTTP_403_FORBIDDEN,
+            detail={
+                "error": {
+                    "message": f"User '{user_id}' does not have required role 'admin'",
+                    "type": "permission_error",
+                    "code": HTTP_403_FORBIDDEN
+                }
+            }
+        )
     
     # Log the request
     logger.info(f"Delete pattern request from user {user_id}")
@@ -383,7 +423,17 @@ async def get_settings_endpoint(
     auth.check_rate_limit(None, api_key)
     
     # Check if user has required role
-    auth.require_role(user_id, "admin")
+    if not auth.has_role(user_id, "admin"):
+        raise HTTPException(
+            status_code=HTTP_403_FORBIDDEN,
+            detail={
+                "error": {
+                    "message": f"User '{user_id}' does not have required role 'admin'",
+                    "type": "permission_error",
+                    "code": HTTP_403_FORBIDDEN
+                }
+            }
+        )
     
     # Log the request
     logger.info(f"Get settings request from user {user_id}")
@@ -424,7 +474,17 @@ async def update_settings_endpoint(
     auth.check_rate_limit(None, api_key)
     
     # Check if user has required role
-    auth.require_role(user_id, "admin")
+    if not auth.has_role(user_id, "admin"):
+        raise HTTPException(
+            status_code=HTTP_403_FORBIDDEN,
+            detail={
+                "error": {
+                    "message": f"User '{user_id}' does not have required role 'admin'",
+                    "type": "permission_error",
+                    "code": HTTP_403_FORBIDDEN
+                }
+            }
+        )
     
     # Log the request
     logger.info(f"Update settings request from user {user_id}")
