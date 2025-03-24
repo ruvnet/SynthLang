@@ -1,0 +1,29 @@
+{
+    "examples": [
+        {
+            "input": "↹ data•sales\n⊕ analyze => insights\nΣ report",
+            "label": "analysis",
+            "explanation": "This prompt focuses on analyzing sales data and generating insights"
+        },
+        {
+            "input": "↹ feedback•customer\n⊕ sentiment>0 => pos\n⊕ sentiment<0 => neg\nΣ summary + metrics",
+            "label": "sentiment",
+            "explanation": "This prompt performs sentiment analysis on customer feedback"
+        },
+        {
+            "input": "↹ data•monthly\n⊕ process => stats\nΣ report + insights",
+            "label": "reporting",
+            "explanation": "This prompt generates monthly reports with statistics"
+        },
+        {
+            "input": "↹ text•input\n⊕ translate => output\nΣ result + quality",
+            "label": "translation",
+            "explanation": "This prompt translates text with quality metrics"
+        },
+        {
+            "input": "↹ code•source\n⊕ analyze => bugs\n⊕ fix => clean\nΣ code + report",
+            "label": "code",
+            "explanation": "This prompt analyzes and fixes code issues"
+        }
+    ]
+}

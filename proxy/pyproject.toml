@@ -1,0 +1,61 @@
+[tool.poetry]
+name = "synthlang-router"
+version = "0.1.0"
+description = "High-Speed LLM Proxy with SynthLang integration"
+authors = ["SynthLang Team"]
+readme = "README.md"
+packages = [{include = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+fastapi = "^0.95.0"
+uvicorn = "^0.22.0"
+pydantic = "^2.0.0"
+python-multipart = "^0.0.6"
+python-dotenv = "^1.0.0"
+cryptography = "^41.0.0"
+faiss-cpu = "^1.7.4"
+openai = "^1.0.0"
+sqlalchemy = "^2.0.0"
+asyncpg = "^0.28.0"
+rich = "^13.7.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.3"
+pytest-asyncio = "^0.21.0"
+pytest-cov = "^4.1.0"
+httpx = "^0.24.0"
+black = "^23.11.0"
+isort = "^5.12.0"
+mypy = "^1.7.1"
+pre-commit = "^3.5.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+include = '\.pyi?$'
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+check_untyped_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+filterwarnings = [
+    "ignore::DeprecationWarning:faiss.*:",
+    "ignore::DeprecationWarning:numpy.*:"
+]
+asyncio_mode = "strict"
+asyncio_default_fixture_loop_scope = "function"

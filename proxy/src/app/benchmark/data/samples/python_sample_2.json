@@ -1,0 +1,10 @@
+{
+  "text": "from fastapi import FastAPI, HTTPException, Depends, status\nfrom fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm\nfrom pydantic import BaseModel, Field\nfrom typing import List, Optional\nfrom datetime import datetime, timedelta\nimport jwt\nfrom passlib.context import CryptContext\nimport uvicorn\nfrom motor.motor_asyncio import AsyncIOMotorClient\nfrom bson import ObjectId\n\n# Initialize FastAPI app\n#init_app\napp = FastAPI(\n    title=\"Task Management API\",\n    description=\"A RESTful API for managing tasks with user authentication\",\n    version=\"1.0.0\"\n)\n\n# Database connection\n#connect_db\nMONGODB_URL = \"mongodb://localhost:27017\"\nclient = AsyncIOMotorClient(MONGODB_URL)\ndb = client.task_manager\n\n# Security\n#setup_security\nSECRET_KEY = \"your-secret-key\"  # In production, use environment variable\nALGORITHM = \"HS256\"\nACCESS_TOKEN_EXPIRE_MINUTES = 30\n\npwd_context = CryptContext(schemes=[\"bcrypt\"], deprecated=\"auto\")\noauth2_scheme = OAuth2PasswordBearer(tokenUrl=\"token\")\n\n# Models\n#define_models\nclass UserCreate(BaseModel):\n    username: str = Field(..., min_length=3, max_length=50)\n    email: str = Field(..., regex=r\"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$\")\n    password: str = Field(..., min_length=8)\n\nclass User(BaseModel):\n    id: str\n    username: str\n    email: str\n    disabled: bool = False\n\nclass UserInDB(User):\n    hashed_password: str\n\nclass Token(BaseModel):\n    access_token: str\n    token_type: str\n\nclass TaskCreate(BaseModel):\n    title: str = Field(..., min_length=1, max_length=100)\n    description: Optional[str] = Field(None, max_length=1000)\n    due_date: Optional[datetime] = None\n    priority: int = Field(1, ge=1, le=5)\n    completed: bool = False\n\nclass Task(TaskCreate):\n    id: str\n    user_id: str\n    created_at: datetime\n    updated_at: datetime",
+  "metadata": {
+    "language": "python",
+    "heading": "Code Examples for Benchmarking",
+    "length": 1816,
+    "id": "python_2",
+    "description": "python code example: Code Examples for Benchmarking"
+  }
+}

@@ -26,3 +26,7 @@ dist-ssr
 .aider*
 *cache*
 aider*
+venv/
+.api_keys.json
+synthlang_proxy.db
+*.db

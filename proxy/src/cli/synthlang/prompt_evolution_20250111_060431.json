@@ -1,0 +1,176 @@
+[
+  {
+    "generation": 0,
+    "population": [
+      {
+        "prompt": "analyze sales data and generate insights",
+        "fitness": {
+          "clarity": 0.0,
+          "specificity": 0.0,
+          "task_score": 0.3333333333333333,
+          "overall": 0.13333333333333333
+        }
+      }
+    ]
+  },
+  {
+    "generation": 1,
+    "population": [
+      {
+        "prompt": "analyze sales data \u21b9 \ngenerate insights \u2022 \nvisualize trends \u03a3",
+        "fitness": {
+          "clarity": 0.6666666666666666,
+          "specificity": 0.2,
+          "task_score": 0.0,
+          "overall": 0.26
+        }
+      },
+      {
+        "prompt": "analyze sales data and generate insights",
+        "fitness": {
+          "clarity": 0.0,
+          "specificity": 0.0,
+          "task_score": 0.3333333333333333,
+          "overall": 0.13333333333333333
+        }
+      },
+      {
+        "prompt": "analyze sales data and generate insights",
+        "fitness": {
+          "clarity": 0.0,
+          "specificity": 0.0,
+          "task_score": 0.3333333333333333,
+          "overall": 0.13333333333333333
+        }
+      }
+    ]
+  },
+  {
+    "generation": 2,
+    "population": [
+      {
+        "prompt": "analyze sales data \u21b9 \ngenerate insights \u2022 \nsplit insights > \nvisualize trends \u03a3",
+        "fitness": {
+          "clarity": 0.6666666666666666,
+          "specificity": 0.30000000000000004,
+          "task_score": 0.0,
+          "overall": 0.29
+        }
+      },
+      {
+        "prompt": "analyze sales data \u21b9 \ngenerate insights \u2022 \nvisualize trends \u03a3",
+        "fitness": {
+          "clarity": 0.6666666666666666,
+          "specificity": 0.2,
+          "task_score": 0.0,
+          "overall": 0.26
+        }
+      },
+      {
+        "prompt": "analyze sales data \u21b9 \ngenerate insights \u2022 \nsplit insights > \nvisualize trends \u03a3",
+        "fitness": {
+          "clarity": 0.6666666666666666,
+          "specificity": 0.30000000000000004,
+          "task_score": 0.0,
+          "overall": 0.29
+        }
+      }
+    ]
+  },
+  {
+    "generation": 3,
+    "population": [
+      {
+        "prompt": "analyze sales data \u21b9 \ngenerate insights \u2022 \nsplit insights > \nvisualize trends \u03a3",
+        "fitness": {
+          "clarity": 0.6666666666666666,
+          "specificity": 0.30000000000000004,
+          "task_score": 0.0,
+          "overall": 0.29
+        }
+      },
+      {
+        "prompt": "analyze sales data \u21b9 \ngenerate insights \u2022 \nsplit insights > \nvisualize trends \u03a3",
+        "fitness": {
+          "clarity": 0.6666666666666666,
+          "specificity": 0.30000000000000004,
+          "task_score": 0.0,
+          "overall": 0.29
+        }
+      },
+      {
+        "prompt": "analyze sales data \u21b9 \ngenerate insights \u2022 \nsplit insights > \nvisualize trends \u03a3",
+        "fitness": {
+          "clarity": 0.6666666666666666,
+          "specificity": 0.30000000000000004,
+          "task_score": 0.0,
+          "overall": 0.29
+        }
+      }
+    ]
+  },
+  {
+    "generation": 4,
+    "population": [
+      {
+        "prompt": "analyze sales data \u21b9 \ngenerate insights \u2022 \nsplit insights > \nvisualize trends \u03a3",
+        "fitness": {
+          "clarity": 0.6666666666666666,
+          "specificity": 0.30000000000000004,
+          "task_score": 0.0,
+          "overall": 0.29
+        }
+      },
+      {
+        "prompt": "analyze sales data \u21b9 \ngenerate insights \u2022 \nsplit insights > \nvisualize trends \u03a3",
+        "fitness": {
+          "clarity": 0.6666666666666666,
+          "specificity": 0.30000000000000004,
+          "task_score": 0.0,
+          "overall": 0.29
+        }
+      },
+      {
+        "prompt": "analyze sales data \u21b9 \ngenerate insights \u2022 \nsplit insights > \nvisualize trends \u03a3",
+        "fitness": {
+          "clarity": 0.6666666666666666,
+          "specificity": 0.30000000000000004,
+          "task_score": 0.0,
+          "overall": 0.29
+        }
+      }
+    ]
+  },
+  {
+    "generation": 5,
+    "population": [
+      {
+        "prompt": "analyze sales data \u21b9 \ngenerate insights \u2022 \nsplit insights > \nvisualize trends \u03a3",
+        "fitness": {
+          "clarity": 0.6666666666666666,
+          "specificity": 0.30000000000000004,
+          "task_score": 0.0,
+          "overall": 0.29
+        }
+      },
+      {
+        "prompt": "analyze sales data \u21b9 \ngenerate insights \u2022 \nsplit insights > \nvisualize trends \u03a3",
+        "fitness": {
+          "clarity": 0.6666666666666666,
+          "specificity": 0.30000000000000004,
+          "task_score": 0.0,
+          "overall": 0.29
+        }
+      },
+      {
+        "prompt": "analyze sales data \u21b9 \ngenerate insights \u2022 \nsplit insights > \nvisualize trends \u03a3",
+        "fitness": {
+          "clarity": 0.6666666666666666,
+          "specificity": 0.30000000000000004,
+          "task_score": 0.0,
+          "overall": 0.29
+        }
+      }
+    ]
+  }
+]

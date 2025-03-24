@@ -1,0 +1,19 @@
+{
+  "examples": [
+    {
+      "input": "How should we scale our microservices architecture to handle 10x traffic?",
+      "thought_process": "↹ system•scale•requirements\n⊕ analyze => current•load\n⊕ identify => bottlenecks\n⊕ design => solutions\nΣ scaling•plan + metrics",
+      "response": "Based on systematic analysis, we should implement horizontal scaling for stateless services, add caching layers, and optimize database queries. This will provide a 10x capacity increase while maintaining system reliability."
+    },
+    {
+      "input": "What's the best way to migrate from monolithic to microservices while keeping the system running?",
+      "thought_process": "↹ system•architecture•constraints\n⊕ identify => boundaries\n⊕ design => migration•steps\n⊕ validate => transitions\nΣ migration•plan + continuity",
+      "response": "Start with extracting stateless services, implement API gateway for routing, and gradually migrate functionality using the strangler fig pattern. This ensures continuous operation during migration."
+    },
+    {
+      "input": "How can we improve our system's error handling across distributed services?",
+      "thought_process": "↹ services•errors•patterns\n⊕ analyze => failure•modes\n⊕ design => strategies\n⊕ implement => recovery\nΣ resilient•system + monitoring",
+      "response": "Implement circuit breakers, use distributed tracing, and establish fallback mechanisms. This creates a self-healing system that gracefully handles failures."
+    }
+  ]
+}

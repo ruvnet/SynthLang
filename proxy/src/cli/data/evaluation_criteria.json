@@ -1,0 +1,16 @@
+{
+  "criteria": {
+    "clarity": {
+      "weight": 0.3,
+      "threshold": 0.8
+    },
+    "specificity": {
+      "weight": 0.3,
+      "threshold": 0.8
+    },
+    "agency": {
+      "weight": 0.4,
+      "threshold": 0.9
+    }
+  }
+}

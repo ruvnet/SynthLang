@@ -1,0 +1,37 @@
+[settings]
+enable_keyword_detection = true
+detection_threshold = 0.7
+default_role = "basic"
+
+[patterns.weather_query]
+name = "weather_query"
+pattern = "(?:what's|what is|how's|how is|get|check|tell me about)\\s+(?:the)?\\s*(?:weather|temperature|forecast)\\s+(?:in|at|for)?\\s+(?P<location>.+)"
+tool = "weather"
+description = "Detects requests for weather information"
+priority = 100
+enabled = true
+
+[patterns.web_search_query]
+name = "web_search_query"
+pattern = "(?:search|google|look up|find|research)\\s+(?:for|about)?\\s+(?P<query>.+)"
+tool = "web_search"
+description = "Detects requests for web searches"
+priority = 90
+enabled = true
+
+[patterns.calculator_query]
+name = "calculator_query"
+pattern = "(?:calculate|compute|what is|solve|evaluate)\\s+(?P<expression>.+)"
+tool = "calculator"
+description = "Detects requests for calculations"
+priority = 80
+enabled = true
+
+[patterns.admin_query]
+name = "admin_query"
+pattern = "(?:admin|system|configure|setup|manage)\\s+(?:the|this)?\\s*(?:system|server|application|app|service)\\s+(?:to|for)?\\s+(?P<action>.+)"
+tool = "system_admin"
+description = "Detects requests for system administration tasks"
+priority = 200
+enabled = true
+required_role = "admin"

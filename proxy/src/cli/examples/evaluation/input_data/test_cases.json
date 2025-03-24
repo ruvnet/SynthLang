@@ -1,0 +1,226 @@
+{
+  "test_cases": [
+    {
+      "category": "Mathematical Reasoning",
+      "cases": [
+        {
+          "id": "math-1",
+          "name": "Fibonacci Sequence",
+          "description": "Generate Fibonacci sequence with optimization for large numbers",
+          "input": "n=100",
+          "expected_complexity": "O(n)",
+          "edge_cases": ["n=0", "n=1", "n=1000000"],
+          "evaluation_criteria": [
+            "Performance at scale",
+            "Memory efficiency",
+            "Error handling"
+          ]
+        },
+        {
+          "id": "math-2",
+          "name": "Prime Factorization",
+          "description": "Implement efficient prime factorization algorithm",
+          "input": "n=84923",
+          "expected_complexity": "O(sqrt(n))",
+          "edge_cases": ["n=1", "n=prime", "n=perfect_square"],
+          "evaluation_criteria": [
+            "Algorithm efficiency",
+            "Mathematical reasoning",
+            "Code optimization"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Natural Language Processing",
+      "cases": [
+        {
+          "id": "nlp-1",
+          "name": "Sentiment Analysis",
+          "description": "Analyze sentiment with context awareness and nuance detection",
+          "input": "Complex text with mixed sentiments and sarcasm",
+          "expected_output": "Detailed sentiment breakdown with confidence scores",
+          "edge_cases": [
+            "Sarcastic statements",
+            "Mixed emotions",
+            "Cultural context"
+          ],
+          "evaluation_criteria": [
+            "Contextual understanding",
+            "Nuance detection",
+            "Confidence scoring"
+          ]
+        },
+        {
+          "id": "nlp-2",
+          "name": "Text Summarization",
+          "description": "Generate concise, coherent summaries preserving key information",
+          "input": "Long technical document",
+          "expected_output": "Structured summary with main points and relationships",
+          "edge_cases": [
+            "Technical jargon",
+            "Multiple topics",
+            "Hierarchical information"
+          ],
+          "evaluation_criteria": [
+            "Information retention",
+            "Coherence",
+            "Length optimization"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Code Generation",
+      "cases": [
+        {
+          "id": "code-1",
+          "name": "API Implementation",
+          "description": "Generate RESTful API endpoints with proper error handling",
+          "input": "API specification document",
+          "expected_output": "Fully implemented API with documentation",
+          "edge_cases": [
+            "Rate limiting",
+            "Authentication",
+            "Concurrent requests"
+          ],
+          "evaluation_criteria": [
+            "Code quality",
+            "Security considerations",
+            "Documentation completeness"
+          ]
+        },
+        {
+          "id": "code-2",
+          "name": "Design Pattern Application",
+          "description": "Implement appropriate design patterns for given scenarios",
+          "input": "System requirements specification",
+          "expected_output": "Well-structured implementation with patterns",
+          "edge_cases": [
+            "Pattern combinations",
+            "Scalability requirements",
+            "System constraints"
+          ],
+          "evaluation_criteria": [
+            "Pattern appropriateness",
+            "Implementation quality",
+            "System architecture"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Data Transformation",
+      "cases": [
+        {
+          "id": "data-1",
+          "name": "Complex Data Pipeline",
+          "description": "Transform and validate data through multiple stages",
+          "input": "Raw data in various formats",
+          "expected_output": "Cleaned, transformed, and validated dataset",
+          "edge_cases": [
+            "Missing data",
+            "Invalid formats",
+            "Large datasets"
+          ],
+          "evaluation_criteria": [
+            "Data quality",
+            "Processing efficiency",
+            "Error handling"
+          ]
+        },
+        {
+          "id": "data-2",
+          "name": "Schema Evolution",
+          "description": "Handle data schema changes while maintaining compatibility",
+          "input": "Data with evolving schema",
+          "expected_output": "Properly migrated and validated data",
+          "edge_cases": [
+            "Breaking changes",
+            "Backward compatibility",
+            "Data integrity"
+          ],
+          "evaluation_criteria": [
+            "Migration success",
+            "Data consistency",
+            "Performance impact"
+          ]
+        }
+      ]
+    }
+  ],
+  "evaluation_metrics": {
+    "accuracy": {
+      "description": "Correctness of output compared to expected results",
+      "weight": 0.3
+    },
+    "token_efficiency": {
+      "description": "Optimal use of tokens in prompt construction",
+      "weight": 0.2
+    },
+    "reasoning_quality": {
+      "description": "Depth and clarity of problem-solving approach",
+      "weight": 0.25
+    },
+    "performance": {
+      "description": "Execution time and resource utilization",
+      "weight": 0.15
+    },
+    "robustness": {
+      "description": "Handling of edge cases and error conditions",
+      "weight": 0.1
+    }
+  },
+  "comparison_criteria": {
+    "traditional_prompting": {
+      "strengths": [
+        "Simple implementation",
+        "Quick for basic tasks",
+        "Low overhead"
+      ],
+      "limitations": [
+        "Limited reasoning depth",
+        "Poor handling of edge cases",
+        "Inconsistent results"
+      ]
+    },
+    "reasoning_based": {
+      "strengths": [
+        "Structured problem decomposition",
+        "Better error handling",
+        "Clearer solution steps"
+      ],
+      "limitations": [
+        "Longer execution time",
+        "Higher token usage",
+        "May over-complicate simple tasks"
+      ]
+    },
+    "agentic_flow": {
+      "strengths": [
+        "Comprehensive problem analysis",
+        "Strong documentation",
+        "Systematic approach"
+      ],
+      "limitations": [
+        "Complex implementation",
+        "Resource intensive",
+        "Overhead for simple tasks"
+      ]
+    },
+    "synthlang_optimized": {
+      "strengths": [
+        "Mathematical pattern recognition",
+        "Efficient token usage",
+        "Robust error handling",
+        "Scalable solutions",
+        "Optimal performance"
+      ],
+      "limitations": [
+        "Requires domain knowledge",
+        "Initial setup complexity",
+        "Learning curve for advanced features"
+      ]
+    }
+  }
+}

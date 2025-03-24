@@ -1,0 +1,33 @@
+{
+  "id": "1ef46ca1-34c6-4ee1-a4a2-e8f8ad46b5ef",
+  "scenario_name": "compression",
+  "start_time": "2025-03-22T23:52:12.217204",
+  "end_time": "2025-03-22T23:52:12.222958",
+  "duration_ms": 5.7582855224609375,
+  "parameters": {
+    "compression_method": "synthlang",
+    "model": "gpt-4o",
+    "text_type": "general",
+    "sample_size": 5,
+    "min_length": 200,
+    "max_length": 2000,
+    "use_real_samples": true
+  },
+  "metrics": {
+    "compression_ratio": 1.0,
+    "token_reduction_percentage": 0.0,
+    "cost_savings_percentage": 0.0,
+    "average_compression_time_ms": 0.703275203704834,
+    "total_original_size_bytes": 9408,
+    "total_compressed_size_bytes": 9408,
+    "total_original_tokens": 2351,
+    "total_compressed_tokens": 2351,
+    "size_reduction_bytes": 0,
+    "token_reduction_count": 0,
+    "token_cost_original_usd": 0.02351,
+    "token_cost_compressed_usd": 0.02351,
+    "cost_savings_usd": 0.0,
+    "samples_count": 4
+  },
+  "metadata": {}
+}

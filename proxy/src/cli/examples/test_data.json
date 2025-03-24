@@ -1,0 +1,29 @@
+{
+    "examples": [
+        {
+            "input": "↹ data•revenue\n⊕ analyze => trends\n⊕ forecast => future\nΣ insights + charts",
+            "label": "analysis",
+            "explanation": "This prompt analyzes revenue data and forecasts trends"
+        },
+        {
+            "input": "↹ reviews•product\n⊕ sentiment>0.5 => positive\n⊕ sentiment<0.5 => negative\nΣ analysis + score",
+            "label": "sentiment",
+            "explanation": "This prompt analyzes product review sentiment"
+        },
+        {
+            "input": "↹ data•quarterly\n⊕ aggregate => summary\n⊕ format => report\nΣ document + metrics",
+            "label": "reporting",
+            "explanation": "This prompt generates quarterly reports"
+        },
+        {
+            "input": "↹ document•en\n⊕ translate => es\n⊕ verify => accuracy\nΣ translation + score",
+            "label": "translation",
+            "explanation": "This prompt translates from English to Spanish"
+        },
+        {
+            "input": "↹ code•python\n⊕ lint => issues\n⊕ refactor => clean\nΣ code + metrics",
+            "label": "code",
+            "explanation": "This prompt lints and refactors Python code"
+        }
+    ]
+}

@@ -1,0 +1,176 @@
+[
+  {
+    "generation": 0,
+    "population": [
+      {
+        "prompt": "analyze sales data and generate insights",
+        "fitness": {
+          "clarity": 0.0,
+          "specificity": 0.0,
+          "task_score": 0.3333333333333333,
+          "overall": 0.13333333333333333
+        }
+      }
+    ]
+  },
+  {
+    "generation": 1,
+    "population": [
+      {
+        "prompt": "analyze sales data and generate insights",
+        "fitness": {
+          "clarity": 0.0,
+          "specificity": 0.0,
+          "task_score": 0.3333333333333333,
+          "overall": 0.13333333333333333
+        }
+      },
+      {
+        "prompt": "analyze sales data and generate insights",
+        "fitness": {
+          "clarity": 0.0,
+          "specificity": 0.0,
+          "task_score": 0.3333333333333333,
+          "overall": 0.13333333333333333
+        }
+      },
+      {
+        "prompt": "analyze sales data and generate insights",
+        "fitness": {
+          "clarity": 0.0,
+          "specificity": 0.0,
+          "task_score": 0.3333333333333333,
+          "overall": 0.13333333333333333
+        }
+      }
+    ]
+  },
+  {
+    "generation": 2,
+    "population": [
+      {
+        "prompt": "analyze sales data and generate insights",
+        "fitness": {
+          "clarity": 0.0,
+          "specificity": 0.0,
+          "task_score": 0.3333333333333333,
+          "overall": 0.13333333333333333
+        }
+      },
+      {
+        "prompt": "\u21b9 data\u2022sales\n\u2295 analyze => insights\n\u03a3 report + metrics",
+        "fitness": {
+          "clarity": 1.0,
+          "specificity": 0.6000000000000001,
+          "task_score": 0.0,
+          "overall": 0.48
+        }
+      },
+      {
+        "prompt": "analyze sales data and generate insights",
+        "fitness": {
+          "clarity": 0.0,
+          "specificity": 0.0,
+          "task_score": 0.3333333333333333,
+          "overall": 0.13333333333333333
+        }
+      }
+    ]
+  },
+  {
+    "generation": 3,
+    "population": [
+      {
+        "prompt": "\u21b9 data\u2022sales\n\u2295 analyze => insights\n\u03a3 report + metrics",
+        "fitness": {
+          "clarity": 1.0,
+          "specificity": 0.6000000000000001,
+          "task_score": 0.0,
+          "overall": 0.48
+        }
+      },
+      {
+        "prompt": "\u21b9 data\u2022sales\n\u2295 analyze => insights\n\u03a3 report + metrics",
+        "fitness": {
+          "clarity": 1.0,
+          "specificity": 0.6000000000000001,
+          "task_score": 0.0,
+          "overall": 0.48
+        }
+      },
+      {
+        "prompt": "\u21b9 data\u2022sales\n\u2295 analyze => insights\n\u03a3 report + metrics",
+        "fitness": {
+          "clarity": 1.0,
+          "specificity": 0.6000000000000001,
+          "task_score": 0.0,
+          "overall": 0.48
+        }
+      }
+    ]
+  },
+  {
+    "generation": 4,
+    "population": [
+      {
+        "prompt": "\u21b9 data\u2022sales\n\u2295 analyze => insights\n\u03a3 report + metrics",
+        "fitness": {
+          "clarity": 1.0,
+          "specificity": 0.6000000000000001,
+          "task_score": 0.0,
+          "overall": 0.48
+        }
+      },
+      {
+        "prompt": "\u21b9 data\u2022sales\n\u2295 filter>Q1 => subset\n\u2295 analyze => insights\n\u03a3 report + metrics",
+        "fitness": {
+          "clarity": 1.0,
+          "specificity": 0.8,
+          "task_score": 0.0,
+          "overall": 0.54
+        }
+      },
+      {
+        "prompt": "\u21b9 data\u2022sales\n\u2295 filter>Q1 => subset\n\u2295 analyze => insights\n\u03a3 report + metrics",
+        "fitness": {
+          "clarity": 1.0,
+          "specificity": 0.8,
+          "task_score": 0.0,
+          "overall": 0.54
+        }
+      }
+    ]
+  },
+  {
+    "generation": 5,
+    "population": [
+      {
+        "prompt": "\u21b9 data\u2022sales\n\u2295 filter>Q1 => subset\n\u2295 analyze => insights\n\u03a3 report + metrics",
+        "fitness": {
+          "clarity": 1.0,
+          "specificity": 0.8,
+          "task_score": 0.0,
+          "overall": 0.54
+        }
+      },
+      {
+        "prompt": "\u21b9 data\u2022sales\n\u2295 filter>Q1 => subset\n\u2295 analyze => insights\n\u03a3 report + metrics",
+        "fitness": {
+          "clarity": 1.0,
+          "specificity": 0.8,
+          "task_score": 0.0,
+          "overall": 0.54
+        }
+      },
+      {
+        "prompt": "\u21b9 data\u2022sales\n\u2295 filter>Q1 => subset\n\u2295 analyze => insights\n\u03a3 report + metrics",
+        "fitness": {
+          "clarity": 1.0,
+          "specificity": 0.8,
+          "task_score": 0.0,
+          "overall": 0.54
+        }
+      }
+    ]
+  }
+]
