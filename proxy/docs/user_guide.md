@@ -80,6 +80,76 @@ synthlang proxy cache-stats
 
 This command provides statistics about cache hits, misses, and cache size, helping you optimize your caching configuration.
 
+### PII Masking
+
+SynthLang Proxy includes a robust PII (Personally Identifiable Information) masking system to protect sensitive information in user messages before sending to LLMs and in logs.
+
+#### Overview of PII Masking
+
+The PII masking system automatically detects and replaces sensitive information with placeholders, ensuring that personal data is not exposed to LLMs or stored in logs. This helps maintain privacy and comply with data protection regulations.
+
+#### Types of PII Detected and Masked
+
+SynthLang Proxy can detect and mask various types of PII:
+
+- **Email addresses**: `user@example.com` → `<EMAIL_ADDRESS>`
+- **Phone numbers**: `+1 (888) 555-1234` → `<PHONE_NUMBER>`
+- **Social Security Numbers**: `123-45-6789` → `<SSN>`
+- **Credit card numbers**: `4111-1111-1111-1111` → `<CREDIT_CARD>`
+- **IP addresses**: `192.168.1.1` → `<IP_ADDRESS>`
+- **Dates**: `01/01/2025` → `<DATE>`
+- **Street addresses**: `123 Main St, Anytown, CA` → `<STREET_ADDRESS>`
+- **Passport numbers**: `AB1234567` → `<PASSPORT_NUMBER>`
+
+#### Configuration Options for PII Masking
+
+PII masking can be configured using environment variables in your `.env` file:
+
+- `MASK_PII_BEFORE_LLM`: Enable or disable PII masking before sending to LLMs (default: `0` for disabled, `1` for enabled).
+- `MASK_PII_IN_LOGS`: Enable or disable PII masking in logs (default: `1` for enabled, `0` for disabled).
+
+#### Using PII Masking in API Requests
+
+You can control PII masking on a per-request basis using HTTP headers:
+
+- `X-Mask-PII-Before-LLM`: Set to `1` to enable PII masking before sending to LLM, or `0` to disable.
+- `X-Mask-PII-In-Logs`: Set to `1` to enable PII masking in logs, or `0` to disable.
+
+Example API request with PII masking headers:
+
+```bash
+curl -X POST http://localhost:8000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer your_api_key" \
+  -H "X-Mask-PII-Before-LLM: 1" \
+  -H "X-Mask-PII-In-Logs: 1" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [
+      {"role": "system", "content": "You are a helpful assistant."},
+      {"role": "user", "content": "My email is user@example.com and my phone is 555-123-4567."}
+    ]
+  }'
+```
+
+#### Implementation Details
+
+PII masking is implemented in the `src/app/security.py` module using regular expressions to identify and replace PII with placeholders. The masking process occurs:
+
+1. Before sending messages to the LLM (if `MASK_PII_BEFORE_LLM=1` or `X-Mask-PII-Before-LLM: 1`)
+2. Before writing to logs (if `MASK_PII_IN_LOGS=1` or `X-Mask-PII-In-Logs: 1`)
+
+#### Example and Testing
+
+You can find examples of PII masking in the `/proxy/examples/sh/pii/` directory:
+
+- `01_basic_pii_masking.sh`: Demonstrates basic PII masking in text
+- `02_pii_masking_before_llm.sh`: Shows how to use the `X-Mask-PII-Before-LLM` header
+- `03_pii_masking_in_logs.sh`: Illustrates PII masking in logs
+- `04_combined_pii_masking.sh`: Demonstrates a combination of PII masking techniques
+
+For more detailed information, see the [PII Masking Documentation](pii_masking.md).
+
 ### Agent Framework
 
 SynthLang Proxy transforms static LLM applications into dynamic, agentic systems with its built-in agent framework.
@@ -518,228 +588,3 @@ Some settings can be dynamically configured at runtime, such as:
 - **Keyword Patterns**: Keyword patterns can be added, updated, or removed at runtime using the CLI or API.
 
 Dynamic configuration allows for flexible adaptation to changing requirements and conditions without restarting the proxy server.
-
-## Deployment
-
-SynthLang Proxy can be deployed in various environments, including Docker, Fly.io, and serverless platforms.
-
-### Docker Deployment
-
-Docker deployment provides a containerized and portable way to run SynthLang Proxy.
-
-#### Dockerfile
-
-SynthLang Proxy includes a `Dockerfile` for easy containerization. 
-
-```dockerfile
-FROM python:3.10-slim-buster
-
-WORKDIR /app
-
-COPY requirements.txt ./
-RUN pip install -r requirements.txt --no-cache-dir
-
-COPY src ./src
-COPY config ./config
-COPY .env.sample ./.env.sample 
-
-CMD ["python", "-m", "app.main"]
-```
-
-#### Building the Docker Image
-
-To build the Docker image, navigate to the `proxy` directory and run:
-
-```bash
-docker build -t synthlang-proxy .
-```
-
-#### Running the Docker Container
-
-To run the Docker container:
-
-```bash
-docker run -d -p 8000:8000 --env-file .env synthlang-proxy
-```
-
-Ensure you have configured the `.env` file before running the container.
-
-### Fly.io Deployment
-
-Fly.io provides a platform for deploying globally distributed applications.
-
-#### Fly.toml Configuration
-
-SynthLang Proxy includes a `fly.toml` configuration file for Fly.io deployment.
-
-```toml
-app = "synthlang-proxy-app"
-primary_region = "iad"
-
-[build]
-  dockerfile = "Dockerfile"
-
-[http_service]
-  internal_port = 8000
-  force_https = true
-  auto_stop_machines = true
-  auto_start_machines = true
-  min_machines_running = 0
-  processes = ["app"]
-
-[[vm]]
-  cpu_kind = "shared"
-  cpus = 1
-  memory_mb = 512
-
-[[mounts]]
-  source="data"
-  destination="/app/data"
-```
-
-#### Deploying to Fly.io
-
-To deploy to Fly.io:
-
-1. Install the Fly CLI: `curl -L https://fly.io/install.sh | sh`
-2. Login to Fly.io: `fly auth login`
-3. Deploy the app: `fly deploy --env-file .env`
-
-Ensure you have configured the `.env` file and Fly.io CLI before deployment.
-
-### Serverless Deployment Options
-
-SynthLang Proxy can be deployed on serverless platforms like AWS Lambda, Google Cloud Functions, or Azure Functions. Serverless deployment offers scalability and cost-efficiency for production environments.
-
-#### Serverless Considerations
-
-- **Statelessness**: Serverless functions are stateless. Ensure any persistent data (e.g., cache, user roles) is stored in external services like databases or managed cache stores.
-- **Cold Starts**: Be aware of cold start latency in serverless environments. Optimize initialization code and consider provisioned concurrency for latency-sensitive applications.
-- **Function Limits**: Serverless platforms have limits on function duration, memory, and deployment package size. Ensure SynthLang Proxy deployment stays within these limits.
-- **API Gateway**: Use an API Gateway (e.g., AWS API Gateway, Google Cloud Endpoints, Azure API Management) to handle API routing, authentication, and rate limiting for serverless deployments.
-
-#### Deployment Steps
-
-1. **Package the application**: Create a deployment package (e.g., ZIP file) containing the application code, dependencies, and configuration files.
-2. **Configure serverless function**: Create a serverless function on your chosen platform, configure runtime environment (Python 3.8+), memory allocation, and timeout settings.
-3. **Upload deployment package**: Upload the deployment package to the serverless function.
-4. **Configure environment variables**: Set environment variables via the serverless platform's configuration settings.
-5. **Set up API Gateway**: Configure an API Gateway to route requests to the serverless function and handle authentication and authorization.
-
-See the documentation for your chosen serverless platform for detailed deployment instructions.
-
-## Troubleshooting
-
-This section provides solutions to common issues and guidance on debugging SynthLang Proxy.
-
-### Common Issues and Solutions
-
-- **API Key Issues**:
-    - **Issue**: `openai` module not found or `OPENAI_API_KEY` not set.
-    - **Solution**: Ensure `openai` package is installed (`pip install openai`) and `OPENAI_API_KEY` environment variable is correctly set in `.env` or environment.
-- **Database Connection Errors**:
-    - **Issue**: Failed to connect to PostgreSQL database.
-    - **Solution**: Verify `DATABASE_URL` in `.env` is correct and database server is running. For SQLite, check `SQLITE_PATH` and permissions.
-- **Port Conflicts**:
-    - **Issue**: Proxy server fails to start due to port conflict.
-    - **Solution**: Change `PORT` environment variable in `.env` to an available port.
-- **Cache Not Working**:
-    - **Issue**: Semantic cache is not caching responses.
-    - **Solution**: Ensure `ENABLE_CACHE` is set to `1` in `.env`. Check logs for cache initialization errors. Verify `CACHE_SIMILARITY_THRESHOLD` is appropriately configured.
-- **Keyword Detection Issues**:
-    - **Issue**: Keyword detection is not triggering tools.
-    - **Solution**: Ensure `ENABLE_KEYWORD_DETECTION` is `true`. Verify keyword patterns in `config/keywords.toml` are correctly defined and enabled. Check logs for pattern loading errors.
-- **SynthLang Features Disabled**:
-    - **Issue**: SynthLang compression or other features are not working.
-    - **Solution**: Ensure `SYNTHLANG_FEATURES_ENABLED` and `USE_SYNTHLANG` are set to `true` in `.env`. Check for SynthLang initialization errors in logs.
-
-### Logging and Debugging
-
-SynthLang Proxy uses a comprehensive logging system to help diagnose issues.
-
-- **Logging Levels**: Configure logging level using the `LOG_LEVEL` environment variable (`DEBUG`, `INFO`, `WARNING`, `ERROR`). `DEBUG` level provides the most detailed logs.
-- **Log File**: Logs are written to the file specified by `LOG_FILE` environment variable (default: `proxy.log`).
-- **CLI Logging**: Use the `--log-level` option with CLI commands to control logging verbosity. For example: `synthlang proxy serve --log-level debug`.
-- **Debug Mode**: Enable debug mode by setting `DEBUG=true` in `.env`. Debug mode provides more detailed error messages and diagnostics.
-- **SQL Debug Logging**: Enable SQL query logging by setting `DEBUG_SQL=1` in `.env` to debug database-related issues.
-
-Analyze the logs for error messages, warnings, and debug information to identify and resolve issues.
-
-### Getting Help and Support
-
-If you encounter issues that you cannot resolve using the documentation and troubleshooting guide, you can get help and support through:
-
-- **GitHub Issues**: Report bugs, request features, or ask questions by creating issues on the [SynthLang Proxy GitHub repository](https://github.com/yourusername/synthlang-proxy/issues).
-- **Community Forums**: Join the SynthLang community forums to discuss issues, share experiences, and get help from other users and developers.
-- **Direct Support**: For enterprise users or urgent issues, contact the SynthLang support team directly via email or support channels (if applicable).
-
-## Examples and Use Cases
-
-SynthLang Proxy can be used in various scenarios to enhance LLM applications.
-
-### 1. Cost Optimization for Chatbots
-
-SynthLang Proxy significantly reduces token costs for chatbot applications through prompt compression and semantic caching.
-
-- **Scenario**: A customer support chatbot handles thousands of queries daily.
-- **Benefit**: SynthLang compression reduces input token usage by up to 75%, and semantic caching reuses responses for common queries, resulting in substantial cost savings on LLM API calls.
-
-### 2. Performance Improvement for Real-time Applications
-
-Semantic caching in SynthLang Proxy drastically reduces response latency, making it ideal for real-time applications.
-
-- **Scenario**: A real-time coding assistant needs to provide instant code suggestions.
-- **Benefit**: Semantic caching ensures that frequently requested code snippets or suggestions are served from the cache with minimal latency, improving user experience.
-
-### 3. Agentic Capabilities for Complex Workflows
-
-SynthLang Proxy's agent framework enables complex, multi-step workflows to be triggered from natural language prompts.
-
-- **Scenario**: A research assistant agent needs to perform comprehensive research and generate reports.
-- **Benefit**: Keyword detection and agent tools allow users to initiate complex research workflows with simple natural language commands, automating multi-step processes.
-
-### 4. Enhanced Security with RBAC
-
-Role-Based Access Control in SynthLang Proxy ensures secure access to sensitive tools and features.
-
-- **Scenario**: An enterprise application requires different access levels for basic users, premium users, and administrators.
-- **Benefit**: RBAC allows fine-grained control over feature access, ensuring that sensitive tools and data are only accessible to authorized users based on their roles.
-
-### 5. Guard Rails for Content Moderation
-
-Keyword Detection System can be used to implement guard rails for content moderation and safety.
-
-- **Scenario**: A content generation platform needs to prevent generation of harmful or inappropriate content.
-- **Benefit**: Keyword patterns can detect harmful content requests and trigger content moderation tools, ensuring platform safety and policy compliance.
-
-## Best Practices
-
-This section provides tips and best practices for optimal performance, security, and prompt engineering with SynthLang Proxy.
-
-### Tips for Optimal Performance and Security
-
-- **Enable Semantic Caching**: Semantic caching significantly reduces latency and costs. Ensure `ENABLE_CACHE=1` and tune `CACHE_SIMILARITY_THRESHOLD` for your use case.
-- **Use Prompt Compression**: SynthLang compression reduces token usage and improves throughput. Enable `USE_SYNTHLANG=1` for cost savings. Consider enabling gzip compression (`use_gzip: true` in requests) for very large prompts.
-- **Configure Rate Limiting**: Set appropriate rate limits (`DEFAULT_RATE_LIMIT_QPM`, `PREMIUM_RATE_LIMIT`) to protect your proxy server from abuse.
-- **Implement RBAC**: Use Role-Based Access Control to secure access to sensitive tools and features. Define roles and assign users appropriately.
-- **Monitor Logs**: Regularly monitor logs (`proxy.log`) for errors, warnings, and performance insights. Set `LOG_LEVEL` to `INFO` or `DEBUG` for detailed logging.
-- **Benchmark Regularly**: Use the benchmarking framework to measure performance and optimize configurations. Run benchmarks after configuration changes or updates.
-- **Secure API Keys**: Protect your OpenAI API key and SynthLang Proxy API key. Do not expose keys in client-side code or public repositories. Use environment variables to manage API keys securely.
-- **Encrypt Sensitive Data**: Ensure `ENCRYPTION_KEY` is set to protect sensitive data at rest.
-- **Regularly Update**: Keep SynthLang Proxy and its dependencies updated to the latest versions for security patches and performance improvements.
-- **Use Distributed Cache**: For high-availability deployments, configure a distributed cache backend like Redis to share cache across instances.
-- **Optimize Database Settings**: Configure database connection pooling and tune query performance for production deployments.
-- **Monitor Resource Usage**: Keep an eye on CPU, memory, and network usage to identify bottlenecks and optimize resource allocation.
-
-### Best Practices for Prompt Engineering with SynthLang Proxy
-
-- **Use SynthLang Symbolic Notation**: Leverage SynthLang's symbolic notation for concise and efficient prompts. Translate natural language prompts to SynthLang format using the CLI `translate` command.
-- **Optimize Prompts with DSPy**: Use SynthLang's DSPy integration to optimize prompts for clarity, specificity, and performance. Experiment with prompt optimization techniques using the `/v1/synthlang/optimize` endpoint.
-- **Evolve Prompts for Continuous Improvement**: Utilize prompt evolution techniques to automatically improve prompt performance over time. Use the `/v1/synthlang/evolve` endpoint to evolve prompts using genetic algorithms.
-- **Manage Prompts Effectively**: Use SynthLang's prompt management features to save, load, list, and compare prompts. Organize prompts with metadata and version history.
-- **Design Effective Keyword Patterns**: Create well-defined keyword patterns for accurate tool invocation and guard rail implementation. Use named capture groups for parameter extraction and prioritize patterns appropriately.
-- **Test and Validate Prompts**: Thoroughly test and validate prompts for different scenarios and user inputs. Use the benchmarking framework to measure prompt performance and identify areas for improvement.
-- **Iterate and Refine**: Prompt engineering is an iterative process. Continuously refine and improve prompts based on performance metrics, user feedback, and benchmark results.
-- **Structure Your Prompts**: Organize complex prompts into clear sections for better compression and understanding. Use consistent formatting and terminology.
-- **Domain-Specific Compression**: For specialized applications, develop domain-specific compression patterns to maximize token reduction for your specific use case.
-- **Cache Warming**: Pre-populate the semantic cache with common queries to improve performance for frequent requests right from startup.

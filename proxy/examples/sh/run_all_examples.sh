@@ -75,6 +75,27 @@ run_example "13_cache_stats.sh"
 run_example "14_cache_clear.sh"
 run_example "15_cache_demo.sh"
 
+# PII Masking Examples
+echo "========================================================"
+echo "PII Masking Examples"
+echo "========================================================"
+echo "The following examples demonstrate PII masking features."
+echo "Would you like to run the PII masking examples? (y/n)"
+read run_pii
+
+if [[ $run_pii == "y" || $run_pii == "Y" ]]; then
+    # Make PII scripts executable
+    chmod +x "$SCRIPT_DIR/pii"/*.sh
+    
+    # Run PII examples
+    run_example "pii/01_basic_pii_masking.sh"
+    run_example "pii/02_pii_masking_before_llm.sh"
+    run_example "pii/03_pii_masking_in_logs.sh"
+    run_example "pii/04_combined_pii_masking.sh"
+else
+    echo "Skipping PII masking examples."
+fi
+
 echo "========================================================"
 echo "All examples completed!"
 echo "========================================================"

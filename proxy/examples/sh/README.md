@@ -57,6 +57,23 @@ This directory contains example shell scripts demonstrating various features of 
 
 - **11_complex_example.sh**: Complex scenario combining multiple features (system message, multi-turn conversation, tool invocation, streaming)
 
+### PII Masking Examples
+
+- **pii/01_basic_pii_masking.sh**: Demonstrates basic PII masking in text
+- **pii/02_pii_masking_before_llm.sh**: Shows how to mask PII before sending to LLMs
+- **pii/03_pii_masking_in_logs.sh**: Illustrates PII masking in logs
+- **pii/04_combined_pii_masking.sh**: Demonstrates a combination of PII masking techniques
+- **pii/04_combined_pii_masking_debug.sh**: Shows detailed debug output for PII masking
+- **pii/test_pii_masking.sh**: Tests the PII masking function directly
+- **pii/test_pii_integration.sh**: Tests the integration of PII masking with the API
+- **pii/implement_pii_masking.py**: Provides a guide for implementing PII masking in the API
+
+To run all PII masking examples:
+```bash
+cd pii
+./run_all_examples.sh
+```
+
 ## Features Demonstrated
 
 - **Different Models**: Examples of using gpt-3.5-turbo, gpt-4o-mini, and o3-mini
@@ -65,6 +82,10 @@ This directory contains example shell scripts demonstrating various features of 
 - **Compression**: SynthLang compression and gzip compression for token reduction
 - **Multi-turn Conversations**: Maintaining context across multiple messages
 - **System Messages**: Setting the assistant's behavior
+- **PII Masking**: Protection of personally identifiable information in logs and before sending to LLMs
+  - PII detection and masking for emails, phone numbers, SSNs, credit cards, etc.
+  - Control via HTTP headers (X-Mask-PII-Before-LLM, X-Mask-PII-In-Logs)
+  - Testing and implementation guidance
 
 ## API Key Handling
 
@@ -78,6 +99,7 @@ All scripts include automatic API key handling:
 - If you get connection errors, make sure the SynthLang Proxy server is running
 - If you get authentication errors, check that your API key is valid
 - If the hashtag directives aren't working, ensure the keyword detection system is properly configured
+- If PII masking isn't working, check the implementation guide in pii/implement_pii_masking.py
 
 ## Additional Resources
 
@@ -85,3 +107,4 @@ All scripts include automatic API key handling:
 - [API Reference](../docs/api.md)
 - [CLI Documentation](../docs/cli.md)
 - [Keyword Detection System](../docs/keyword_detection.md)
+- [PII Masking Documentation](pii/README.md)

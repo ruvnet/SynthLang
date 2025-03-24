@@ -13,6 +13,7 @@ Key benefits include:
 - **Agent Framework**: Add agentic capabilities to any LLM application with tools and multi-step workflows
 - **Keyword Detection**: Automatically trigger tools and actions based on user messages
 - **Role-Based Access Control**: Fine-grained control over feature access
+- **PII Masking**: Protect sensitive information before sending to LLMs and in logs
 - **Compatible Interface**: Drop-in replacement for OpenAI API endpoints
 
 ## Documentation Sections
@@ -29,6 +30,7 @@ Key benefits include:
 - [Compression System](compression_system.md) - Reduce token usage and costs with advanced compression techniques
 - [Semantic Caching](semantic_caching.md) - Improve performance and reduce costs with intelligent caching
 - [Keyword Detection System](keyword_detection.md) - Automatically detect patterns in user messages
+- [PII Masking](pii_masking.md) - Protect personally identifiable information in requests and logs
 - [Role-Based Access Control](role_based_access_control.md) - Secure access control for features and tools
 
 ### API and CLI
@@ -59,6 +61,7 @@ Key benefits include:
 | [Compression](compression_system.md) | Token compression techniques |
 | [Caching](semantic_caching.md) | Semantic caching system |
 | [Keywords](keyword_detection.md) | Keyword detection and pattern matching |
+| [PII Masking](pii_masking.md) | Protecting sensitive information |
 | [RBAC](role_based_access_control.md) | Role-based access control |
 | [Development](development.md) | Development guide |
 | [Deployment](deployment.md) | Deployment options |

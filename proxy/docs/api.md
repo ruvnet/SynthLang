@@ -83,6 +83,20 @@ Error responses include a JSON object with details about the error:
 }
 ```
 
+## Common Headers
+
+SynthLang Proxy supports several custom headers that can be used to control behavior across endpoints:
+
+| Header | Description | Values |
+|--------|-------------|--------|
+| `X-Mask-PII-Before-LLM` | Mask PII before sending to LLM | `0` (disabled) or `1` (enabled) |
+| `X-Mask-PII-In-Logs` | Mask PII in logs | `0` (disabled) or `1` (enabled) |
+| `X-Use-SynthLang` | Enable SynthLang compression | `0` (disabled) or `1` (enabled) |
+| `X-Use-Gzip` | Enable additional gzip compression | `0` (disabled) or `1` (enabled) |
+| `X-Disable-Keyword-Detection` | Disable keyword detection | `0` (disabled) or `1` (enabled) |
+
+These headers override the default configuration for the specific request.
+
 ## OpenAI-Compatible Endpoints
 
 ### Chat Completions
@@ -129,6 +143,13 @@ Create a chat completion similar to OpenAI's chat completion endpoint.
 | use_synthlang | boolean | Enable SynthLang compression | true |
 | use_gzip | boolean | Enable additional gzip compression | false |
 | disable_keyword_detection | boolean | Disable keyword detection | false |
+
+**Headers**:
+
+| Header | Description | Values |
+|--------|-------------|--------|
+| `X-Mask-PII-Before-LLM` | Mask PII before sending to LLM | `0` (disabled) or `1` (enabled) |
+| `X-Mask-PII-In-Logs` | Mask PII in logs | `0` (disabled) or `1` (enabled) |
 
 **Response**:
 
@@ -199,6 +220,8 @@ Create a completion similar to OpenAI's completion endpoint.
 ```
 
 **Parameters**: Similar to chat completions, but with `prompt` instead of `messages`.
+
+**Headers**: Same as chat completions, including PII masking headers.
 
 **Response**: Similar structure to chat completions.
 
@@ -879,7 +902,9 @@ const apiClient = axios.create({
   baseURL: 'http://localhost:8000',
   headers: {
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${API_KEY}`
+    'Authorization': `Bearer ${API_KEY}`,
+    'X-Mask-PII-Before-LLM': '1',  // Enable PII masking before sending to LLM
+    'X-Mask-PII-In-Logs': '1'      // Enable PII masking in logs
   }
 });
 
@@ -910,7 +935,9 @@ BASE_URL = 'http://localhost:8000'
 
 headers = {
     'Content-Type': 'application/json',
-    'Authorization': f'Bearer {API_KEY}'
+    'Authorization': f'Bearer {API_KEY}',
+    'X-Mask-PII-Before-LLM': '1',  # Enable PII masking before sending to LLM
+    'X-Mask-PII-In-Logs': '1'      # Enable PII masking in logs
 }
 
 def chat_completion():
@@ -939,6 +966,8 @@ def chat_completion():
 curl -X POST http://localhost:8000/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer your_api_key" \
+  -H "X-Mask-PII-Before-LLM: 1" \
+  -H "X-Mask-PII-In-Logs: 1" \
   -d '{
     "model": "gpt-4o",
     "messages": [

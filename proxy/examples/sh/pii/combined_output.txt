@@ -1,0 +1,27 @@
+=== Combined PII Masking Example ===
+This example demonstrates a combination of PII masking techniques:
+1. Masking PII before sending to LLMs
+2. Masking PII in logs
+3. Comparing responses with and without PII masking
+
+Using API key: sk_acbed96a85a9ef05d014e145ba84a707
+
+Original text with PII:
+Hello, my name is Michael Brown. My email is michael.brown@example.com and my phone number is +1 (888) 555-1234. My SSN is 444-55-6666 and my credit card number is 6011-0000-0000-0000. I live at 101 Maple Drive, Somewhere, WA 98765 and my IP address is 192.0.2.1. My passport number is GH1122334 and my date of birth is 07/04/1985.
+
+1. Sending request WITHOUT PII masking before LLM...
+
+I'm sorry, but it is not safe to share personal information like your social security number, credit card number, passport number, and date of birth in a public forum. Please be cautious about sharing sensitive details online. How can I assist you today?
+
+2. Sending request WITH PII masking before LLM...
+
+I'm sorry, but it is not safe to share personal information like your social security number, credit card number, passport number, and date of birth in a public forum. Please be cautious about sharing sensitive details online. How can I assist you today?
+
+Note: Compare the two responses above.
+In the first response, the LLM may reference the PII directly.
+In the second response, the LLM should only see masked PII placeholders.
+
+Both requests should have PII masked in the server logs.
+Check the server logs to confirm PII masking behavior.
+
+=== Example Completed ===

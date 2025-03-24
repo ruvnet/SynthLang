@@ -20,9 +20,9 @@ Paired with gzip compression, token pruning, semantic caching to store and retri
 
 This means if a user asks a question similar to something previously answered, or if the system generated code earlier for a related task, it can instantly reuse that result locally without making another LLM request. Faster, more efficient, and significantly cheaper. Over time, SynthLang refines its compression patterns to better match your domain and tasks.
 
-This turns any legacy LLM application into an **agentic, hyper-optimized, self-evolving system, **without rebuilding it. Whether you're running a chatbot, coding assistant, research agent, or enterprise automation tool, SynthLang brings modern agentic capabilities into your existing flow.
+This turns any legacy LLM application into an agentic, hyper-optimized, self-evolving system, without rebuilding it. Whether you're running a chatbot, coding assistant, research agent, or enterprise automation tool, SynthLang brings modern agentic capabilities into your existing flow.
 
-I've bundled it with a simple CLI and a FastAPI backend you can deploy serverlessly or run on your cloud of choice. Install it with pip install spark-proxy, and you're ready to go. 
+I've bundled it with a simple CLI and a FastAPI backend you can deploy serverlessly or run on your cloud of choice. Install it with pip install synthlang-proxy, and you're ready to go. 
 
 There's also a built-in benchmarking tool that I use to test and optimize the system against different models and application types, it's all integrated, fast, and easy to use.
 
@@ -221,6 +221,81 @@ The Keyword Detection System automatically identifies specific patterns in user 
 | Toxic Language | "You're so [offensive term]" | Policy reminder | Responds appropriately to offensive language |
 | Self-Harm Prevention | "I want to hurt myself" | Crisis resources | Provides support for concerning content |
 | Hallucination Prevention | "Who won the 2030 World Cup?" | Clarification | Prevents responses about future events |
+
+## PII Masking System
+
+SynthLang Proxy includes a robust PII (Personally Identifiable Information) masking system to protect sensitive information in user messages before sending to LLMs and in logs.
+
+### PII Masking Features
+
+| Feature | Description | Configuration |
+|---------|-------------|---------------|
+| **PII Detection** | Automatically detect various types of PII in text | Enabled by default for logs |
+| **Masking Before LLM** | Replace PII with placeholders before sending to LLM | Configurable via environment or headers |
+| **Log Protection** | Prevent sensitive information from appearing in logs | Enabled by default |
+| **Configurable Per Request** | Control PII masking behavior for each request | Via HTTP headers |
+
+### Types of PII Detected and Masked
+
+| PII Type | Example | Masked As | Detection Method |
+|----------|---------|-----------|------------------|
+| Email Addresses | user@example.com | `<EMAIL_ADDRESS>` | Regex pattern matching |
+| Phone Numbers | +1 (555) 123-4567 | `<PHONE_NUMBER>` | Multiple format detection |
+| Social Security Numbers | 123-45-6789 | `<SSN>` | Format validation |
+| Credit Card Numbers | 4111-1111-1111-1111 | `<CREDIT_CARD>` | Luhn algorithm + pattern |
+| IP Addresses | 192.168.1.1 | `<IP_ADDRESS>` | IPv4/IPv6 pattern matching |
+| Dates | 01/01/2025 | `<DATE>` | Multiple format detection |
+| Street Addresses | 123 Main St, Anytown | `<STREET_ADDRESS>` | Context-aware pattern matching |
+| Passport Numbers | AB1234567 | `<PASSPORT_NUMBER>` | Format validation |
+
+### Configuration Options
+
+PII masking can be configured using environment variables in your `.env` file:
+
+```
+# Enable PII masking before sending to LLM (default: disabled)
+MASK_PII_BEFORE_LLM=0
+
+# Enable PII masking in logs (default: enabled)
+MASK_PII_IN_LOGS=1
+```
+
+### Using PII Masking in API Requests
+
+Control PII masking on a per-request basis using HTTP headers:
+
+```bash
+curl -X POST http://localhost:8000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer your_api_key" \
+  -H "X-Mask-PII-Before-LLM: 1" \
+  -H "X-Mask-PII-In-Logs: 1" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [
+      {"role": "system", "content": "You are a helpful assistant."},
+      {"role": "user", "content": "My email is user@example.com and my phone is 555-123-4567."}
+    ]
+  }'
+```
+
+### PII Masking Examples
+
+The `/proxy/examples/sh/pii/` directory contains example scripts demonstrating PII masking:
+
+- `01_basic_pii_masking.sh`: Basic PII masking demonstration
+- `02_pii_masking_before_llm.sh`: Using the X-Mask-PII-Before-LLM header
+- `03_pii_masking_in_logs.sh`: PII masking in logs
+- `04_combined_pii_masking.sh`: Comprehensive PII masking example
+
+### Implementation Details
+
+PII masking is implemented in the `src/app/security.py` module using regular expressions to identify and replace PII with placeholders. The masking process occurs:
+
+1. Before sending messages to the LLM (if `MASK_PII_BEFORE_LLM=1` or `X-Mask-PII-Before-LLM: 1`)
+2. Before writing to logs (if `MASK_PII_IN_LOGS=1` or `X-Mask-PII-In-Logs: 1`)
+
+For more detailed information, see the [PII Masking Documentation](docs/pii_masking.md).
 
 ## Role-Based Access Control
 
@@ -431,10 +506,7 @@ curl -X POST http://localhost:8000/v1/chat/completions \
 
 ### Using Keyword Detection
 
-Keyword detection is enabled by default for all chat completion requests:
-
-```bash
-```
+Keyword detection is enabled by default for all chat completion requests.
 
 ## Semantic Caching
 
@@ -482,6 +554,8 @@ See `.env.sample` for all available configuration options.
 | | `ENABLE_CACHE` | Enable/disable semantic caching | true |
 | | `ENABLE_KEYWORD_DETECTION` | Enable/disable keyword detection | true |
 | | `ENABLE_GZIP_COMPRESSION` | Enable/disable additional gzip compression | false |
+| **PII Masking** | `MASK_PII_BEFORE_LLM` | Mask PII before sending to LLM | false (0) |
+| | `MASK_PII_IN_LOGS` | Mask PII in logs and database | true (1) |
 | **Settings** | `CACHE_SIMILARITY_THRESHOLD` | Threshold for semantic cache hits (0.0-1.0) | 0.85 |
 | | `DEFAULT_RATE_LIMIT` | Default rate limit (requests per minute) | 60 |
 | | `SYNTHLANG_DEFAULT_MODEL` | Default model for SynthLang operations | "gpt-4o-mini" |
@@ -526,8 +600,7 @@ To add a new keyword pattern:
 3. Specify the tool to invoke when the pattern matches
 
 Example in TOML:
-
-```toml
+```
 [patterns.stock_price]
 name = "stock_price_query"
 pattern = "(?:what's|what is|get|check)\\s+(?:the)?\\s*(?:stock price|share price|stock value)\\s+(?:of|for)?\\s+(?P<ticker>[A-Z]+)"
@@ -538,89 +611,67 @@ required_role = "basic"
 enabled = true
 ```
 
-Example in Python:
+```toml
+# config/keywords.toml - Keyword Pattern Configuration File
+# This file defines natural language patterns that automatically trigger specific tools
 
-```python
-from app.keywords.registry import KeywordPattern, register_pattern
+# Weather patterns - Detects requests about weather conditions
+[patterns.weather]
+name = "weather_query"
+pattern = "(?:what's|what is|tell me|get|check)\\s+(?:the)?\\s*(?:weather|temperature|forecast)\\s+(?:in|for|at)?\\s+(?P<location>[\\w\\s,]+)"
+tool = "weather"
+description = "Detects queries about weather conditions for a location"
+priority = 100
+required_role = "basic"
+enabled = true
 
-# Create a custom pattern
-custom_pattern = KeywordPattern(
-    name="stock_price_query",
-    pattern=r"(?:what's|what is|get|check)\s+(?:the)?\s*(?:stock price|share price|stock value)\s+(?:of|for)?\s+(?P<ticker>[A-Z]+)",
-    tool="stock_price",
-    description="Detects requests for stock price information",
-    priority=95,
-    required_role="basic"
-)
+# Stock price patterns - Detects requests for stock market information
+[patterns.stock_price]
+name = "stock_price_query"
+pattern = "(?:what's|what is|get|check)\\s+(?:the)?\\s*(?:stock price|share price|stock value)\\s+(?:of|for)?\\s+(?P<ticker>[A-Z]+)"
+tool = "stock_price"
+description = "Detects requests for stock price information"
+priority = 95
+required_role = "basic"
+enabled = true
 
-# Register the pattern
-register_pattern(custom_pattern)
+# Web search patterns - Detects requests to search the web
+[patterns.web_search]
+name = "web_search_query"
+pattern = "(?:search|look up|find|google)\\s+(?:for|about)?\\s+(?P<query>[\\w\\s]+)"
+tool = "web_search"
+description = "Detects web search requests"
+priority = 90
+required_role = "basic"
+enabled = true
 
+# Calculator patterns - Detects requests for calculations
+[patterns.calculator]
+name = "calculator_query"
+pattern = "(?:calculate|compute|what is)\\s+(?P<expression>[\\d\\s\\+\\-\\*\\/\\^\\%\\(\\)]+)"
+tool = "calculator"
+description = "Detects calculation requests"
+priority = 85
+required_role = "basic"
+enabled = true
 
+# Admin patterns - Only available to users with admin role
+[patterns.admin]
+name = "admin_action"
+pattern = "(?:admin|administrator)\\s+(?:the system|server)\\s+to\\s+(?P<action>[\\w\\s]+)"
+tool = "system_admin"
+description = "Detects requests for administrative actions"
+priority = 200
+required_role = "admin"
+enabled = true
 
-## Quick Start
-
-### 1. Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/synthlang-proxy.git
-cd synthlang-proxy/proxy
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Copy and configure environment variables
-cp .env.sample .env
-# Edit .env with your configuration
+# PII masking tool pattern - For testing PII masking capabilities
+[patterns.pii_mask]
+name = "pii_masking_demo"
+pattern = "(?:mask|anonymize|remove)\\s+(?:the)?\\s*(?:pii|personal information|sensitive data)\\s+(?:from|in)\\s+(?P<source>[\\w\\s\\.]+)"
+tool = "pii_mask"
+description = "Detects requests to demonstrate PII masking"
+priority = 80
+required_role = "basic"
+enabled = true
 ```
-
-### 2. Generate API Key
-
-Before using the proxy, you need to generate an API key:
-
-```bash
-# Generate a new API key
-python -m src.cli.api_keys create --user-id "your_username" --rate-limit 100 --save-env
-
-# Or use the CLI tool
-python -m synthlang.cli proxy apikey create --user-id "your_username" --rate-limit 100 --save-env
-```
-
-This will:
-- Create a new API key with the specified rate limit
-- Save it to your .env file
-- Display the key in the terminal
-
-### 3. Start the Server
-
-```bash
-# Start the proxy server
-python -m src.app.main
-
-# Or use the CLI tool
-python -m synthlang.cli proxy serve
-```
-
-### 4. Make API Requests
-
-```bash
-# Example API request
-curl -X POST http://localhost:8000/v1/chat/completions \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "model": "gpt-4o",
-    "messages": [
-      {"role": "user", "content": "Hello, how are you?"}
-    ]
-  }'
-```
-
-## Troubleshooting
-
-If you encounter issues with the proxy, check the following resources:
-
-- [Admin Role Troubleshooting Guide](docs/admin_role_troubleshooting.md) - Fix "Admin role required" errors when accessing admin endpoints
-- [Benchmarking Documentation](docs/benchmarking.md) - Information on running benchmarks
-- [CLI Documentation](docs/cli.md) - Detailed CLI usage instructions
