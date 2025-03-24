@@ -6,73 +6,6 @@ SynthLang Proxy is an advanced, high-performance middleware solution designed to
 
 By integrating SynthLang's SynthLang prompt compression  with semantic caching, robust security features, and an extensible agent framework, this proxy transforms how developers and organizations interact with AI language models.
 
-## Quick Start
-
-### 1. Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/synthlang-proxy.git
-cd synthlang-proxy/proxy
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Copy and configure environment variables
-cp .env.sample .env
-# Edit .env with your configuration
-```
-
-### 2. Generate API Key
-
-Before using the proxy, you need to generate an API key:
-
-```bash
-# Generate a new API key
-python -m src.cli.api_keys create --user-id "your_username" --rate-limit 100 --save-env
-
-# Or use the CLI tool
-python -m synthlang.cli proxy apikey create --user-id "your_username" --rate-limit 100 --save-env
-```
-
-This will:
-- Create a new API key with the specified rate limit
-- Save it to your .env file
-- Display the key in the terminal
-
-### 3. Start the Server
-
-```bash
-# Start the proxy server
-python -m src.app.main
-
-# Or use the CLI tool
-python -m synthlang.cli proxy serve
-```
-
-### 4. Make API Requests
-
-```bash
-# Example API request
-curl -X POST http://localhost:8000/v1/chat/completions \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "model": "gpt-4o",
-    "messages": [
-      {"role": "user", "content": "Hello, how are you?"}
-    ]
-  }'
-```
-
-## Troubleshooting
-
-If you encounter issues with the proxy, check the following resources:
-
-- [Admin Role Troubleshooting Guide](docs/admin_role_troubleshooting.md) - Fix "Admin role required" errors when accessing admin endpoints
-- [Benchmarking Documentation](docs/benchmarking.md) - Information on running benchmarks
-- [CLI Documentation](docs/cli.md) - Detailed CLI usage instructions
-
 ## Overview of Features
 
 If you've already built-or are using-any application that talks to an LLM, whether it's OpenAI, OpenRouter, Together, DeepSeek, or a local endpoint that mimics the OpenAI API, you can now instantly give it agentic capabilities without even touching your existing app logic. That's what SynthLang Proxy does. It's a high-speed, drop-in middleware that plugs into the /v1/chat/completions endpoint and transforms static LLM apps into dynamic, self-optimizing systems.
@@ -501,21 +434,193 @@ curl -X POST http://localhost:8000/v1/chat/completions \
 Keyword detection is enabled by default for all chat completion requests:
 
 ```bash
+```
+
+## Semantic Caching
+
+SynthLang Proxy uses advanced semantic caching to store and retrieve responses based on the meaning of queries, not just exact text matches:
+
+- **Similarity-Based Retrieval**: Get cached responses for semantically similar queries
+- **Configurable Thresholds**: Adjust similarity thresholds to balance precision and recall
+- **Model-Specific Caching**: Separate caches for different LLM models
+- **Automatic Invalidation**: Smart cache management to ensure freshness
+
+Example of how semantic caching works:
+
+1. User asks: "How do I implement a binary search tree in Python?"
+2. LLM generates a detailed response
+3. Later, another user asks: "Can you show me Python code for a BST implementation?"
+4. The system recognizes the semantic similarity and returns the cached response instantly
+
+## Prompt Engineering with DSPy
+
+SynthLang Proxy integrates with DSPy to provide advanced prompt engineering capabilities:
+
+| Capability | Description | Use Case |
+|------------|-------------|----------|
+| Prompt Programming | Use DSPy's declarative programming model for LLMs | Complex reasoning tasks |
+| Signature-Based Design | Define input and output fields with clear descriptions | Structured outputs |
+| Chain-of-Thought | Automatically generate step-by-step reasoning | Problem-solving tasks |
+| Prompt Optimization | Optimize prompts using DSPy's optimization techniques | Improving response quality |
+| Self-Improvement | Prompts that learn from examples and improve over time | Continuous refinement |
+
+## Configuration
+
+See `.env.sample` for all available configuration options.
+
+### Key Configuration Options
+
+| Category | Configuration | Description | Default |
+|----------|--------------|-------------|---------|
+| **Security** | `ENCRYPTION_KEY` | Secret key for encrypting sensitive data | (Required) |
+| | `ADMIN_USERS` | Comma-separated list of user IDs with admin role | "" |
+| | `PREMIUM_USERS` | Comma-separated list of user IDs with premium role | "" |
+| | `DEFAULT_ROLE` | Default role assigned to users | "basic" |
+| **Database** | `DB_*` | Database connection settings | SQLite |
+| **API Keys** | `OPENAI_API_KEY` | Your OpenAI API key | (Required) |
+| **Features** | `ENABLE_SYNTHLANG` | Enable/disable SynthLang prompt compression | true |
+| | `ENABLE_CACHE` | Enable/disable semantic caching | true |
+| | `ENABLE_KEYWORD_DETECTION` | Enable/disable keyword detection | true |
+| | `ENABLE_GZIP_COMPRESSION` | Enable/disable additional gzip compression | false |
+| **Settings** | `CACHE_SIMILARITY_THRESHOLD` | Threshold for semantic cache hits (0.0-1.0) | 0.85 |
+| | `DEFAULT_RATE_LIMIT` | Default rate limit (requests per minute) | 60 |
+| | `SYNTHLANG_DEFAULT_MODEL` | Default model for SynthLang operations | "gpt-4o-mini" |
+| | `KEYWORD_CONFIG_PATH` | Path to keyword definition file | "config/keywords.toml" |
+| | `SYNTHLANG_STORAGE_DIR` | Directory for storing prompts | "/tmp/synthlang" |
+
+## Development
+
+### Running Tests
+
+```bash
+python -m pytest tests -v
+```
+
+### Adding New Tools
+
+To add a new tool to the agent SDK:
+
+1. Create a new module in `src/app/agents/tools/`
+2. Implement your tool function
+3. Register it using `register_tool` from `app.agents.registry`
+
+Example:
+
+```python
+from app.agents.registry import register_tool
+
+def my_custom_tool(param1, param2):
+    # Tool implementation
+    return {"content": "Tool response"}
+
+# Register the tool
+register_tool("my_tool_name", my_custom_tool)
+```
+
+### Adding Keyword Patterns
+
+To add a new keyword pattern:
+
+1. Create a pattern definition in `config/keywords.toml` or programmatically
+2. Define the regular expression pattern with named capture groups
+3. Specify the tool to invoke when the pattern matches
+
+Example in TOML:
+
+```toml
+[patterns.stock_price]
+name = "stock_price_query"
+pattern = "(?:what's|what is|get|check)\\s+(?:the)?\\s*(?:stock price|share price|stock value)\\s+(?:of|for)?\\s+(?P<ticker>[A-Z]+)"
+tool = "stock_price"
+description = "Detects requests for stock price information"
+priority = 95
+required_role = "basic"
+enabled = true
+```
+
+Example in Python:
+
+```python
+from app.keywords.registry import KeywordPattern, register_pattern
+
+# Create a custom pattern
+custom_pattern = KeywordPattern(
+    name="stock_price_query",
+    pattern=r"(?:what's|what is|get|check)\s+(?:the)?\s*(?:stock price|share price|stock value)\s+(?:of|for)?\s+(?P<ticker>[A-Z]+)",
+    tool="stock_price",
+    description="Detects requests for stock price information",
+    priority=95,
+    required_role="basic"
+)
+
+# Register the pattern
+register_pattern(custom_pattern)
+
+
+
+## Quick Start
+
+### 1. Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/synthlang-proxy.git
+cd synthlang-proxy/proxy
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Copy and configure environment variables
+cp .env.sample .env
+# Edit .env with your configuration
+```
+
+### 2. Generate API Key
+
+Before using the proxy, you need to generate an API key:
+
+```bash
+# Generate a new API key
+python -m src.cli.api_keys create --user-id "your_username" --rate-limit 100 --save-env
+
+# Or use the CLI tool
+python -m synthlang.cli proxy apikey create --user-id "your_username" --rate-limit 100 --save-env
+```
+
+This will:
+- Create a new API key with the specified rate limit
+- Save it to your .env file
+- Display the key in the terminal
+
+### 3. Start the Server
+
+```bash
+# Start the proxy server
+python -m src.app.main
+
+# Or use the CLI tool
+python -m synthlang.cli proxy serve
+```
+
+### 4. Make API Requests
+
+```bash
+# Example API request
 curl -X POST http://localhost:8000/v1/chat/completions \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer your_api_key" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
     "model": "gpt-4o",
     "messages": [
-      {"role": "user", "content": "What's the weather in New York?"}
+      {"role": "user", "content": "Hello, how are you?"}
     ]
   }'
 ```
 
-## Contributing
+## Troubleshooting
 
-Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+If you encounter issues with the proxy, check the following resources:
 
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+- [Admin Role Troubleshooting Guide](docs/admin_role_troubleshooting.md) - Fix "Admin role required" errors when accessing admin endpoints
+- [Benchmarking Documentation](docs/benchmarking.md) - Information on running benchmarks
+- [CLI Documentation](docs/cli.md) - Detailed CLI usage instructions
