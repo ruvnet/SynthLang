@@ -35,6 +35,9 @@ MASK_PII_IN_LOGS = bool(int(os.getenv("MASK_PII_IN_LOGS", "1")))
 DEFAULT_RATE_LIMIT_QPM = int(os.getenv("DEFAULT_RATE_LIMIT_QPM", "60"))
 PREMIUM_RATE_LIMIT_QPM = int(os.getenv("PREMIUM_RATE_LIMIT_QPM", "120"))
 
+# Default model to use when none is specified
+DEFAULT_MODEL = os.getenv("DEFAULT_MODEL", "gpt-4o-mini")
+
 # SQLite configuration
 USE_SQLITE = bool(int(os.getenv("USE_SQLITE", "0")))
 SQLITE_PATH = os.getenv("SQLITE_PATH", "sqlite+aiosqlite:///./synthlang_proxy.db")
@@ -48,7 +51,8 @@ CACHE_MAX_ITEMS = int(os.getenv("CACHE_MAX_ITEMS", "1000"))
 logger.info(f"Configuration loaded: USE_SYNTHLANG={USE_SYNTHLANG}, "
             f"MASK_PII_BEFORE_LLM={MASK_PII_BEFORE_LLM}, "
             f"MASK_PII_IN_LOGS={MASK_PII_IN_LOGS}, "
-            f"DEFAULT_RATE_LIMIT_QPM={DEFAULT_RATE_LIMIT_QPM}")
+            f"DEFAULT_RATE_LIMIT_QPM={DEFAULT_RATE_LIMIT_QPM}, "
+            f"DEFAULT_MODEL={DEFAULT_MODEL}")
 
 # Model routing configuration
 MODEL_PROVIDER = {

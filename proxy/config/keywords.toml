@@ -49,7 +49,7 @@ pattern = "(?:calculate|compute|what is|solve)\\s+(?P<expression>[\\d\\s\\+\\-\\
 tool = "calculator"
 description = "Detects requests to calculate mathematical expressions"
 priority = 70
-enabled = true
+enabled = false  # Disabled to prevent interference with XML-like tags
 
 [patterns.code_generation]
 pattern = "(?:write|generate|create|give me)\\s+(?:some|a)?\\s*(?:code|function|program|script)\\s+(?:in|using)?\\s+(?P<language>[a-zA-Z\\+\\#]+)(?:\\s+to\\s+(?P<task>.+))?"

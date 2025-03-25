@@ -39,7 +39,6 @@ from .keywords.endpoints import router as keywords_router
 from .models_endpoint import router as models_router
 from .config.keywords import initialize_from_config
 from .validation_handler import validation_exception_handler
-from .json_validation_fix import safe_json_loads
 
 
 # Configure logging
@@ -270,42 +269,7 @@ async def process_chat_completion(
             async def yield_keyword_response():
                 """Generate SSE events from the keyword response."""
                 content = keyword_response.get("content", "")
-                
-                # Format as proper OpenAI streaming JSON
-                response_chunk = {
-                    "id": f"chatcmpl-{int(time.time())}",
-                    "object": "chat.completion.chunk",
-                    "created": int(time.time()),
-                    "model": request.model,
-                    "choices": [
-                        {
-                            "index": 0,
-                            "delta": {
-                                "content": content
-                            },
-                            "finish_reason": None
-                        }
-                    ]
-                }
-                yield f"data: {json.dumps(response_chunk)}\n\n"
-                
-                # Send final chunk with finish_reason
-                final_chunk = {
-                    "id": f"chatcmpl-{int(time.time())}",
-                    "object": "chat.completion.chunk",
-                    "created": int(time.time()),
-                    "model": request.model,
-                    "choices": [
-                        {
-                            "index": 0,
-                            "delta": {},
-                            "finish_reason": "stop"
-                        }
-                    ]
-                }
-                yield f"data: {json.dumps(final_chunk)}\n\n"
-                
-                # Signal end of stream
+                yield f"data: {content}\n\n"
                 yield "data: [DONE]\n\n"
             
             return StreamingResponse(yield_keyword_response(), media_type="text/event-stream")
@@ -327,48 +291,13 @@ async def process_chat_completion(
     # If we have a cache hit, return the cached response
     if cached_response:
         logger.info(f"Cache hit for user {user_id} with model {request.model}")
-        logger.info(f"LLM Response (cached): {cached_response}")
         
         # Handle streaming for cache hits
         if request.stream:
             async def yield_cached():
                 """Generate SSE events from the cached response."""
-                # Format as proper OpenAI streaming JSON
-                response_chunk = {
-                    "id": f"chatcmpl-{int(time.time())}",
-                    "object": "chat.completion.chunk",
-                    "created": int(time.time()),
-                    "model": request.model,
-                    "choices": [
-                        {
-                            "index": 0,
-                            "delta": {
-                                "content": cached_response
-                            },
-                            "finish_reason": None
-                        }
-                    ]
-                }
-                yield f"data: {json.dumps(response_chunk)}\n\n"
-                
-                # Send final chunk with finish_reason
-                final_chunk = {
-                    "id": f"chatcmpl-{int(time.time())}",
-                    "object": "chat.completion.chunk",
-                    "created": int(time.time()),
-                    "model": request.model,
-                    "choices": [
-                        {
-                            "index": 0,
-                            "delta": {},
-                            "finish_reason": "stop"
-                        }
-                    ]
-                }
-                yield f"data: {json.dumps(final_chunk)}\n\n"
-                
-                # Signal end of stream
-                yield "data: [DONE]\n\n"
+                yield f"data: {cached_response}\n\n"
+                yield "data: [CACHE_END]\n\n"  # Signal end of cached stream
             
             # Save interaction to database
             await db.save_interaction(user_id, request.model, compressed_messages, cached_response, cache_hit=True)
@@ -440,48 +369,10 @@ async def process_chat_completion(
                             content_piece = chunk['choices'][0]['delta'].get('content', '')
                             if content_piece:
                                 full_response += content_piece
-                                # Log the content piece to the console
-                                logger.info(f"LLM Response (streaming): {content_piece}")
-                                
-                                # Format as proper OpenAI streaming JSON
-                                response_chunk = {
-                                    "id": f"chatcmpl-{int(time.time())}-{hash(content_piece) % 10000:04d}",
-                                    "object": "chat.completion.chunk",
-                                    "created": int(time.time()),
-                                    "model": request.model,
-                                    "choices": [
-                                        {
-                                            "index": 0,
-                                            "delta": {
-                                                "content": content_piece
-                                            },
-                                            "finish_reason": None
-                                        }
-                                    ]
-                                }
-                                yield f"data: {json.dumps(response_chunk)}\n\n"
-                
-                # Send final chunk with finish_reason
-                final_chunk = {
-                    "id": f"chatcmpl-{int(time.time())}",
-                    "object": "chat.completion.chunk",
-                    "created": int(time.time()),
-                    "model": request.model,
-                    "choices": [
-                        {
-                            "index": 0,
-                            "delta": {},
-                            "finish_reason": "stop"
-                        }
-                    ]
-                }
-                yield f"data: {json.dumps(final_chunk)}\n\n"
+                                yield f"data: {content_piece}\n\n"
                 
                 # Signal end of stream
                 yield "data: [DONE]\n\n"
-                
-                # Log the full response at the end of streaming
-                logger.info(f"LLM Full Response (streaming complete): {full_response}")
                 
                 # Store the complete response in cache after streaming is done
                 if cache_key and full_response:
@@ -510,9 +401,6 @@ async def process_chat_completion(
             
             # Extract assistant message
             assistant_msg = llm_response["choices"][0]["message"]["content"]
-            
-            # Log the complete response to the console
-            logger.info(f"LLM Response (non-streaming): {assistant_msg}")
             
             # Store in cache
             if cache_key:
@@ -617,8 +505,8 @@ async def create_chat_completion(
             raw_body = await request.body()
             body_str = raw_body.decode(errors='replace')
             
-            # Parse as JSON - use safe_json_loads to handle XML-like content
-            body = safe_json_loads(body_str)
+            # Parse as JSON
+            body = json.loads(body_str)
             
             # Check if this is a nested JSON request (JSON string inside a JSON request)
             if "messages" in body and len(body["messages"]) == 1 and "content" in body["messages"][0]:
@@ -626,15 +514,15 @@ async def create_chat_completion(
                 # Check if the content is a JSON string that might contain another request
                 if isinstance(content, str) and content.strip().startswith("{"):
                     try:
-                        # Try to parse the content as JSON - use safe_json_loads
-                        inner_body = safe_json_loads(content)
+                        # Try to parse the content as JSON
+                        inner_body = json.loads(content)
                         if "model" in inner_body and "messages" in inner_body:
                             # Use the inner JSON as our request body
-                            logger.info(f"Detected nested JSON request, using inner request with model: {inner_body.get('model')}")
+                            logger.info("Detected nested JSON request, using inner request")
                             body = inner_body
-                    except Exception as e:
+                    except:
                         # If parsing fails, continue with the original body
-                        logger.warning(f"Failed to parse nested JSON: {e}")
+                        pass
             
             # Extract the model name before it gets compressed
             original_model = body.get("model", "gpt-4o-mini")

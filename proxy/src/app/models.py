@@ -14,10 +14,26 @@ class Message(BaseModel):
     
     Attributes:
         role: The role of the message sender (system, user, or assistant)
-        content: The content of the message
+        content: The content of the message (can be string or complex JSON)
     """
     role: Literal["system", "user", "assistant"]
-    content: str
+    content: Union[str, Dict[str, Any], List[Dict[str, Any]]]
+    
+    @field_validator('content')
+    @classmethod
+    def validate_content(cls, v):
+        """
+        Validate and convert content to string if it's not already a string.
+        This ensures compatibility with both string and complex JSON content.
+        """
+        if not isinstance(v, str) and v is not None:
+            # Convert complex JSON to string for internal processing
+            import json
+            try:
+                return json.dumps(v)
+            except:
+                return str(v)
+        return v
 
 
 class ChatRequest(BaseModel):
@@ -37,7 +53,7 @@ class ChatRequest(BaseModel):
         logit_bias: Modifies likelihood of specific tokens
         user: A unique identifier for the end-user
     """
-    model: str = Field(..., description="Model name (e.g., gpt-3.5-turbo)")
+    model: str = Field(default="gpt-4o-mini", description="Model name (e.g., gpt-3.5-turbo)")
     messages: List[Message] = Field(..., description="Conversation messages")
     stream: Optional[bool] = Field(False, description="Whether to stream the response")
     temperature: Optional[float] = Field(None, description="Controls randomness (higher = more random)")
@@ -205,3 +221,27 @@ class HealthCheck(BaseModel):
     timestamp: int
     synthlang_available: bool
     version: str
+
+
+class ModelInfo(BaseModel):
+    """
+    Information about a model.
+    
+    Attributes:
+        id: The model ID
+        object: The object type (always "model")
+        created: The Unix timestamp of when the model was created
+        owned_by: The organization that owns the model
+        permission: The permissions for the model
+        root: The root model
+        parent: The parent model
+        is_default: Whether this is the default model
+    """
+    id: str
+    object: str = "model"
+    created: int
+    owned_by: str
+    permission: List[Dict[str, Any]] = []
+    root: str
+    parent: Optional[str] = None
+    is_default: Optional[bool] = False

@@ -110,8 +110,8 @@ KEYWORD_REGISTRY: Dict[str, KeywordPattern] = {}
 # Threshold for keyword detection confidence (0.0 to 1.0)
 DETECTION_THRESHOLD = float(os.getenv("KEYWORD_DETECTION_THRESHOLD", "0.7"))
 
-# Enable/disable keyword detection
-ENABLE_KEYWORD_DETECTION = os.getenv("ENABLE_KEYWORD_DETECTION", "1").lower() in ("1", "true", "yes")
+# Enable/disable keyword detection - DISABLED by default to prevent interference with XML-like tags
+ENABLE_KEYWORD_DETECTION = os.getenv("ENABLE_KEYWORD_DETECTION", "0").lower() in ("1", "true", "yes")
 
 
 def register_pattern(pattern: KeywordPattern) -> None:

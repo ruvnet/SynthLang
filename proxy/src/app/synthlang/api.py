@@ -6,6 +6,8 @@ This module provides a clean API interface to the SynthLang core functionality.
 import logging
 from typing import Any, Dict, List, Optional, Union
 import os
+import json
+import re
 
 from src.app.config import USE_SYNTHLANG
 from src.app.synthlang.compression import compress_prompt, decompress_prompt
@@ -118,8 +120,12 @@ class SynthLangAPI:
         """
         if not self.enabled:
             return text
-            
-        return compress_prompt(text, use_gzip)
+        
+        try:
+            return compress_prompt(text, use_gzip)
+        except Exception as e:
+            logger.error(f"Compression error: {e}")
+            return text
     
     def decompress(self, text: str) -> str:
         """

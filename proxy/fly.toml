@@ -15,6 +15,13 @@ primary_region = 'iad'
   DEBUG = "false"
   USE_SQLITE = "1"
   SQLITE_PATH = "sqlite+aiosqlite:///./data/synthlang_proxy.db"
+  DATABASE_URL = "sqlite+aiosqlite:///./data/synthlang_proxy.db"
+  ENCRYPTION_KEY = "synthlang-proxy-encryption-key-for-demo"
+  OPENAI_API_KEY = ""  # Set this via fly secrets set OPENAI_API_KEY=your_key
+  DEFAULT_MODEL = "gpt-4o-mini"
+  USE_SYNTHLANG = "1"
+  MASK_PII_IN_LOGS = "1"
+  DEFAULT_RATE_LIMIT_QPM = "60"
 
 [http_service]
   internal_port = 8000

@@ -48,13 +48,14 @@ web_search_pattern = KeywordPattern(
     priority=90
 )
 
-# Calculator patterns
+# Calculator patterns - DISABLED to prevent interference with XML-like tags
 calculator_pattern = KeywordPattern(
     name="calculator_query",
     pattern=r"(?:calculate|compute|what is|solve|evaluate)\s+(?P<expression>.+)",
     tool="calculator",
     description="Detects requests for calculations",
-    priority=80
+    priority=80,
+    enabled=False  # Disabled to prevent interference with XML-like tags
 )
 
 # Admin patterns (requires admin role)
@@ -73,7 +74,7 @@ def register_default_patterns():
     logger.info("Registering default patterns...")
     register_pattern(weather_pattern)
     register_pattern(web_search_pattern)
-    register_pattern(calculator_pattern)
+    register_pattern(calculator_pattern)  # Still register it, but it's disabled
     register_pattern(admin_pattern)
     logger.info("Default patterns registered successfully")
 
