@@ -160,6 +160,15 @@ export const useSynthLang = () => {
     }
   }, [parseSynthLang]);
 
+  const escapeHtml = useCallback((text: string): string => {
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }, []);
+
   const highlightSyntax = useCallback((code: string): string => {
     const lines = code.split('\n');
     let inJson = false;
@@ -172,27 +181,32 @@ export const useSynthLang = () => {
       if (trimmed.startsWith('Σ {')) {
         inJson = true;
         jsonContent = trimmed;
-        return `<span class="text-purple-400">Σ</span> <span class="text-blue-300">${trimmed.slice(1)}</span>`;
+        const escapedRest = escapeHtml(trimmed.slice(1));
+        return `<span class="text-purple-400">Σ</span> <span class="text-blue-300">${escapedRest}</span>`;
       }
       if (inJson) {
         jsonContent += '\n' + trimmed;
+        const escapedTrimmed = escapeHtml(trimmed);
         if (trimmed.endsWith('}')) {
           inJson = false;
-          return `<span class="text-blue-300">${trimmed}</span>`;
+          return `<span class="text-blue-300">${escapedTrimmed}</span>`;
         }
-        return `<span class="text-blue-300">${trimmed}</span>`;
+        return `<span class="text-blue-300">${escapedTrimmed}</span>`;
       }
 
       // Handle JSON content lines
       const jsonLineMatch = trimmed.match(/^([a-zA-Z0-9_]+):\s+(\^[a-zA-Z0-9_]+)(?:\s*,\s*)?$/);
       if (jsonLineMatch) {
         const [_, key, modifier] = jsonLineMatch;
-        return `<span class="text-blue-400">${key}</span>: <span class="text-green-400">${modifier}</span>${trimmed.endsWith(',') ? ',' : ''}`;
+        return `<span class="text-blue-400">${escapeHtml(key)}</span>: <span class="text-green-400">${escapeHtml(modifier)}</span>${trimmed.endsWith(',') ? ',' : ''}`;
       }
 
+      // HTML-escape the entire line before applying syntax highlighting spans
+      // so that user-typed content (strings, comments, labels) cannot inject HTML.
+      const escapedLine = escapeHtml(line);
       // Handle regular lines
-      return line.replace(
-        /(↹|⊕|Σ)|\b([a-zA-Z0-9_]+)\s+(?=")|("[^"]*")|(\^[a-zA-Z0-9_]+)|(@[a-zA-Z0-9_]+)|#.*$/g,
+      return escapedLine.replace(
+        /(↹|⊕|Σ)|\b([a-zA-Z0-9_]+)\s+(?=&quot;)|(&quot;[^&]*(?:&[a-z]+;[^&]*)*&quot;)|(\^[a-zA-Z0-9_]+)|(@[a-zA-Z0-9_]+)|#.*$/g,
         (match, glyph, label, content, modifier, context, comment) => {
           if (glyph) return `<span class="text-purple-400">${glyph}</span>`;
           if (label) return `<span class="text-blue-400">${label}</span>`;
@@ -204,7 +218,7 @@ export const useSynthLang = () => {
         }
       );
     }).join('\n');
-  }, []);
+  }, [escapeHtml]);
 
   return {
     executeSynthLang,
