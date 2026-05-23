@@ -8,12 +8,12 @@ packages = [{include = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-fastapi = "^0.95.0"
-uvicorn = "^0.22.0"
+fastapi = "^0.115.0"
+uvicorn = "^0.30.0"
 pydantic = "^2.0.0"
-python-multipart = "^0.0.6"
+python-multipart = "^0.0.18"
 python-dotenv = "^1.0.0"
-cryptography = "^41.0.0"
+cryptography = "^43.0.0"
 faiss-cpu = "^1.7.4"
 openai = "^1.0.0"
 sqlalchemy = "^2.0.0"
