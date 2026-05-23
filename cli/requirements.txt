@@ -1,4 +1,11 @@
 click
 dspy
-pytest
+# pytest>=9.0.3 fixes CVE-2025-71176
+pytest>=9.0.3
 litellm
+# diskcache is a transitive dependency pulled in by litellm.
+# CVE-2025-69872: diskcache <=5.6.3 uses pickle for serialization by default,
+# allowing arbitrary code execution if an attacker can write to the cache dir.
+# No patched version is available yet upstream.
+# Mitigation: ensure the cache directory (typically ~/.cache/litellm) is only
+# writable by the process owner and is not shared with untrusted users.

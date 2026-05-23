@@ -17,16 +17,12 @@ logger = logging.getLogger(__name__)
 API_KEYS_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), ".api_keys.json")
 
 # Dictionary of API keys: key -> user_id
-API_KEYS: Dict[str, str] = {
-    "sk_test_user1": "user1",
-    "sk_test_user2": "user2"
-}
+# Hardcoded keys are intentionally removed. All keys are loaded from the
+# .api_keys.json file or from the API_KEY environment variable at runtime.
+API_KEYS: Dict[str, str] = {}
 
 # Dictionary of rate limits: user_id -> requests per minute
-RATE_LIMITS: Dict[str, int] = {
-    "user1": 60,  # 60 requests per minute
-    "user2": 5    # 5 requests per minute
-}
+RATE_LIMITS: Dict[str, int] = {}
 
 # Default rate limit for users not in RATE_LIMITS
 DEFAULT_RATE_LIMIT = 10  # 10 requests per minute

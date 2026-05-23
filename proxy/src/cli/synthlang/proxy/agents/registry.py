@@ -186,30 +186,44 @@ def get_current_time() -> str:
 @register_tool(description="Perform a simple calculation")
 def calculate(expression: str) -> float:
     """Perform a simple calculation.
-    
+
     Args:
         expression: Mathematical expression to evaluate
-        
+
     Returns:
         Result of the calculation
-        
+
     Raises:
         ValueError: If expression is invalid
     """
-    # Use safer eval with restricted globals
-    import math
-    allowed_names = {
-        k: v for k, v in math.__dict__.items() 
-        if not k.startswith('__')
-    }
-    allowed_names.update({
-        'abs': abs,
-        'round': round,
-        'min': min,
-        'max': max
-    })
-    
+    import re as _re
+    # Validate against safe-character allowlist before parsing; eval() is not used.
+    if not expression or not isinstance(expression, str):
+        raise ValueError("Expression must be a non-empty string")
+    stripped = expression.strip()
+    if not _re.match(r'^[0-9+\-*/().% e\t]+$', stripped):
+        raise ValueError(
+            "Expression contains disallowed characters. "
+            "Only digits, +, -, *, /, (, ), ., % and whitespace are permitted."
+        )
     try:
-        return eval(expression, {"__builtins__": {}}, allowed_names)
+        import sympy
+        result = sympy.sympify(stripped).evalf()
+        return float(result)
+    except ImportError:
+        import ast as _ast
+        tree = _ast.parse(stripped, mode='eval')
+        _ALLOWED_AST = (
+            _ast.Expression, _ast.BinOp, _ast.UnaryOp,
+            _ast.Constant, _ast.Num,
+            _ast.Add, _ast.Sub, _ast.Mult, _ast.Div,
+            _ast.Mod, _ast.Pow, _ast.UAdd, _ast.USub,
+        )
+        for node in _ast.walk(tree):
+            if not isinstance(node, _ALLOWED_AST):
+                raise ValueError(
+                    f"Disallowed AST node '{type(node).__name__}' in expression"
+                )
+        return float(_ast.literal_eval(stripped))
     except Exception as e:
         raise ValueError(f"Invalid expression: {str(e)}")
