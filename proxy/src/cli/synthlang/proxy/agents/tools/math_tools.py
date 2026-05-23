@@ -1,6 +1,7 @@
 """Math tools for SynthLang agents."""
 import math
 import random
+import re
 import statistics
 from typing import List, Dict, Any, Union, Optional
 
@@ -9,34 +10,92 @@ from synthlang.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
+# Allowlist of safe characters in a math expression (digits, operators, parens, dot, spaces)
+_SAFE_EXPR_RE = re.compile(r'^[0-9+\-*/().% e\t]+$')
+# Allowlist of safe function names that may appear in expressions
+_ALLOWED_MATH_NAMES = {
+    k: v for k, v in math.__dict__.items()
+    if not k.startswith('__') and callable(v)
+}
+_ALLOWED_MATH_NAMES.update({
+    'abs': abs,
+    'round': round,
+    'min': min,
+    'max': max,
+})
+
+
+def _safe_eval_expression(expression: str) -> float:
+    """Safely evaluate a mathematical expression using sympy.
+
+    eval() is not used.  The expression is first validated against a strict
+    character allowlist, then parsed by sympy which does not execute arbitrary
+    Python code.
+
+    Args:
+        expression: Mathematical expression to evaluate
+
+    Returns:
+        Numeric result as a float
+
+    Raises:
+        ValueError: If the expression contains disallowed characters or cannot
+            be evaluated.
+    """
+    if not expression or not isinstance(expression, str):
+        raise ValueError("Expression must be a non-empty string")
+
+    # Strip and validate against safe-character allowlist before any parsing
+    stripped = expression.strip()
+    if not _SAFE_EXPR_RE.match(stripped):
+        raise ValueError(
+            "Expression contains disallowed characters. "
+            "Only digits, +, -, *, /, (, ), ., % and whitespace are permitted."
+        )
+
+    try:
+        import sympy  # optional but preferred; avoids eval entirely
+        result = sympy.sympify(stripped).evalf()
+        return float(result)
+    except ImportError:
+        # sympy not available — fall back to ast.literal_eval-based approach.
+        # We never call eval() here; the expression has already been validated
+        # against the character allowlist so only numeric literals and the four
+        # arithmetic operators can appear.
+        import ast
+        tree = ast.parse(stripped, mode='eval')
+        # Reject any node that is not a safe arithmetic construct
+        _ALLOWED_AST = (
+            ast.Expression, ast.BinOp, ast.UnaryOp,
+            ast.Constant, ast.Num,  # Num is pre-3.8 compat
+            ast.Add, ast.Sub, ast.Mult, ast.Div,
+            ast.Mod, ast.Pow, ast.UAdd, ast.USub,
+        )
+        for node in ast.walk(tree):
+            if not isinstance(node, _ALLOWED_AST):
+                raise ValueError(
+                    f"Disallowed AST node '{type(node).__name__}' in expression"
+                )
+        return float(ast.literal_eval(stripped))
+    except Exception as e:
+        raise ValueError(f"Cannot evaluate expression: {e}") from e
+
 
 @register_tool(description="Evaluate a mathematical expression")
 def evaluate_expression(expression: str) -> float:
     """Evaluate a mathematical expression.
-    
+
     Args:
         expression: Mathematical expression to evaluate
-        
+
     Returns:
         Result of the evaluation
-        
+
     Raises:
         ValueError: If expression is invalid
     """
-    # Use safer eval with restricted globals
-    allowed_names = {
-        k: v for k, v in math.__dict__.items() 
-        if not k.startswith('__')
-    }
-    allowed_names.update({
-        'abs': abs,
-        'round': round,
-        'min': min,
-        'max': max
-    })
-    
     try:
-        return float(eval(expression, {"__builtins__": {}}, allowed_names))
+        return _safe_eval_expression(expression)
     except Exception as e:
         logger.error(f"Error evaluating expression '{expression}': {str(e)}")
         raise ValueError(f"Invalid expression: {str(e)}")

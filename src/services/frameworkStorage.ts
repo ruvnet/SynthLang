@@ -31,5 +31,17 @@ export const deleteCustomFramework = (id: string): void => {
 };
 
 export const generateFrameworkId = (): string => {
-  return `custom_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  // Use crypto.randomUUID() (available in all modern browsers and Node ≥14.17)
+  // to avoid Math.random() which is not cryptographically secure.
+  const randomPart =
+    typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+      ? crypto.randomUUID().replace(/-/g, '').slice(0, 12)
+      : Array.from(
+          typeof crypto !== 'undefined' && crypto.getRandomValues
+            ? crypto.getRandomValues(new Uint8Array(6))
+            : new Uint8Array(6)
+        )
+          .map(b => b.toString(16).padStart(2, '0'))
+          .join('');
+  return `custom_${Date.now()}_${randomPart}`;
 };
