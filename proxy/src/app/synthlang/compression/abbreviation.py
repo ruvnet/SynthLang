@@ -19,6 +19,10 @@ class AbbreviationCompressor(BaseCompressor):
     
     This compressor maintains a dictionary of common words and their abbreviations,
     and replaces occurrences of these words in the text.
+
+    Expansion recognizes punctuation abbreviations such as ``&``, ``w/`` and
+    ``w/o`` at non-word delimiters. It remains lossy for ambiguous abbreviations
+    and does not preserve the original capitalization.
     """
     
     def __init__(self):
@@ -174,8 +178,10 @@ class AbbreviationCompressor(BaseCompressor):
             
             # Apply each reverse abbreviation
             for abbrev, word in self.reverse_abbreviations.items():
-                # Use word boundaries to avoid partial replacements
-                pattern = re.compile(r'\b' + re.escape(abbrev) + r'\b')
+                # Punctuation abbreviations do not have word boundaries at
+                # both ends. Reject adjacent word characters instead, which
+                # also prevents expanding "w/" inside "w/o".
+                pattern = re.compile(r'(?<!\w)' + re.escape(abbrev) + r'(?!\w)')
                 # Count replacements for metrics
                 new_text, count = pattern.subn(word, decompressed)
                 replacements += count
