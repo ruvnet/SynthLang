@@ -55,30 +55,46 @@ class OpenRouterService {
     if (options.stream && response.body) {
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
+      let pending = '';
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
+      const processLine = (line: string): boolean => {
+        if (!line.startsWith('data: ')) return false;
+        const jsonStr = line.slice(6).replace(/\r$/, '');
+        if (jsonStr === '[DONE]') return true;
 
-        const chunk = decoder.decode(value);
-        const lines = chunk.split('\n').filter(line => line.trim() !== '');
-        
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const jsonStr = line.slice(6);
-            if (jsonStr === '[DONE]') continue;
-            
-            try {
-              const json = JSON.parse(jsonStr);
-              const content = json.choices[0]?.delta?.content;
-              if (content) {
-                options.onChunk?.(content);
-              }
-            } catch (err) {
-              console.error('Failed to parse chunk:', err);
+        let json;
+        try {
+          json = JSON.parse(jsonStr);
+        } catch (err) {
+          console.error('Failed to parse chunk:', err);
+          return false;
+        }
+        const content = json?.choices?.[0]?.delta?.content;
+        if (content) options.onChunk?.(content);
+        return false;
+      };
+
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          // Network chunks may end inside an SSE line or a UTF-8 character.
+          pending += done ? decoder.decode() : decoder.decode(value, { stream: true });
+          const lines = pending.split('\n');
+          pending = lines.pop() ?? '';
+
+          for (const line of lines) {
+            if (processLine(line)) {
+              await reader.cancel();
+              return;
             }
           }
+          if (done) {
+            if (pending) processLine(pending);
+            break;
+          }
         }
+      } finally {
+        reader.releaseLock();
       }
     } else {
       const data = await response.json();

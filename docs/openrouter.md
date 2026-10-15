@@ -4,6 +4,22 @@
 
 This guide details the integration of OpenRouter's API into the SynthLang system for prompt testing and model comparison. OpenRouter provides access to multiple language models through a unified API, enabling comprehensive prompt testing and performance analysis.
 
+### Browser response streaming
+
+`openRouterService.streamCompletion` buffers incomplete `data: ` lines across
+network reads and decodes UTF-8 incrementally. Network chunks need not align
+with JSON events or characters. It handles LF/CRLF line endings, flushes a final
+line at EOF, and stops at `[DONE]`. The reader lock is released on completion or
+failure. Invalid JSON events are logged and skipped; read and `onChunk` callback
+errors propagate to the caller. This handles OpenRouter's line-oriented JSON
+events; it is not a general-purpose multiline SSE parser.
+
+Offline regression coverage (no API key or live request required):
+
+```bash
+npm test -- --runInBand src/services/__tests__/openRouterStream.test.ts
+```
+
 ## API Configuration
 
 ### Authentication
